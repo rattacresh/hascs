@@ -105,5 +105,5 @@ void SetzeZufall(unsigned long n);
 void PrinterOut(char ch);
 int PrinterStatus();
 
-#endif /* HASCS_SYSTEM */
+#endif /* HASCS_SYSTEM */ 
 
