@@ -195,7 +195,7 @@ void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *Waffe)
 {
 	unsigned Schaden, i,t , Trefferwurf, Punkte;
 	Trefferwurf = Zufall(20);
-	if ((Trefferwurf + Spieler.Ge) >= (20 + WM)) {
+	if (Trefferwurf + Spieler.Ge >= 20 + WM) {
 		if (Waffe.KennNummer == GWaffe)
 			Schaden = Zufall(Waffe.WaffenSchaden) + Waffe.WaffenBonus +
 				   Zufall(Spieler.St) / 4;
