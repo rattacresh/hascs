@@ -1,32 +1,32 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
-const int MaxObjects = 100;
+#define MaxObjects 100;
 
-const int Exit = 0; /* Flags */
-const int Editable = 1;
-const int Selectable = 2;
+#define Exit  0; /* Flags */
+#define Editable  1;
+#define Selectable  2;
 
-const int Outlined = 8;
-const int Inverted = 9;
-const int Edited = 10;
-const int Centered = 11;
-const int BigText = 12;
-const int SpriteFill = 13;
+#define Outlined  8;
+#define Inverted  9;
+#define Edited  10;
+#define Centered  11;
+#define BigText  12;
+#define SpriteFill  13;
 
-struct ObjectType = {
+typedef struct {
   int x, y, w, h; /* relativ Position */
   char Text[81];
   char Input[81];
   BITSET Flags; /* Special Properties */
-};
+} ObjectType;
   
-struct ScreenType = {
+typedef struct {
   int x, y, w, h;
   char Title[81];
   ObjectType Obj[MaxObjects];
   int n; /* Number of Objects */
-};
+} ScreenType;
     
 
 ScreenType DScreen;

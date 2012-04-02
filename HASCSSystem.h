@@ -30,10 +30,10 @@
 
 // CONST
 
-const int MausLinks = 0; /* linker Mausknopf */
-const int MausRechts = 1; /* rechter Mausknopf */
-//NULL = ADDRESS(0);
-const int MaxCache = 100;
+#define MausLinks  0; /* linker Mausknopf */
+#define MausRechts  1; /* rechter Mausknopf */
+#define NULL ADDRESS(0);
+#define MaxCache  100;
 
 // TYPE
 typedef struct {

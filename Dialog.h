@@ -28,9 +28,9 @@
 #include "HASCSGlobal.h"
 
 
-const int IniDialog    = 1000;
-const int FelderDialog = 1001;
-cosnt int ConfigDialog = 1002;
+#define IniDialog    1000;
+#define FelderDialog 1001;
+#define ConfigDialog 1002;
 
 int LoadDialog(unsigned n, int coded);
 
