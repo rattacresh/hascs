@@ -35,7 +35,7 @@ typedef struct {
     int CacheLength;
 } CacheType;
 
-char Name[], Command[], ActPath[];
+char *Name, *Command, *ActPath;
 int FileError; /* Fehler bei Fileroutinen */
 int ShowError; /* nicht fatale Fehlermeldungen anzeigen */
 
