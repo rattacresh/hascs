@@ -47,7 +47,6 @@
           11.00 11.08.94 Gegenstands-/Monsterklassen
 */
 
-//FROM HASCSGraphics IMPORT MaxSprites, SpriteType;
 #include "HASCSGraphics.h"
 
 
@@ -284,58 +283,56 @@ int Editor, /* Editiermodus */
 
 /* Bildschirm-Ausgaben ****************************************************/
 
-PROCEDURE SetNewSprite (x, y : CARDINAL);
-PROCEDURE SetOldSprite (x, y : CARDINAL);
-PROCEDURE MakeShoot(VAR qx, qy : CARDINAL; zx, zy, time : CARDINAL;
-                    mode : BOOLEAN) : BOOLEAN;
-PROCEDURE FillRectangle (x0, y0, x1, y1 : INTEGER; VAR Sprite : SpriteType);
-PROCEDURE RestoreScreen ();
-PROCEDURE ReserveScreen (x1, y1, x2, y2 : CARDINAL);
+void SetNewSprite(unsigned x, unsigned y);
+void SetOldSprite(unsigned x, unsigned y);
+int MakeShoot(unsigned *qx, unsigned *qy, unsigned zx, unsigned zy, unsigned time,
+	int mode);
+void FillRectangle (int x0, int y0, int x1, int y1, SpriteType *Sprite);
+void RestoreScreen();
+void ReserveScreen(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
 
-PROCEDURE PrintCharakter (Was : CARDINAL);
-PROCEDURE PrintMenue ();
-PROCEDURE PrintGegenstand (g : GegenstandTyp);
-PROCEDURE PrintLevelName (VAR s : ARRAY OF CHAR);
+void PrintCharakter(unsigned Was);
+void PrintMenue(void);
+void PrintGegenstand (GegenstandTyp *g);
+void PrintLevelName(char *s);
 
-PROCEDURE DisplayCharakter (s : SpielerTyp);
+void DisplayCharakter(SpielerTyp *s);
 
 /* Hilfsprozeduren ********************************************************/
 
-PROCEDURE FindMonster (mx, my : CARDINAL) : CARDINAL;
-PROCEDURE FindGegenstand (x, y : CARDINAL) : CARDINAL;
-PROCEDURE FindParameter (x, y : CARDINAL) : CARDINAL;
-PROCEDURE DeleteMonster (mx, my : CARDINAL);
-PROCEDURE DeleteGegenstand (gx, gy : CARDINAL);
-PROCEDURE DeleteParameter(px, py : CARDINAL);
-PROCEDURE NewMonster (mx, my : CARDINAL; VAR m : MonsterTyp);
-PROCEDURE NewGegenstand (gx, gy : CARDINAL; VAR g : GegenstandTyp);
-PROCEDURE NewParameter (px, py : CARDINAL; VAR p : ParameterTyp);
+unsigned FindMonster(unsigned mx, unsigned my);
+unsigned FindGegenstand(unsigned x, unsigned y);
+unsigned FindParameter(unsigned x, unsigned y);
+void DeleteMonster(unsigned mx, unsigned my);
+void DeleteGegenstand(unsigned gx, unsigned gy);
+void DeleteParameter(unsigned px, unsigned py);
+void NewMonster(unsigned mx, unsigned my; MonsterTyp *m);
+void NewGegenstand(unsigned gx, unsigned gy; GegenstandTyp *g);
+void NewParameter(unsigned px, unsigned py; ParameterTyp *p);
 
 /* Spieler ****************************************************************/
 
-PROCEDURE W6 (i : CARDINAL) : CARDINAL;
-PROCEDURE SchutzWurf (x : CARDINAL) : BOOLEAN;
-PROCEDURE SetLightRange () : CARDINAL;
-PROCEDURE SetOneLight (x, y, w : INTEGER; on : BOOLEAN);
-PROCEDURE SetLightLevel (clear : BOOLEAN);
-PROCEDURE GetBasiswert (n : CARDINAL) : CARDINAL;
-PROCEDURE ChangeBasiswert (n : CARDINAL; x : INTEGER);
+unsigned W6(unsigned i);
+int SchutzWurf(x : CARDINAL);
+unsigned SetLightRange();
+void SetOneLight(int x, int y, int w, int on);
+void SetLightLevel(clear : BOOLEAN);
+unsigned GetBasiswert(unsigned n);
+unsigned ChangeBasiswert(unsigned n, int x);
 
-PROCEDURE Erfahrung (Punkte : CARDINAL);
-PROCEDURE TrefferPunkte (Punkte : CARDINAL; Plus : BOOLEAN);
+void Erfahrung(unsigned Punkte);
+void TrefferPunkte(unsigned Punkte, int Plus);
 
-PROCEDURE NimmGegenstand (px, py : CARDINAL; Einmal : BOOLEAN;
-                          VAR g : GegenstandTyp) : BOOLEAN;
-PROCEDURE LegeGegenstand (px, py : CARDINAL;
-                          g : GegenstandTyp) : BOOLEAN;
+int NimmGegenstand(unsigned px, unsigned py, int Einmal,
+                          GegenstandTyp *g);
+int LegeGegenstand(unsigned px, unsigned py, GegenstandTyp *g);
 
 
 /* Koordinatentransformationen ********************************************/
 
-PROCEDURE NormalKoords (xh, yh : INTEGER; VAR i, j : CARDINAL);
-PROCEDURE SichtLevelUmrechnung (x, y : CARDINAL; VAR i, j : CARDINAL);
-PROCEDURE LevelSichtUmrechnung (x, y : CARDINAL; VAR i, j : CARDINAL) :
-                               BOOLEAN;
+void NormalKoords(int xh, int yh, unsigned *i, unsigned *j);
+void SichtLevelUmrechnung(unsigned x, unsigned y, unsigned *i, unsigned *j);
+int LevelSichtUmrechnung(unsigned x, unsigned y, unsigned *i, unsigned *j);
 
 #endif /* HASCSGLOBAL_H */
 
