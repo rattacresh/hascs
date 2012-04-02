@@ -142,7 +142,7 @@ InOut.WriteLNum(Bytes, 10, 1, ' ');
 		Alloc(BufferLen, BufferAdr);
 		if (BufferAdr == NULL)
 			Error("Kein Speicher mehr frei!", -1);
-		else if (((unsigned long)BufferAdr & 1) != 0)
+		else if (((unsigned long)BufferAdr % 2) != 0)
 			Error("Ungerade Pufferadresse!", -1);
 	}
 	BufferAdr[Bytes] = 0; /* Endmarkierung */

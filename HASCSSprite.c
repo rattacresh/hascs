@@ -1,4 +1,4 @@
-//IMPLEMENTATION MODULE HASCSSprite;
+/* HASCSSprite module */
 #include "HASCSSprite.h"
 
 				
@@ -44,7 +44,7 @@ void PrintAllSprites(SpriteArrayType *s)
 {
 	unsigned x;
 	for (x = 0; x <= MaxSprites - 1; x++)
-		SetSprite(x * 40, 17 + x / 40, s[x]);
+		SetSprite(x % 40, 17 + x / 40, s[x]);
 }
 
 
@@ -348,7 +348,7 @@ void DoEdit(void)
 		case 2 : SystemSprite[n] = aSprite; break;
 		case 3 : GegenSprite[n] = aSprite; break;
 		}
-		SetSprite(n * 40, 17 + n / 40, aSprite);
+		SetSprite(n % 40, 17 + n / 40, aSprite);
 		if (!Changes) {
 			Changes = TRUE;
 			MakeScreen(SpriteArray);

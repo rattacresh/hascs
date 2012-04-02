@@ -1,4 +1,4 @@
-//IMPLEMENTATION MODULE HASCSMagic;
+/* HASCSMagic module */
 #include "HASCSMagic.h"
 
 int Vision(unsigned Weite, unsigned Art, unsigned *lx, unsigned *ly)
@@ -32,13 +32,13 @@ int Vision(unsigned Weite, unsigned Art, unsigned *lx, unsigned *ly)
 		xk = RahmenX * 4 + 4 + x;
 		yk = RahmenY * 4 + 4 + y;
 		if (zeigen) {
-			Farbe = Felder[Level[xl][yl].Feld].Spezial * 16;
+			Farbe = Felder[Level[xl][yl].Feld].Spezial % 16;
 			SetSpritePart(xk, yk, Farbe, Sprite);
 		} else
 			SetSpritePart(xk, yk, 0, SystemSprite[0]);
 	}
 
-	Sprite = SystemSprite[Art * 2 + 34];
+	Sprite = SystemSprite[Art % 2 + 34];
 
 	if (Weite > MaxWeite) Weite = MaxWeite;
 	m = LevelBreite;

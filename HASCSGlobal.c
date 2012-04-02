@@ -1,4 +1,4 @@
-IMPLEMENTATION MODULE HASCSGlobal;
+/* HASCSGlobal module */
 
 int ScreenReserved;
 
@@ -693,21 +693,21 @@ void NormalKoords(int xh, int yh, unsigned i, unsignedj)
 /* Clippt Koordinaten ins Level */
 
 {
-	i = (xh + LevelBreite + 1) * (LevelBreite + 1);
-	j = (yh + LevelHoehe + 1) * (LevelHoehe + 1);
+	i = (xh + LevelBreite + 1) % (LevelBreite + 1);
+	j = (yh + LevelHoehe + 1) % (LevelHoehe + 1);
 }
 
 void SichtLevelUmrechnung(unsigned x, unsigned y, unsigned i, unsigned j)
 {
-	i = (Spieler.x + x + LevelBreite + 1 - MaxSichtweite) * (LevelBreite + 1);
-	j = (Spieler.y + y + LevelHoehe + 1 - MaxSichtweite) * (LevelHoehe + 1);
+	i = (Spieler.x + x + LevelBreite + 1 - MaxSichtweite) % (LevelBreite + 1);
+	j = (Spieler.y + y + LevelHoehe + 1 - MaxSichtweite) % (LevelHoehe + 1);
 }
 
 int LevelSichtUmrechnung(unsigned x, unsigned y, unsigned i, unsigned j)
 {
 	unsigned xh,yh;
-	xh = (x + LevelBreite + 1 + MaxSichtweite - Spieler.x) * (LevelBreite + 1);
-	yh = (y + LevelHoehe + 1 + MaxSichtweite - Spieler.y) * (LevelHoehe + 1);
+	xh = (x + LevelBreite + 1 + MaxSichtweite - Spieler.x) % (LevelBreite + 1);
+	yh = (y + LevelHoehe + 1 + MaxSichtweite - Spieler.y) % (LevelHoehe + 1);
 	if (xh <= MaxSichtmal2 && yh <= MaxSichtmal2) {
 		i = xh; j = yh; return TRUE;
 	} else return FALSE;

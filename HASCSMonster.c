@@ -1,3 +1,5 @@
+/* HASCSMonster module */
+
 #include "HASCSMonster.h"
 
 
@@ -480,9 +482,9 @@ void MonsterBewegung(void)
 				return;
 		AnzahlMonster++;
 		Monster[AnzahlMonster] = Monster[i];
-		Monster[AnzahlMonster].Status = Status * 1000;
+		Monster[AnzahlMonster].Status = Status % 1000;
 		Monster[AnzahlMonster].Sprich = Bonus / 256;
-		Monster[AnzahlMonster].Bonus = Bonus * 256;
+		Monster[AnzahlMonster].Bonus = Bonus % 256;
 	}
 
 	for (i = 1; i <= AnzahlMonster; i++) {

@@ -1,6 +1,5 @@
-//IMPLEMENTATION MODULE HASCSOutput;
+/* HASCSOutput module */
 #include "HASCSOutput.h"
-
 
 /* Textausgabe für HASCS */
 
@@ -41,11 +40,11 @@ void BWOut(char c)
 			n = 80 + c - "A";
 		else if (c == " ")
 			n = 0;
-		else if ((c == "Ä" || c == "ä"))
+		else if (c == "Ä" || c == "ä")
 			n = 106;
-		else if ((c == "Ö" || c == "ö"))
+		else if (c == "Ö" || c == "ö")
 			n = 107;
-		else if ((c == "Ü" || c == "ü"))
+		else if (c == "Ü" || c == "ü")
 			n = 108;
 		else if (c == "_")
 			n = 1;
@@ -185,9 +184,9 @@ void CardToString(unsigned c, unsigned l, char *s)
 		c = j;
 		do {
 			l--;
-			s[l] = c * 10 + '0';
+			s[l] = c % 10 + '0';
 			c = c / 10;
-		} while (!(c == 0 || l == 0);
+		} while (c != 0 && l != 0);
 	} while (c != 0);
 	s[k] = '\0';
 }
@@ -221,7 +220,7 @@ void PrintLongCard(unsigned long x, unsigned z)
 		PrintCard(x, z);
 	else {
 		PrintCard(x / 10000, z-4);
-		c = x * 10000;
+		c = x % 10000;
 		n = 0;
 		while (c > 0) {
 			n++;
@@ -229,7 +228,7 @@ void PrintLongCard(unsigned long x, unsigned z)
 		}
 		for (i = 1; i <= 4-n; i++)
 			Print("0");
-		PrintCard(x * 10000, 1);
+		PrintCard(x % 10000, 1);
 	}
 }
 

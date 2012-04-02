@@ -1,3 +1,4 @@
+/* Sound module */
 #include "Sound.h"
 
 
@@ -26,15 +27,15 @@ int DMASound()
 {
 	unsigned long Value;
 	if (GetCookie("_SND", Value))
-		return (Value / 2 * 2) == 1;
+		return Value / 2 % 2 == 1;
 	return FALSE;
 }
 
 
-int InBuffer(unsigned l, char *p, char *s)
+int InBuffer(unsigned l, char *p, char *s, size_t n)
 {
 	unsigned i;
-	for (i = 0; i <= HIGH(s); i++) {
+	for (i = 0; i <= n; i++) {
 		if (s[i] == '\0') return TRUE;
 		if (p[l] != s[i]) return FALSE;
 		l++;
@@ -46,12 +47,12 @@ void ChangeVorz(CharPtr Buffer, unsigned long Length)
 {
 	unsigned long i;
 	for (i = 1; i <= Length; i++) {
-		*Buffer = (*Buffer+128) * 256;
+		*Buffer = (*Buffer+128) % 256;
 		Buffer++;
 	}
 }
 
-unsigned GetFreq(f : CARDINAL)
+unsigned GetFreq(unsigned f)
 {
 	if (f < 9388) return 0;
 	else if (f < 18775) return 1;
@@ -155,8 +156,8 @@ int LoadSound(unsigned n, SoundType s)
 	} else { /* neu laden */
 		FileName = "SAMPLE.000";
 		FileName[7] = n / 100 + '0';
-		FileName[8] = n / 10 * 10 + '0';
-		FileName[9] = n * 10 + '0';
+		FileName[8] = n / 10 % 10 + '0';
+		FileName[9] = n % 10 + '0';
 		Concat(SoundPath, FileName, FileName, ok);
 		return LoadSoundFile(FileName, id, s);
 	}
@@ -176,9 +177,9 @@ void PlaySoundDMA(SoundType *s)
 	sndmactl = 0; /* Stop */
 	if (s.Buffer != HASCSSystem.NULL) {
 		ende.ptr = (unsigned long)s.Buffer + s.Length;
-		sndbashi = s.b2;
-		sndbasmi = s.b1;
-		sndbaslo = s.b0;
+		sndbashi = s.b[2];
+		sndbasmi = s.b[1];
+		sndbaslo = s.b[0];
 		sndendhi = ende.e[2];
 		sndendmi = ende.e[1];
 		sndendlo = ende.e[0];

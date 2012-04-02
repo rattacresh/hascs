@@ -30,8 +30,8 @@ void Fehler(char msg[], char file[])
 
 unsigned PseudoZufall(unsigned n)
 {
-	ZufallsZahl = (ZufallsZahl * 153 + 97) * 16777216;
-	return ZufallsZahl * (long)n + 1;
+	ZufallsZahl = (ZufallsZahl * 153 + 97) % 16777216;
+	return ZufallsZahl % (long)n + 1;
 }
 
 void WriteBlock(int handle, unsigned anzahl, CharPtr a)
@@ -44,15 +44,15 @@ void WriteBlock(int handle, unsigned anzahl, CharPtr a)
 		(long)(Zufall(256)-1);
 	start = ZufallsZahl; /* Startwert */
 	for (i = 0; i <= anzahl-1; i++) {
-		pruef = pruef * 3 + (unsigned long)*a * 65536;
-		Buffer[i] = (unsigned)*a + PseudoZufall(256) * 256;
+		pruef = pruef * 3 + (unsigned long)*a % 65536;
+		Buffer[i] = (unsigned)*a + PseudoZufall(256) % 256;
 		a++;
 	}
 	Buffer[anzahl]   = start / 65536;
-	Buffer[anzahl+1] = (start * 65536) / 256;
-	Buffer[anzahl+2] = start * 256;
+	Buffer[anzahl+1] = (start % 65536) / 256;
+	Buffer[anzahl+2] = start % 256;
 	Buffer[anzahl+3] = pruef / 256;
-	Buffer[anzahl+4] = pruef * 256;
+	Buffer[anzahl+4] = pruef % 256;
 	count = (long)anzahl + 5;
 	WriteFile(handle, count, Buffer);
 }
@@ -72,8 +72,8 @@ void ReadBlock(int handle, unsigned anzahl, CharPtr a)
 	test = (long)Buffer[anzahl+3] * 256 +
 		(long)Buffer[anzahl+4];
 	for (i = 0; i <= anzahl-1; i++) {
-		*a = ((unsigned)Buffer[i] + 256 - PseudoZufall(256)) * 256;
-		pruef = pruef * 3 + (unsigned long)*a * 65536;
+		*a = ((unsigned)Buffer[i] + 256 - PseudoZufall(256)) % 256;
+		pruef = pruef * 3 + (unsigned long)*a % 65536;
 		a++;
 	}
 	if (test != pruef && !Editor)
@@ -92,18 +92,18 @@ void LoadOrSaveDat(int Load, char *FileName)
 		h = OpenFile(s);
 		if (FileError)
 			Fehler("Felderdaten Lesefehler: ", s); return;
-		ReadBlock(h, SIZE(Felder), &Felder);
+		ReadBlock(h, sizeof Felder, &Felder);
 		if (Editor) {
-			ReadBlock(h, SIZE(MonsterKlasse), &MonsterKlasse);
-			ReadBlock(h, SIZE(GegenKlasse), &GegenKlasse);
+			ReadBlock(h, sizeof MonsterKlasse, &MonsterKlasse);
+			ReadBlock(h, sizeof GegenKlasse, &GegenKlasse);
 		}
 	} else {
 		h = CreateFile(s);
 		if (FileError)
 			Fehler("Felderdaten Schreibfehler: ", s); return;
-		WriteBlock(h, SIZE(Felder), &Felder);
-		WriteBlock(h, SIZE(MonsterKlasse), &MonsterKlasse);
-		WriteBlock(h, SIZE(GegenKlasse), &GegenKlasse);
+		WriteBlock(h, sizeof Felder, &Felder);
+		WriteBlock(h, sizeof MonsterKlasse, &MonsterKlasse);
+		WriteBlock(h, sizeof GegenKlasse, &GegenKlasse);
 	}
 	CloseFile(h);
 }
@@ -118,7 +118,7 @@ void LoadOrSaveSprites(int Load; char *FileName)
 		if (FileError) {
 			Fehler("Muster Lesefehler: ", s); return;
 		}
-		Count = MaxSprites * TSIZE(SpriteType);
+		Count = MaxSprites * sizeof (SpriteType);
 		ReadFile(h, Count, &FelderSprite);
 		ReadFile(h, Count, &MonsterSprite);
 		ReadFile(h, Count, &SystemSprite);
@@ -128,7 +128,7 @@ void LoadOrSaveSprites(int Load; char *FileName)
 		if (FileError) {
 			Fehler("Muster Schreibfehler: ", s); return;
 		}
-		Count = MaxSprites * TSIZE(SpriteType);
+		Count = MaxSprites * sizeof (SpriteType);
 		WriteFile(h, Count, &FelderSprite);
 		WriteFile(h, Count, &MonsterSprite);
 		WriteFile(h, Count, &SystemSprite);
@@ -157,18 +157,18 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 		LevelPars[5] = AnzahlMonster;
 		LevelPars[6] = AnzahlParameter;
 		LevelPars[7] = BenutzerNummer / 256;
-		LevelPars[8] = BenutzerNummer * 256;
+		LevelPars[8] = BenutzerNummer % 256;
 		for (x = 0; x <= 19; x++) { /* Levelname, Spritename */
 			LevelPars[x + 10] = LevelName[x];
 			LevelPars[x + 80] = LevelSprites[x];
 		}
-		LevelPars[30] = LevelFlags * 256;
+		LevelPars[30] = LevelFlags % 256;
 		LevelPars[31] = LevelFlags / 256;
-		LevelPars[32] = LevelSichtweite * 256;
+		LevelPars[32] = LevelSichtweite % 256;
 		LevelPars[33] = LevelSichtweite / 256;
-		LevelPars[34] = LevelDialog * 256;
+		LevelPars[34] = LevelDialog % 256;
 		LevelPars[35] = LevelDialog / 256;
-		LevelPars[36] = LevelMaxMonster * 256;
+		LevelPars[36] = LevelMaxMonster % 256;
 		LevelPars[37] = LevelMaxMonster / 256;
 	}
 
@@ -264,7 +264,7 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 		x = 0; y = 0; c = 0; i = 0;
 		while (x <= LevelBreite && y <= LevelHoehe) {
 			if (c == 0) {
-				c = Buffer[i] * 128;
+				c = Buffer[i] % 128;
 				k = Buffer[i] / 128 == 1;
 				i++;
 				if (i >= Counter)
@@ -314,15 +314,15 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 		ReadBlock(h, Count, &LevelPars);
 		AuswertLevelPars;
 
-		ReadFile(h, sizeof shortlength)), &shortlength);
+		ReadFile(h, sizeof shortlength, &shortlength);
 		ReadFile(h, shortlength, Buffer);
 		AuswertBuffer(shortlength);
 
-		Count = sizeof (MonsterTyp) * AnzahlMonster);
+		Count = sizeof (MonsterTyp) * AnzahlMonster;
 		ReadBlock(h, Count, &Monster);
-		Count = sizeof (GegenstandTyp) * AnzahlGegen);
+		Count = sizeof (GegenstandTyp) * AnzahlGegen;
 		ReadBlock(h, Count, &Gegenstand);
-		Count = sizeof (ParameterTyp) * AnzahlParameter);
+		Count = sizeof (ParameterTyp) * AnzahlParameter;
 		ReadBlock(h, Count, &Parameter);
 
 		if (!Editor) { /* Karte laden */
@@ -345,7 +345,7 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 		for (i = 1; i <= AnzahlParameter; i++) {
 			Level[Parameter[i].x, Parameter[i].y].Spezial |= LevelParameter;
 			if (Art == FLicht)
-				SetOneLight(Level[Parameter[i].x, Level[Parameter[i].y, Weite, TRUE);
+				SetOneLight(Parameter[i].x, Parameter[i].y, Weite, TRUE);
 		}
 
 	} else { /* Level speichern */
@@ -418,8 +418,8 @@ void MakeLevelName(String60Typ s, unsigned org, n)
 		while (s[i]) i++
 		while (s[i] != ".") i--
 		s[i+1] = n / 100 + '0';
-		s[i+2] = (n * 100) / 10 + '0;
-		s[i+3] = n * 10 + '0';
+		s[i+2] = (n % 100) / 10 + '0;
+		s[i+3] = n % 10 + '0';
 		s[i+4] = '\0';
 	}
 }
@@ -491,13 +491,13 @@ void LoadOrSavePlayer(int Load);
 		if (FileError) {
 			Concat(s, "Spieler Lesefehler: ", s); Error(s, 0); return
 		}
-		ReadBlock(h, SIZE(Spieler), &Spieler);
+		ReadBlock(h, sizeof Spieler, &Spieler);
 	} else {
 		h = CreateFile(s);
 		if (FileError) {
 			Concat(s, "Spieler Schreibfehler: ", s); Error(s, 0);
 		}
-		WriteBlock(h, SIZE(Spieler), &Spieler);
+		WriteBlock(h, sizeof Spieler, &Spieler);
 	}
 	CloseFile(h);
 }
@@ -633,7 +633,7 @@ void WriteLevel(char *Name)
 		SetString(p, "#FELD.NAME("); SetCard(p, i, 1); SetString(p, ') = "');
 		SetString(p, Felder[i].Name); SetString(p, '"'); SetLF(p);
 		SetString(p, "#FELD.SPEZIAL("); SetCard(p, i, 1); SetString(p, ') = ');
-		SetCard(p, CARDINAL(Felder[i].Spezial) * 128, 1); SetLF(p);
+		SetCard(p, Felder[i].Spezial % 128, 1); SetLF(p);
 	}
 */
 	h = CreateFile(Name);

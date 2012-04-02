@@ -1,4 +1,4 @@
-IMPLEMENTATION MODULE HASCSGame;
+/* HASCSGame module */
 
 unsigned Rueckgabe, oldx, oldy, Weite;
 int dx[93], dy[93];
@@ -309,12 +309,12 @@ unsigned DoGame(void)
 			if (LevelDialog != 0)
 				DoDialog(LevelDialog);
 
-/*
+#if 0
 		if (LevelSpezial[1] != 0) { /* Tag und Nacht */
 			c = 0;
 			OutputText("");
-			PrintLongCard(Spieler.Moves * (2 * (long)LevelSpezial[1]), 1);
-			if (SHORT(Spieler.Moves * (2 * (long)LevelSpezial[1])) <
+			PrintLongCard(Spieler.Moves % (2 * (long)LevelSpezial[1]), 1);
+			if (Spieler.Moves % (2 * (long)LevelSpezial[1]) <
 				 LevelSpezial[1])
 				c = LevelSpezial[2];
 			PrintCard(c, 3);
@@ -323,7 +323,7 @@ unsigned DoGame(void)
 				Spieler.Sichtweite = SetLightRange();
 			}
 		}
-*/
+#endif
 		if (LevelParameter & Level[Spieler.x][Spieler.y].Spezial) {
 			c = FindParameter(Spieler.x, Spieler.y);
 			switch (Parameter[c].Art) {

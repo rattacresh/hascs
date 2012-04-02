@@ -1,4 +1,4 @@
-// IMPLEMENTATION MODULE Image;
+/* Image module */
 #include "Image.h"
 
 
@@ -45,7 +45,7 @@ int Decompress(BytePtr source, BytePtr dest)
 		unsigned long i;
 		i = *source++;
 		while (i > 0) {
-			CheckSum = (CheckSum + 1 + *source) * 32768;
+			CheckSum = (CheckSum + 1 + *source) % 32768;
 			*dest++ = *source++; Count++; i--;
 		}
 	}
@@ -53,7 +53,7 @@ int Decompress(BytePtr source, BytePtr dest)
 	void SolidRun(void)
 	{
 		unsigned long i;
-		i = (unsigned)*source * 128;
+		i = (unsigned)*source % 128;
 		if ((unsigned)*source >= 128)
 			while (i > 0) {
 				*dest++ = 0xFF; Count++; i--;
@@ -89,7 +89,7 @@ int Decompress(BytePtr source, BytePtr dest)
 			source++; BitString();
 		else
 			SolidRun();
-		if (Count * (long)LineBytes == 0) {
+		if (Count % (long)LineBytes == 0) {
 			if (WordAusgleich == 1)
 				*dest++ = 0x00;
 			while (repetitions > 1) {
@@ -127,8 +127,8 @@ int LoadImageN(unsigned n, unsigned w, h)
 	HASCSOutput.Concat(Name, HASCSDisk.DiaPath, "PICTURE.000");
 	i = LENGTH(Name) - 3;
 	Name[i]   = n / 100 + '0';
-	Name[i+1] = n * 100 / 10 + '0';
-	Name[i+2] = n * 10 + '0';
+	Name[i+1] = n % 100 / 10 + '0';
+	Name[i+2] = n % 10 + '0';
 
 	CheckSum = 0;
 	length = HASCSSystem.FileLength(Name);
@@ -145,7 +145,7 @@ int LoadImageN(unsigned n, unsigned w, h)
 	if (ImageHeader^.Length > 8)
 		HASCSSystem.FileSeek(handle, 2 * ImageHeader->Length);
 	LineBytes = (ImageHeader->LineWidth + 7) / 8;
-	WordAusgleich = LineBytes * 2;
+	WordAusgleich = LineBytes % 2;
 	i = HASCSSystem.NewCache(id, (long)(LineBytes+WordAusgleich) * 
 				 ImageHeader->Lines);
 	Start = ImgBuffer + (2 * ImageHeader^.Length);
@@ -187,7 +187,7 @@ int SaveImage(char *Name)
 							       [HASCSGlobal.FindGegenstand(x,y)].Sprite];
 			else
 				 Sprite = HASCSGraphics.FelderSprite[HASCSGlobal.Level[x,y].Feld];
-			return Sprite[z * 16];
+			return Sprite[z % 16];
 		 }
 
 		i = 0;
@@ -205,7 +205,7 @@ int SaveImage(char *Name)
 			x[j++] = 0;
 			x[j++] = c;
 			x[j++] = GetSpritePattern(i, z / 16, z) / 256;
-			x[j++] = GetSpritePattern(i, z / 16, z) * 256);
+			x[j++] = GetSpritePattern(i, z / 16, z) % 256;
 			i = i + c;
 			if (i <= HASCSGlobal.LevelBreite)
 				f = GetSpritePattern(i, z / 16, z);

@@ -1,7 +1,7 @@
-IMPLEMENTATION MODULE HASCSGraphics;
+/* HASCSGraphics module */
 
-
-#define Black "\0\01\02\03\04\05\06\07\010,\011\012\013\014\015\016\017"
+#define Black ((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7) \
+	(1<<8)|(1<<9)|(1<<10)|(1<<11)|(1<<12)|(1<<13)|(1<<14)|(1<<15))
 
 BITSET Bildschirm[16000]; /* virtueller Bildschirm */
 unsigned char *Bild2, /*0..31999*/
@@ -29,7 +29,7 @@ void OrMonoSprite(unsigned x,unsigned y, SpriteType *Sprite)
 	/*register*/ unsigned i, j;
 	i = y * 640 + x;
 	for (j = 0; j <= 15; j++) {
-		Bildschirm[i] = Bildschirm[i] + Sprite[j];
+		Bildschirm[i] = Bildschirm[i] | Sprite[j];
 		i += 40;
 	}
 	if (NewXMin > x) NewXMin = x;
@@ -44,7 +44,7 @@ void SetMonoChar(unsigned x,unsigned y, char ch)
 
 	i = y * 1280 + x;
 	Sprite2 = GegenSprite[ch / 2];
-	j = ch * 2;
+	j = ch % 2;
 	for (h = 0; h <= 15; h++) {
 		Bild2[i] = Sprite2[j];
 		i += 80; j += 2;
@@ -63,19 +63,19 @@ void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, SpriteType *Sprite)
 	unsigned z[4];
 	j = f / 4 * 4;
 	for (i = 0; i <= 3; i++) {
-		switch (f * 4) {
-		case 0 : z[i] = Sprite[j + i] / 4096 * 16; break;
-		case 1 : z[i] = Sprite[j + i] / 256 * 16; break;
-		case 2 : z[i] = Sprite[j + i] / 16 * 16; break;
+		switch (f % 4) {
+		case 0 : z[i] = Sprite[j + i] / 4096 % 16; break;
+		case 1 : z[i] = Sprite[j + i] / 256 % 16; break;
+		case 2 : z[i] = Sprite[j + i] / 16 % 16; break;
 		case 3 : z[i] = Sprite[j + i] * 16; break;
 		}
-		switch (x * 4) {
+		switch (x % 4) {
 		case 0 : z[i] = z[i] * 4096; break;
 		case 1 : z[i] = z[i] * 256; break;
 		case 2 : z[i] = z[i] * 16; break;
 		}
 	}
-	j = y * 160 + x / 4; m = mask[x * 4];
+	j = y * 160 + x / 4; m = mask[x % 4];
 	for (i = 0; i <= 3; i++) {
 		Bildschirm[j] = (Bildschirm[j] & ~m) | z[i];
 		j += 40;
@@ -125,10 +125,10 @@ void HorzLine(unsigned x, unsigned y, unsigned w)
 	unsigned b;
 	b = 40 * y + x / 16;
 	while (w > 0) {
-		if ((x * 16) != 0 || w < 16) {
-			Bildschirm[b] |= (1 <<(15 - x * 16));
+		if ((x % 16) != 0 || w < 16) {
+			Bildschirm[b] |= (1 <<(15 - x % 16));
 			x++; w--;
-			if (x * 16 == 0) b++;
+			if (x % 16 == 0) b++;
 		} else if (w >= 16) {
 			Bildschirm[b] = Bildschirm[b] | Black;
 			x += 16; w -= 16; b++;
@@ -140,7 +140,7 @@ void VertLine(unsigned x, unsigned y, unsigned h)
 {
 	unsigned b, m;
 	b = 40 * y + x / 16;
-	m = 15 - x * 16;
+	m = 15 - x % 16;
 	while (h > 0) {
 		Bildschirm[b] |= m;
 		b += 40; h--;
