@@ -1,4 +1,5 @@
-IMPLEMENTATION MODULE HASCSSystem;
+//IMPLEMENTATION MODULE HASCSSystem;
+#include "HASCSSystem.h"
 
 
 DeviceHandle ScreenHandle;

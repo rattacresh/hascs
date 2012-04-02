@@ -1,5 +1,7 @@
-/* Hardware Register für DMA Sound */
+#include "Sound.h"
 
+
+/* Hardware Register für DMA Sound */
 #define sndmactl (*(volatile unsigned char *)0xFF8901) /* Sound-DMA-Control Register */
 #define sndbashi (*(volatile unsigned char *)0xFF8903) /* Frame-Start-Address  */
 #define sndbasmi (*(volatile unsigned char *)0xFF8905)

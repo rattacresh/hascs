@@ -1,4 +1,6 @@
-IMPLEMENTATION MODULE Screen;
+//IMPLEMENTATION MODULE Screen;
+#include "Screen.h"
+
 
 /************************************************************************/
 

@@ -1,4 +1,6 @@
-IMPLEMENTATION MODULE Start;
+//IMPLEMENTATION MODULE Start;
+#include "Start.h"
+
 
 unsigned Auswahl, SpriteAnzahl, d, s;
 int Ok, OnceMore;

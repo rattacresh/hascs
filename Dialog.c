@@ -27,6 +27,9 @@
            4.00  20.09.94 Megamax Umstellung, Tokenisierung
 */
 
+#include "Dialog.h"
+
+
 #define MaxCommand (1 + sizeof Command / sizeof *Command) /* Kommandos */
 #define MaxOperator (1 + sizeof Operator / sizeof *Operator) /* Operatoren */
 #define MaxVariable (1 + sizeof Variable / sizeof *Variable) /* Variablen */
@@ -306,12 +309,12 @@ void DialogFehler(char *s, *q, unsigned c)
 	Error(err, 3);
 }
 
-unsigned Max(unsigned x, unsigned y);
+unsigned Max(unsigned x, unsigned y)
 {
 	if (x > y) return x else return y;
 }
 
-unsigned Min(unsigned x, unsigned y);
+unsigned Min(unsigned x, unsigned y)
 {
 	if (x < y) return x else return y;
 }
@@ -599,7 +602,7 @@ int FindLabel(CharPtr *p; unsigned l)
 
 /************************************************************************/
 
-void PrinterLine(char *s, size_t n);
+void PrinterLine(char *s, size_t n)
 {
 	unsigned i;
 	if (!PrinterStatus())
@@ -688,7 +691,7 @@ void GetString(CharPtr *p, char *s)
 	EvalString(p, s);
 }
 
-void *GetAddress(CharPtr *p; unsigned *t, unsigned *c, char *s);
+void *GetAddress(CharPtr *p; unsigned *t, unsigned *c, char *s)
 {
 	void *v;
 	unsigned i, k;
@@ -926,7 +929,7 @@ void Ausgabe(char *s)
 
 /* Kommandos  ***********************************************************/
 
-void Label(CharPtr *p);
+void Label(CharPtr *p)
 {
 	unsigned label;
 
@@ -942,7 +945,7 @@ void Goto(CharPtr *p)
 	Continue = FindLabel(p, label);
 }
 
-void Gosub(CharPtr *p);
+void Gosub(CharPtr *p)
 {
 	unsigned label;
 	
@@ -1022,7 +1025,7 @@ void Input(CharPtr *p)
 		PrinterLine(ein);
 }
 
-void Aim(CharPtr *p);
+void Aim(CharPtr *p)
 {
 	unsigned i, x, y, qx, qy, mode, type;
 	BITSET b : BITSET;
@@ -1059,7 +1062,7 @@ void Aim(CharPtr *p);
 }
 
 
-void Nothing(CharPtr *p);
+void Nothing(CharPtr *p)
 {
 }
 
@@ -1107,7 +1110,7 @@ void Picture(CharPtr *p)
 	ShowPicture(n, FALSE);
 }
 
-void ShowPicture(unsigned n, int New);
+void ShowPicture(unsigned n, int New)
 {
 	unsigned ys, ws, hs, i, PicW, PicH;
 	if (!LoadImageN(n, PicW, PicH))
@@ -1360,7 +1363,7 @@ void Call(CharPtr *p)
 
 /* Dialog ausführen *****************************************************/
 
-void ExecuteDialog(void);
+void ExecuteDialog(void)
 {
 	unsigned cmd, type, token;
 	String80Type s;
@@ -1529,7 +1532,7 @@ void DoGegenstandDialog(unsigned n, GegenstandTyp *g)
 	DoDialog(n);
 }
 
-void DoParameterDialog(unsigned n, ParameterTyp *p);
+void DoParameterDialog(unsigned n, ParameterTyp *p)
 {
 	SelectedParameter = p;
 	DoDialog(n);

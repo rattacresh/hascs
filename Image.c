@@ -1,4 +1,6 @@
 // IMPLEMENTATION MODULE Image;
+#include "Image.h"
+
 
 typedef struct {
 	unsigned Version,
