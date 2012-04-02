@@ -125,7 +125,7 @@ OperatorType Operator[] = {
 };
 
 
-VariableType Variable[];
+VariableType Variable[] = {
 	/* Variablen */
 	
 	{"SPIELER.TP", &Spieler.TP, 0, NumberToken},
@@ -280,19 +280,19 @@ char LocalVarName[2];
     
 /* Forward Deklarationen ************************************************/
 
-unsigned GetNumber (CharPtr *p);
+unsigned GetNumber(CharPtr *p);
 
 void *GetItem(unsigned n, void **p, unsigned *r; char **s);
 unsigned EvalTerm(CharPtr *p, unsigned n);
-void EvalString (CharPtr *p, char **s);
+void EvalString(CharPtr *p, char **s);
 void NewLabel(unsigned l, CharPtr p);
 
 /* Hilfprozeduren *******************************************************/
 
-void DialogFehler (char **s, **q, unsigned c)
+void DialogFehler(char *s, *q, unsigned c)
 {
 	char err[256], num[256];
-	err[0] = 0;
+	err[0] = '\0';
 	if (DialogNummer < 1000) {
 		CardToString(DialogNummer, 1, num);
 		Concat(err, "Dialog ", num);
@@ -323,7 +323,8 @@ unsigned GetToken(CharPtr *ref_p, unsigned *ref_n, char *s)
 
 	unsigned i, t;
 
-	switch ((t = **p)) {
+	t = *p;
+	switch (t) {
 	case OperatorToken:
 	case VariableToken:
 	case CommandToken:
@@ -344,9 +345,9 @@ unsigned GetToken(CharPtr *ref_p, unsigned *ref_n, char *s)
 		p++;
 		n = *p++;
 		if (n > 0)
-			for (i = 0; i < n; i++)
+			for (i = 0; i <= n -1; i++)
 				s[i] = *p++;
-		s[n] = 0;
+		s[n] = '\0';
 		break;
 	case KlammerAufToken:
 	case KlammerZuToken:
@@ -357,7 +358,7 @@ unsigned GetToken(CharPtr *ref_p, unsigned *ref_n, char *s)
 		i = 0; p++;
 		while (*p >= ' ')
 			s[i++] = *p++;
-		s[i] = 0;
+		s[i] = '\0';
 		break;
 	}
 	*ref_p = p, *ref_n = n;
@@ -371,7 +372,8 @@ int NextLine(CharPtr *ref_p)
 	String80Type s;
 
 	do {
-		if ((t = GetToken(&p, i, s)) == TextEndeToken) return FALSE;
+		t = GetToken(&p, i, s);
+		if (t == TextEndeToken) return FALSE;
 	while (t != ZeilenEndeToken);
 	p++;
 	*ref_p = p;
@@ -391,19 +393,19 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 	{
 		CharPtr p = *ref_p;
 		while (*p >= ' ') p++;
-		while (*p && *p != 10) p++;
+		while (*p != '\0' && *p != 10) p++;
 		if (*p == 10) p++;
 		Line++;
 		*ref_p = p;
-		return *p == 0;
+		return *p == '\0';
 	}
 
 	static void GetLine(CharPtr *ref_p, char *s, size_t n)
 	{
 		CharPtr p = *ref_p;
 		unsigned i;
-		for (i = 0; i < n; i++) {
-			if (*p < ' ') {s[i] = 0; break;}
+		for (i = 0; i <= n; i++) {
+			if (*p < ' ') { s[i] = '\0'; break; }
 			s[i] = *p++;
 		}
 		*ref_p = p;
@@ -442,7 +444,7 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 			while (*p IN VarSet)
 				s[i++] = *p++;
 		}
-		s[i] = 0;
+		s[i] = '\0';
 		*ref_p = p;
 		return t;
 	}
@@ -502,8 +504,8 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 					n = FindVariable(s, &t, &ok);
 					if (!COMPARE(s, "LET")) {
 						Out(t); Out(n);
-						label = (t == CommandToken)
-							&& (n = 4);
+						label = t == CommandToken
+							&& n == 4;
 					}
 					break;
 				case KommaToken:
@@ -526,7 +528,7 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 					n = LENGTH(s);
 					Out(t); Out(n);
 					if (n > 0)
-						for (i = 0; i < n; i++)
+						for (i = 0; i <= n - 1; i++)
 							OutC(s[i]);
 				}
 				t = GetToken(p, s);
@@ -538,7 +540,7 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 			n = LENGTH(s);
 			Out(AusgabeToken);
 			if (n > 0)
-				for (i = 0; i < n ; i++)
+				for (i = 0; i <= n - 1 ; i++)
 					OutC(s[i]);
 			
 			if (n > DialogBreite) DialogBreite = n;
@@ -570,9 +572,9 @@ void *GetLabel(unsigned l)
 void NewLabel(unsigned l, CharPtr p)
 {
 	if (LabelAnzahl < MaxLabel) {
+		LabelAnzahl++;
 		Labels[LabelAnzahl].LabelNumber = l;
 		Labels[LabelAnzahl].LabelAddress = p;
-		LabelAnzahl++;
 	}
 }
 
@@ -601,10 +603,10 @@ void PrinterLine(char *s, size_t n);
 {
 	unsigned i;
 	if (!PrinterStatus())
-		WaitTime (1000);
+		WaitTime(1000);
 
-	for (i = 0; i < n ; i++) {
-		if (s[i] == 0) {
+	for (i = 0; i <= n ; i++) {
+		if (s[i] == '\0') {
 			PrinterOut(13); PrinterOut(10);
 			return;
 		}
@@ -709,10 +711,11 @@ unsigned FindText(unsigned n)
 {
 	unsigned i;
 
-	for (i = 0; i < AnzahlTexte; i++)
+	for (i = 1; i <= AnzahlTexte; i++)
 		if (Text[i].Nummer == n)
 			return i;
-	Text[AnzahlTexte++].Nummer = n;
+	AnzahlTexte++
+	Text[AnzahlTexte].Nummer = n;
 	return AnzahlTexte;
 }
 
@@ -863,7 +866,7 @@ void EvalString(CharPtr *p, char *s)
 		case 12: Assign(s, InString(s, h) ? "1" : "0"); break;
 		case 13: Assign(s, InString(h, s) ? "1" : "0"); break;
 		default
-			DialogFehler ("Falscher Operator in Stringausdruck!", "", 65535);
+			DialogFehler("Falscher Operator in Stringausdruck!", "", 65535);
 			break;
 		}
 	}
@@ -901,7 +904,7 @@ void Ausgabe(char *s)
 {
 	unsigned i;
 	if (OpenWindow)
-		OpenScreen (0, 0);
+		OpenScreen(0, 0);
 
 	if (ZeilenAus == h) {
 		WaitKey();  /* mal abwarten */
@@ -945,7 +948,8 @@ void Gosub(CharPtr *p);
 	
 	label = GetNumber(p);
 	if (ReturnLevel < MaxGosub) {
-		ReturnAddress[ReturnLevel++].LabelAddress = p;
+		ReturnLevel++
+		ReturnAddress[ReturnLevel].LabelAddress = p;
 		Continue = FindLabel(p, label);
 	} else {
 		DialogFehler("Zuviele verschachtelte GOSUB", "", 65535);
@@ -990,7 +994,7 @@ void Input(CharPtr *p)
 		i = 0;
 		while (DialogText[my][mx] >= '0')
 			s[i++] = DialogText[my][mx++];
-		s[i] = 0;
+		s[i] = '\0';
 	}
 
 	if  (OpenWindow)
@@ -1000,7 +1004,7 @@ void Input(CharPtr *p)
 	if (ZeilenPos < h)
 		ZeilenPos++;
 	else {
-		ScrollUp (fx, fy, fw, fh);
+		ScrollUp(fx, fy, fw, fh);
 		for (i = 2; i <= ZeilenPos; i++)
 			Assign(DialogText[i-1], DialogText[i]);
 		
@@ -1010,7 +1014,7 @@ void Input(CharPtr *p)
 	InputClick(ein, w - 1, mx, my, mb);
 	if (mb) {
 		GetWord(mx, my, ein);
-		PrintAt (x, y + ZeilenPos - 1, ein);
+		PrintAt(x, y + ZeilenPos - 1, ein);
 	}
 	Assign(DialogText[ZeilenPos], ein);
 	ZeilenAus = 0;
@@ -1086,14 +1090,14 @@ void Output(CharPtr *p)
 	OutputText(s);
 }
 
-void Invert (CharPtr *p)
+void Invert(CharPtr *p)
 {
 	unsigned x, y;
 
 	x = GetNumber(p);
 	y = GetNumber(p);
 	if (LevelSichtUmrechnung(x, y, x, y))
-		InvertFeld (x+1, y+1);
+		InvertFeld(x+1, y+1);
 }
 
 void Picture(CharPtr *p)
@@ -1106,7 +1110,7 @@ void Picture(CharPtr *p)
 void ShowPicture(unsigned n, int New);
 {
 	unsigned ys, ws, hs, i, PicW, PicH;
-	if (!LoadImageN (n, PicW, PicH))
+	if (!LoadImageN(n, PicW, PicH))
 		return;
 	if (New) {
 		OpenWindow = TRUE;
@@ -1124,7 +1128,7 @@ void ShowPicture(unsigned n, int New);
 		if (ZeilenPos < h) 
 			ZeilenPos++;
 		else {
-			ScrollUp (fx, fy, fw, fh);
+			ScrollUp(fx, fy, fw, fh);
 			for (i = 2; i <= ZeilenPos; i++)
 				Assign(DialogText[i-1], DialogText[i]);
 		}
@@ -1199,7 +1203,7 @@ void Sound(CharPtr *p)
 	}
 }
 
-void Wait(CharPtr *)
+void Wait(CharPtr *p)
 {
 	unsigned t;
 
@@ -1374,7 +1378,7 @@ void ExecuteDialog(void);
 
 	while (Continue) {
 		token = GetToken(p, cmd, s);
-		if (DebugLevel != {}) {
+		if (DebugLevel != 0) {
 			switch (token) {
 			case VariableToken: Assign(s, Variable[cmd].name); break;
 			case CommandToken: Assign(s, Command[cmd].name); break;
@@ -1466,13 +1470,13 @@ int LoadDialog(unsigned n, int coded)
 	if (FileError) return FALSE;
 
 	DialogBuffer = GetBuffer(DialogLaenge);
-	f = OpenFile (s); ReadFile(f, DialogLaenge, DialogBuffer); CloseFile(f);
+	f = OpenFile(s); ReadFile(f, DialogLaenge, DialogBuffer); CloseFile(f);
 
 	if (coded)
 		CodeDialog(BenutzerNummer, DialogLaenge, DialogBuffer);
 
 	i = NewCache(id, DialogLaenge + 16);
-	if (!(Tokenize(DialogBuffer, Cache[i].CacheBuffer, DialogLaenge))) {
+	if (!Tokenize(DialogBuffer, Cache[i].CacheBuffer, DialogLaenge)) {
 		FreeCache(i);
 		return FALSE
 	} /* Syntaxfehler */
@@ -1482,7 +1486,7 @@ int LoadDialog(unsigned n, int coded)
 	return TRUE;
 }
 
-int SaveDialog (unsigned n, int coded)
+int SaveDialog(unsigned n, int coded)
 {
 	String80Type s;
 	int f;
@@ -1495,14 +1499,14 @@ int SaveDialog (unsigned n, int coded)
 	f = OpenFile(s); ReadFile(f, l, p); CloseFile(f);
 	CodeDialog(LONG(BenutzerNummer), l, p);
 	MakeFileName(coded, n, s);
-	f = CreateFile(s); WriteFile (f, l, p); CloseFile (f);
+	f = CreateFile(s); WriteFile(f, l, p); CloseFile(f);
 	return !FileError;
 }
 
 
 /* Dialog ausführen *****************************************************/
 
-void DoDialog (unsinged n)
+void DoDialog(unsinged n)
 {
 	unsigned i;
 	if (!LoadDialog(n, FALSE)) /* unkodierter Dialog */
@@ -1534,7 +1538,7 @@ void DoParameterDialog(unsigned n, ParameterTyp *p);
 
 /* Kommandos und Variablen initialisieren *******************************/
 
-void NewVariable (char *s, void *l, unsigned n, unsigned t)
+void NewVariable(char *s, void *l, unsigned n, unsigned t)
 {
 	Assign(Variable[ZeilenPos].name, s);
 	Variable[ZeilenPos].loc = l;
@@ -1543,7 +1547,7 @@ void NewVariable (char *s, void *l, unsigned n, unsigned t)
 	ZeilenPos++;
 }
 
-(************************************************************************)
+/************************************************************************/
 
 void DialogInit()
 {

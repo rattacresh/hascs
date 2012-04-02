@@ -10,8 +10,8 @@ IMPLEMENTATION MODULE HASCSOutput;
 typedef char TextString[TextSpalten];
 typedef const char *CharSet;
 
-void CharOut(char);
-void StringOut(char *);
+void (*CharOut)(char);
+void (*StringOut)(char *);
 
 unsigned cx, cy; /* Cursorposition */
 
@@ -26,7 +26,7 @@ void BWOut(char c)
 {
 	unsigned pos, i, n;
 	if (TextMode == 0) {
-		if (c != 10C) {
+		if (c != 10) {
 			if (cx < MaxX) {
 				SetChar(cx, cy, c);
 				cx++;

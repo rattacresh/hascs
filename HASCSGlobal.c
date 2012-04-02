@@ -383,7 +383,7 @@ void SetLightLevel(int clear)
 	if (clear)
 		for (x = 0; x <= LevelBreite; x++)
 			for (y = 0; y <= LevelHoehe; y++)
-				Level[x, y].Spezial &= ~LevelSichtbar;
+				Level[x][y].Spezial &= ~LevelSichtbar;
 	for (i = 1; i <= AnzahlParameter; i++)
 		if (Parameter[i].Art == FLicht)
 			SetOneLight(Parameter[i].x, Parameter[i].y, Parameter[i].Weite, TRUE);
@@ -450,14 +450,12 @@ void DeleteMonster(unsigned mx, unsigned my)
 	}
 }
 
-unsigned FindGegenstand(x, y : CARDINAL)
-VAR i : CARDINAL;
+unsigned FindGegenstand(unsigned x, unsigned y)
 {
-	FOR i = AnzahlGegen TO 1 BY -1 DO
-		if ((Gegenstand[i].x == x && Gegenstand[i].y == y)) {
+	unsigned i;
+	for (i = AnzahlGegen; i >= 1; i--)
+		if (Gegenstand[i].x == x && Gegenstand[i].y == y)
 			return i;
-		}
-	}
 	return 0;
 }
 

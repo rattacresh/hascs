@@ -63,7 +63,7 @@ void MakeScreen(unsigned SpriteArray)
 		PrintAt(54,8,"   Farbe");   OutlineBar(27, 8, 32, 8);
 
 		FillRectangle(34, SpriteArray+5, 39, SpriteArray+5, SystemSprite[0]);
-		PrintAt(68,0,"    }   OutlineBar(34, 0, 39, 0);
+		PrintAt(68,0,"    ENDE");   OutlineBar(34, 0, 39, 0);
 		PrintAt(68,2,"   Laden");   OutlineBar(34, 2, 39, 2);
 		PrintAt(68,3," Speichern"); OutlineBar(34, 3, 39, 3);
 		PrintAt(68,5,"   Felder");  OutlineBar(34, 5, 39, 5);
