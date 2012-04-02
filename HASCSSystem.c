@@ -78,7 +78,7 @@ void InitWorkstation(char *WinName)
 		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung 640*480 öffnen: %s\n", SDL_GetError());
 		exit(1);
 	}
-
+	
 	SDL_WM_SetCaption(WinName, WinName);    
 }
 
@@ -91,10 +91,12 @@ void ExitWorkstation(int result)
 
 void *Allocate(unsigned long Bytes)
 {
+	/*
 	void *Ptr;
 	if (Bytes == 0) { return NULL; }
 	Alloc(Bytes, Ptr);
 	return Ptr;
+	*/
 }
 
 void *GetBuffer(unsigned long Bytes)
@@ -105,7 +107,8 @@ void *GetBuffer(unsigned long Bytes)
 	  InOut.WriteString("GetBuffer: Bytes = ");
 	  InOut.WriteLNum(Bytes, 10, 1, ' ');
 	*/
-    
+	/*
+
 	if (Bytes >= BufferLen) {
 		BufferLen = Bytes + 1;
 		if (BufferAdr != NULL) {
@@ -119,8 +122,8 @@ void *GetBuffer(unsigned long Bytes)
 		else if (((unsigned long)BufferAdr % 2) != 0)
 			Error("Ungerade Pufferadresse!", -1);
 	}
-	BufferAdr[Bytes] = 0; /* Endmarkierung */
-    
+	BufferAdr[Bytes] = 0; // Endmarkierung 
+	*/
 	/*
 	  InOut.WriteString("  BufferAdr = ");
 	  InOut.WriteLNum(BufferAdr, 10, 1, ' ');
@@ -156,8 +159,9 @@ unsigned GetCache(unsigned id)
 
 void FreeCache(unsigned n)
 {
+	/*
 	unsigned i;
-	if (n == 0) { /* alles löschen */
+	if (n == 0) { // alles löschen 
 		for (i = 1; i <= AnzCache; i++)
 			if (!Free(Cache[i].CacheBuffer))
 				Error("Fehler in der Speicherverwaltung(1)!", 0);
@@ -169,6 +173,7 @@ void FreeCache(unsigned n)
 			Cache[i] = Cache[i+1];
 		AnzCache--;
 	}
+	*/
 }
 
 unsigned NewCache(unsigned id, unsigned long Bytes)
@@ -199,7 +204,8 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 	  InOut.WriteString("NewCache: id = "); InOut.WriteCard(id, 1);
 	  InOut.WriteString("  Bytes = "); InOut.WriteLNum(Bytes, 10, 1, ' ');
 	*/
-    
+
+	/*
 	i = GetCache(id);
 	if (i != 0) FreeCache(i);
 	adr = NULL;
@@ -216,14 +222,17 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 	Cache[AnzCache].CacheBuffer = adr;
 	Cache[AnzCache].CacheLength = Bytes;
 	Cache[AnzCache].CacheUsed = CacheCounter;
+	*/
 	return AnzCache;
 }
 
 void Deallocate(void *Ptr)
 {
+	/*
 	if (Ptr)
 		if (Free(Ptr))
 			Ptr = NULL;
+	*/
 }
 
 
@@ -236,6 +245,7 @@ int LoadAndRun(char *Prg, char *Arg)
 	int ok;
 	//Rectangle save;
     
+	/*
 	if (StrEqual(Prg, "EDITOR.PRG") || StrEqual(Prg, "HASCSSPR.PRG")
 	    || StrEqual(Prg, "HASCSIII.PRG"))
 		{
@@ -243,24 +253,29 @@ int LoadAndRun(char *Prg, char *Arg)
 			Concat(path, Prg, file, ok);
 		} else
 		Assign(Prg, file, ok);
+	*/
     
 	/* Arg umrechnen in PASCAL String */
+	/*
 	i = 0; while (Arg[i] != 0) i++; l = i;
 	while (i > 0) {
 		Arg[i] = Arg[i-1]; i--;
 	}
 	Arg[0] = CHR(l);
+	*/
     
 	//if (type != 0 && MenuAdr != NIL)
 	//MenuBar(MenuAdr, FALSE);
 	//save = WindowSize(win, borderSize);
-	CloseWindow(win);
+	//CloseWindow(win);
     
 	//Pexec(loadExecute, &file, ADR(Arg), NULL, result);
+	/*
 	if (result < 0) {
 		Concat("Programmstart nicht möglich: ",file, file, ok);
 		Error(file, 1);
 	}
+	*/
     
 	//OpenWindow(win, save);
 	//if (type != 0 && MenuAdr != NIL)
@@ -319,6 +334,7 @@ void SetBuffer(unsigned width, unsigned height, void *Buffer)
 
 int FileName(char *Pattern, char *FileName)
 {
+	/*
 	int result;
 	int ok;
 	if (StrEqual(LastFileName, Pattern))
@@ -329,43 +345,52 @@ int FileName(char *Pattern, char *FileName)
 	}
 	//Assign(DTABuffer.name, FileName, ok);
 	return result >= 0;
+	*/
+	return 0;
 }
 
 unsigned long FileLength(char *Filename)
 {
+	/*
 	int result;
 	SearchFirst(Filename, 0, result);
 	FileError = result < 0;
-	if (FileError) /* nicht gefunden */
+	if (FileError) // nicht gefunden 
 		return 0;
 	else
 		return 0; //DTABuffer.size;
+	*/
+	return 0;		
 }
 
 int OpenFile(char *Name)
 {
+	/*
 	int Handle;
 	Open(Name, 0, Handle);
 	FileError = Handle < 0;
 	return Handle;
+	*/
+	return 0;
 }
 
 void CloseFile(int Handle)
 {
-	FileError = !Close(Handle);
+	//FileError = !Close(Handle);
 }
 
 void DeleteFile(char *Name)
 {
-	FileError = Delete(Name);
+	//FileError = Delete(Name);
 }
 
 int CreateFile(char *Name)
 {
+	/*
 	int Handle;
 	char path[128], file[128];
 	Create(Name, 0, Handle);
-	if (Handle == -34) { /* Path not found */
+	if (Handle == -34) { // Path not found 
 		SplitPath(Name, path, file);
 		path[LENGTH(path)-1] = '\0';
 		if (!(DirCreate(path)));
@@ -373,34 +398,40 @@ int CreateFile(char *Name)
 	}
 	FileError = Handle < 0;
 	return Handle;
+	*/
+	return 0;
 }
 
 void ReadFile(int Handle, unsigned long Bytes, void *Ptr)
 {
+	/*
 	unsigned long Count;
 	Count = Bytes;
 	Read(Handle, Bytes, Ptr);
 	FileError = Bytes != Count;
+	*/
 }
 
 void WriteFile(int Handle, unsigned long Bytes, void *Ptr)
 {
+	/*
 	unsigned long Count;
 	Count = Bytes;
 	Write(Handle, Bytes, Ptr);
 	FileError = Bytes != Count;
+	*/
 }
 
 void FileSeek(int Handle, unsigned long pos)
 {
-	long ret;
+	//long ret;
 	//Seek(pos, Handle, beginning, ret);
-	FileError = ret != pos;
+	//FileError = ret != pos;
 }
 
 void RenameFile(char *s, char *d)
 {
-	Rename(s, d);
+	//Rename(s, d);
 }
 
 int SelectFile(char *msg, char *path, char *file)
@@ -748,18 +779,22 @@ void WaitTime(unsigned t)
 
 unsigned long GetTime()
 {
-	return SuperLPeek(0x04BA);
+	//return SuperLPeek(0x04BA);
+	return 0;
 }
 
 unsigned Zufall(unsigned n)
 {
+	/*
 	if (n == 0) return 0;
 	return RandomCard(1, n);
+	*/
+	return 0;
 }
 
 void SetzeZufall(unsigned long n)
 {
-	Randomize(n);
+	//Randomize(n);
 }
 
 
@@ -792,13 +827,16 @@ void Error(char *s, int Mode)
 
 void PrinterOut(char ch)
 {
+	/*
 	do { } while (!PrnOS());
 	PrnOut(ch);
+	*/
 }
 
 int PrinterStatus()
 {
-	return PrnOS();
+	//return PrnOS();
+	return 0;
 }
 
 void SystemInit(void)
