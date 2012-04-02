@@ -4,11 +4,10 @@
 #include <limits.h>
 #include "HASCSSystem.h"
 
-//DeviceHandle ScreenHandle;
 int ScreenWidth, ScreenHeight, ScreenPlanes;
 
 /* Oberfläche, auf der wir herumzeichnen. */
-SDL_Surface *screen;
+SDL_Surface *ScreenHandle;
 
 char WName[60];
 //WElementSet type;
@@ -73,8 +72,8 @@ void InitWorkstation(char *WinName)
 	ScreenWidth = 640; // paramptr->rasterWidth + 1;
 	ScreenHeight = 400; // paramptr->rasterHeight + 1;
 	
-	screen = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_SWSURFACE);
-	if (screen == NULL) {
+	ScreenHandle = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_SWSURFACE);
+	if (ScreenHandle == NULL) {
 		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung 640*480 öffnen: %s\n", SDL_GetError());
 		exit(1);
 	}
