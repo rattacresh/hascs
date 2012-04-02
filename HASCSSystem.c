@@ -1,21 +1,28 @@
-#include "HASCSSystem.h" /* HASCSSystem module */
+/* HASCSSystem module */
 
-DeviceHandle ScreenHandle;
+#include <SDL/SDL.h>
+#include <limits.h>
+#include "HASCSSystem.h"
+
+//DeviceHandle ScreenHandle;
 int ScreenWidth, ScreenHeight, ScreenPlanes;
 
+/* Oberfläche, auf der wir herumzeichnen. */
+SDL_Surface *screen;
+
 char WName[60];
-WElementSet type;
+//WElementSet type;
 unsigned win;
 		
-Rectangle desk, work, curr, full, save;
+//Rectangle desk, work, curr, full, save;
 int XOff, YOff;
 		
 void *MenuAdr;
 
-MemFormDef ScreenMFDB, BufferMFDB, PicMFDB;
-PtrMemFormDef ScreenMFDBAdr, BufferMFDBAdr, PicMFDBAdr;
+//MemFormDef ScreenMFDB, BufferMFDB, PicMFDB;
+//PtrMemFormDef ScreenMFDBAdr, BufferMFDBAdr, PicMFDBAdr;
 
-SearchRec DTABuffer;
+//SearchRec DTABuffer;
 char LastFileName[60];
 
 unsigned char *BufferAdr;
@@ -28,306 +35,283 @@ int losgelassen;
 
 int Max(int a, int b)
 {
-	if (a > b) { return a; } else { return b; }
+    if (a > b) { return a; } else { return b; }
 }
 
 int Min(int a, int b)
 {
-	if (a < b) { return a; } else { return b; }
+    if (a < b) { return a; } else { return b; }
 }
 
+/*
 int RcIntersect(Rectangle *p1, Rectangle *p2)
 {
-	Rectangle r;
+    Rectangle r;
 
-	r.x = Max(p2.x, p1.x);
-	r.y = Max(p2.y, p1.y);
-	r.w = Min(p2.x + p2.w, p1.x + p1.w);
-	r.h = Min(p2.y + p2.h, p1.y + p1.h);
-	r.w = r.w - r.x;
-	r.h = r.h - r.y;
-	p2  = r;
-	return p2.w > 0 && p2.h > 0;
+    r.x = Max(p2.x, p1.x);
+    r.y = Max(p2.y, p1.y);
+    r.w = Min(p2.x + p2.w, p1.x + p1.w);
+    r.h = Min(p2.y + p2.h, p1.y + p1.h);
+    r.w = r.w - r.x;
+    r.h = r.h - r.y;
+    p2  = r;
+    return p2.w > 0 && p2.h > 0;
 }
+*/
 
 
 /* Programmverwaltung ***********************************************/
 
-void InitWorkstation(char *WinName);
+void InitWorkstation(char *WinName)
 {
+    if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0) {
+        fprintf(stderr, "SDL konnte nicht initialisiert werden: %s\n", SDL_GetError());
+        exit(1);
+    }
+    
+   
+    ScreenWidth = 640; // paramptr->rasterWidth + 1;
+    ScreenHeight = 400; // paramptr->rasterHeight + 1;
 
-	int ok;
-	PtrDevParm paramptr;
+    screen = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_SWSURFACE);
+    if (screen == NULL) {
+        fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung 640*480 öffnen: %s\n", SDL_GetError());
+        exit(1);
+    }
 
-	InitGem(2, ScreenHandle, ok); /* Rasterkoordinaten */
-	if (!ok)
-		Error("Applikation kann nicht angemeldet werden!", -1);
-	ShellRead(Name, Command);
-	GetDefaultPath(ActPath);
-	GrafMouse(bee, NIL);
-
-	paramptr = DeviceParameter(ScreenHandle);
-	ScreenWidth = paramptr->rasterWidth + 1;
-	ScreenHeight = paramptr->rasterHeight + 1;
-	ScreenPlanes = paramptr->maxRasterPls;
-
-	LoadResource("HASCSIII.RSC"); /* Menüzeile laden */
-	if (GemError()) {
-		Error("Resourcedatei HASCSIII.RSC nicht gefunden!", 1);
-		MenuAdr = NIL;
-	} else {
-		MenuAdr = ResourceAddr(treeRsrc, 0);
-		MenuBar(MenuAdr, TRUE);
-	}
-
-	XOff = 0;
-	YOff = 0;
-
-	desk = WindowSize(DeskHandle, workSize); /* Desktopgröße */
-	type = WElementSet{nameBar, closer, fuller, mover, sizer, upArrow,
-		downArrow, vertSlider, leftArrow, rightArrow, horSlider};
-	CreateWindow(type, desk, win);
-	Assign(WinName, WName, ok);
-	SetWindowString(win, nameStr, &WName);
-	work.x = 0; work.y = 0; work.w = 640; workh = 400;
-	curr = CalcWindow(calcBorder, type, work);
-	curr.x = desk.x; curr.y = desk.y;
-	if (curr.w > desk.w) { curr.w = desk.w }
-	if (curr.h > desk.h) { curr.h = desk.h }
-	OpenWindow(win, curr);
-	work = WindowSize(win, workSize);
-
-	ScreenMFDB.start = NULL; /* Bildschirm */
-	ScreenMFDBAdr = &ScreenMFDB;
-
-	SetDTA(&DTABuffer);
+    SDL_WM_SetCaption(WinName, WinName);    
 }
 
 
 void ExitWorkstation(int result)
 {
-	GemHandle AppHandle;
-	AppHandle = CurrGemHandle();
-	ExitGem(AppHandle);
-	TermProcess(result);
+    atexit(SDL_Quit);
 }
 
 
 void *Allocate(unsigned long Bytes)
 {
-	void *Ptr;
-	if (Bytes == 0) { return NULL; }
-	Alloc(Bytes, Ptr);
-	return Ptr;
+    void *Ptr;
+    if (Bytes == 0) { return NULL; }
+    Alloc(Bytes, Ptr);
+    return Ptr;
 }
 
 void *GetBuffer(unsigned long Bytes)
 {
-
-/*
-InOut.WriteLn();
-InOut.WriteString("GetBuffer: Bytes = ");
+    
+    /*
+      InOut.WriteLn();
+      InOut.WriteString("GetBuffer: Bytes = ");
 InOut.WriteLNum(Bytes, 10, 1, ' ');
-*/
-
-	if (Bytes >= BufferLen) {
-		BufferLen = Bytes + 1;
-		if (BufferAdr != NULL) {
-			if (!Free(BufferAdr))
-				Error("Fehler in der Speicherverwaltung(3)", -1);
-			BufferAdr = NULL;
-		}
-		Alloc(BufferLen, BufferAdr);
-		if (BufferAdr == NULL)
-			Error("Kein Speicher mehr frei!", -1);
-		else if (((unsigned long)BufferAdr % 2) != 0)
-			Error("Ungerade Pufferadresse!", -1);
+    */
+    
+    if (Bytes >= BufferLen) {
+	BufferLen = Bytes + 1;
+	if (BufferAdr != NULL) {
+	    if (!Free(BufferAdr))
+		Error("Fehler in der Speicherverwaltung(3)", -1);
+	    BufferAdr = NULL;
 	}
-	BufferAdr[Bytes] = 0; /* Endmarkierung */
-
-/*
-InOut.WriteString("  BufferAdr = ");
-InOut.WriteLNum(BufferAdr, 10, 1, ' ');
-*/
-
-	return BufferAdr;
+	Alloc(BufferLen, BufferAdr);
+	if (BufferAdr == NULL)
+	    Error("Kein Speicher mehr frei!", -1);
+	else if (((unsigned long)BufferAdr % 2) != 0)
+	    Error("Ungerade Pufferadresse!", -1);
+    }
+    BufferAdr[Bytes] = 0; /* Endmarkierung */
+    
+    /*
+      InOut.WriteString("  BufferAdr = ");
+      InOut.WriteLNum(BufferAdr, 10, 1, ' ');
+    */
+    
+    return BufferAdr;
 }
 
 unsigned GetCache(unsigned id)
 {
-	unsigned i;
-
-/*
-InOut.WriteLn();
-InOut.WriteString("GetCache: id = "); InOut.WriteCard(id, 1);
-*/
-
-	for (i = 1; i <= AnzCache; i++)
-		if (id == Cache[i].CacheId) {
-			CacheCounter++;
-			Cache[i].CacheUsed = CacheCounter;
-
-/*
-InOut.WriteString("  index = "); InOut.WriteCard(i, 1);
-InOut.WriteString("  buffer = "); InOut.WriteLNum(CacheBuffer, 10, 1, ' ');
-InOut.WriteString("  bytes = "); InOut.WriteLNum(CacheLength, 10, 1, ' ');
-*/
-
-			return i;
-		}
-	return 0;
+    unsigned i;
+    
+    /*
+      InOut.WriteLn();
+      InOut.WriteString("GetCache: id = "); InOut.WriteCard(id, 1);
+    */
+    
+    for (i = 1; i <= AnzCache; i++)
+	if (id == Cache[i].CacheId) {
+	    CacheCounter++;
+	    Cache[i].CacheUsed = CacheCounter;
+	    
+	    /*
+	      InOut.WriteString("  index = "); InOut.WriteCard(i, 1);
+	      InOut.WriteString("  buffer = "); InOut.WriteLNum(CacheBuffer, 10, 1, ' ');
+	      InOut.WriteString("  bytes = "); InOut.WriteLNum(CacheLength, 10, 1, ' ');
+	    */
+	    
+	    return i;
+	}
+    return 0;
 }
 
 void FreeCache(unsigned n)
 {
-	unsigned i;
-	if (n == 0) { /* alles löschen */
-		for (i = 1; i <= AnzCache; i++)
-			if (!Free(Cache[i].CacheBuffer))
-				Error("Fehler in der Speicherverwaltung(1)!", 0);
-		AnzCache = 0;
-	} else {
-		if (!(Free(Cache[n].CacheBuffer)))
-			Error("Fehler in der Speicherverwaltung(2)!", 0);
-		for (i = n; i <= AnzCache - 1; i++)
-			Cache[i] = Cache[i+1];
-		AnzCache--;
-	}
+    unsigned i;
+    if (n == 0) { /* alles löschen */
+	for (i = 1; i <= AnzCache; i++)
+	    if (!Free(Cache[i].CacheBuffer))
+		Error("Fehler in der Speicherverwaltung(1)!", 0);
+	AnzCache = 0;
+    } else {
+	if (!(Free(Cache[n].CacheBuffer)))
+	    Error("Fehler in der Speicherverwaltung(2)!", 0);
+	for (i = n; i <= AnzCache - 1; i++)
+	    Cache[i] = Cache[i+1];
+	AnzCache--;
+    }
 }
 
 unsigned NewCache(unsigned id, unsigned long Bytes)
 {
-	unsigned i;
-	void *adr;
-
-	unsigned LRUCache(void)
-	{
-		unsigned i, j, Min; int ok;
-		Min = MAX(CARDINAL); j = 0;
-		for (i = 1; i <= AnzCache; i++)
-			if (Cache[i].CacheUsed <= Min) {
-				j = i;
-				Min = Cache[i].CacheUsed;
-			}
-		if (j != 0)
-			return j;
-		else
-			Error("Kein Speicher mehr frei!", -1);
+    unsigned i;
+    void *adr;
+    
+    unsigned LRUCache(void)
+    {
+	unsigned i, j, Min; 
+	int ok;
+	Min = INT_MAX; 
+	j = 0;
+	for (i = 1; i <= AnzCache; i++)
+	    if (Cache[i].CacheUsed <= Min) {
+		j = i;
+		Min = Cache[i].CacheUsed;
+	    }
+	if (j != 0)
+	    return j;
+	else
+	    Error("Kein Speicher mehr frei!", -1);
+    }
+    
+    
+    /*
+      InOut.WriteLn();
+      InOut.WriteString("NewCache: id = "); InOut.WriteCard(id, 1);
+      InOut.WriteString("  Bytes = "); InOut.WriteLNum(Bytes, 10, 1, ' ');
+    */
+    
+    i = GetCache(id);
+    if (i != 0) FreeCache(i);
+    adr = NULL;
+    do {
+	if (AnzCache < MaxCache) Alloc(Bytes, adr);
+	if (adr == NULL) {
+	    i = LRUCache();
+	    FreeCache(i);
 	}
-
-
-/*
-InOut.WriteLn();
-InOut.WriteString("NewCache: id = "); InOut.WriteCard(id, 1);
-InOut.WriteString("  Bytes = "); InOut.WriteLNum(Bytes, 10, 1, ' ');
-*/
-
-	i = GetCache(id);
-	if (i != 0) FreeCache(i);
-	adr = NULL;
-	do {
-		if (AnzCache < MaxCache) Alloc(Bytes, adr);
-		if (adr == NULL) {
-			i = LRUCache();
-			FreeCache(i);
-		}
-	} while (adr == NULL);
-	CacheCounter++;
-	AnzCache++;
-	Cache[AnzCache].CacheId = id;
-	Cache[AnzCache].CacheBuffer = adr;
-	Cache[AnzCache].CacheLength = Bytes;
-	Cache[AnzCache].CacheUsed = CacheCounter;
-	return AnzCache;
+    } while (adr == NULL);
+    CacheCounter++;
+    AnzCache++;
+    Cache[AnzCache].CacheId = id;
+    Cache[AnzCache].CacheBuffer = adr;
+    Cache[AnzCache].CacheLength = Bytes;
+    Cache[AnzCache].CacheUsed = CacheCounter;
+    return AnzCache;
 }
 
 void Deallocate(void *Ptr)
 {
-	if (Ptr)
-		if (Free(Ptr))
-			Ptr = NULL;
+    if (Ptr)
+	if (Free(Ptr))
+	    Ptr = NULL;
 }
 
 
 int LoadAndRun(char *Prg, char *Arg)
 {
-
-	long result;
-	char path[128], file[128];
-	int i, l;
-	int ok;
-	Rectangle save;
-
-	if (StrEqual(Prg, "EDITOR.PRG") || StrEqual(Prg, "HASCSSPR.PRG")
-	 || StrEqual(Prg, "HASCSIII.PRG"))
+    
+    long result;
+    char path[128], file[128];
+    int i, l;
+    int ok;
+    //Rectangle save;
+    
+    if (StrEqual(Prg, "EDITOR.PRG") || StrEqual(Prg, "HASCSSPR.PRG")
+	|| StrEqual(Prg, "HASCSIII.PRG"))
 	{
-		SplitPath(Name, path, file);
-		Concat(path, Prg, file, ok);
+	    SplitPath(Name, path, file);
+	    Concat(path, Prg, file, ok);
 	} else
-		Assign(Prg, file, ok);
-
-	/* Arg umrechnen in PASCAL String */
-	i = 0; while (Arg[i] != 0) i++; l = i;
-	while (i > 0) {
-		Arg[i] = Arg[i-1]; i--;
-	}
-	Arg[0] = CHR(l);
-
-	if (type != 0 && MenuAdr != NIL)
-		MenuBar(MenuAdr, FALSE);
-	save = WindowSize(win, borderSize);
-	CloseWindow(win);
-
-	Pexec(loadExecute, &file, ADR(Arg), NULL, result);
-	if (result < 0) {
-		Concat("Programmstart nicht möglich: ",file, file, ok);
-		Error(file, 1);
-	}
-
-	OpenWindow(win, save);
-	if (type != 0 && MenuAdr != NIL)
-		MenuBar(MenuAdr, TRUE);
-	return result;
+	Assign(Prg, file, ok);
+    
+    /* Arg umrechnen in PASCAL String */
+    i = 0; while (Arg[i] != 0) i++; l = i;
+    while (i > 0) {
+	Arg[i] = Arg[i-1]; i--;
+    }
+    Arg[0] = CHR(l);
+    
+    //if (type != 0 && MenuAdr != NIL)
+    //MenuBar(MenuAdr, FALSE);
+    //save = WindowSize(win, borderSize);
+    CloseWindow(win);
+    
+    //Pexec(loadExecute, &file, ADR(Arg), NULL, result);
+    if (result < 0) {
+	Concat("Programmstart nicht möglich: ",file, file, ok);
+	Error(file, 1);
+    }
+    
+    //OpenWindow(win, save);
+    //if (type != 0 && MenuAdr != NIL)
+    //	MenuBar(MenuAdr, TRUE);
+    return result;
 }
 
 /* Bildschirmverwaltung *********************************************/
 
 void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 {
-	Rectangle sourceRect, destRect;
-
-	sourceRect.x = sx; sourceRect.y = sy;
-	sourceRect.w = width; sourceRect.h = height;
-	destRect.x = dx; destRect.y = dy;
-	destRect.w = width; destRect.h = height;
-	if (direction == 4) /* Pic -> Buffer */
-		CopyOpaque(ScreenHandle, PicMFDBAdr, BufferMFDBAdr,
-			  sourceRect, destRect, onlyS);
-	else /* Buffer -> Buffer */
-		CopyOpaque(ScreenHandle, BufferMFDBAdr, BufferMFDBAdr,
-			  sourceRect, destRect, onlyS);
+    /*
+    Rectangle sourceRect, destRect;
+    
+    sourceRect.x = sx; sourceRect.y = sy;
+    sourceRect.w = width; sourceRect.h = height;
+    destRect.x = dx; destRect.y = dy;
+    destRect.w = width; destRect.h = height;
+    if (direction == 4) // Pic -> Buffer 
+	CopyOpaque(ScreenHandle, PicMFDBAdr, BufferMFDBAdr,
+		   sourceRect, destRect, onlyS);
+    else //  Buffer -> Buffer 
+	CopyOpaque(ScreenHandle, BufferMFDBAdr, BufferMFDBAdr,
+		   sourceRect, destRect, onlyS);
+*/
 }
 
 void SetPicture(unsigned width, unsigned height, void *Picture)
 {
-	PicMFDB.start = Picture;
-	PicMFDB.w = width;
-	PicMFDB.h = height;
-	PicMFDB.words = (w + 15) / 16;
-	PicMFDB.standardForm = FALSE;
-	PicMFDB.planes = 1;
-	PicMFDBAdr = &PicMFDB;
+    /*
+    PicMFDB.start = Picture;
+    PicMFDB.w = width;
+    PicMFDB.h = height;
+    PicMFDB.words = (w + 15) / 16;
+    PicMFDB.standardForm = FALSE;
+    PicMFDB.planes = 1;
+    PicMFDBAdr = &PicMFDB;
+    */
 }
 
 void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
-	BufferMFDB.start = Buffer;
-	BufferMFDB.w = width;
-	BufferMFDB.h = height;
-	BufferMFDB.words = (w+15) / 16;
-	BufferMFDB.standardForm = FALSE;
-	BufferMFDB.planes = 1;
-	BufferMFDBAdr = &BufferMFDB;
+    /*
+    BufferMFDB.start = Buffer;
+    BufferMFDB.w = width;
+    BufferMFDB.h = height;
+    BufferMFDB.words = (w+15) / 16;
+    BufferMFDB.standardForm = FALSE;
+    BufferMFDB.planes = 1;
+    BufferMFDBAdr = &BufferMFDB;
+    */
 }
 
 
@@ -335,233 +319,235 @@ void SetBuffer(unsigned width, unsigned height, void *Buffer)
 
 int FileName(char *Pattern, char *FileName)
 {
-	int result;
-	int ok;
-	if (StrEqual(LastFileName, Pattern))
-		SearchNext(result);
-	else {
-		SearchFirst(Pattern, 0, result);
-		Assign(Pattern, LastFileName, ok);
-	}
-	Assign(DTABuffer.name, FileName, ok);
-	return result >= 0;
+    int result;
+    int ok;
+    if (StrEqual(LastFileName, Pattern))
+	SearchNext(result);
+    else {
+	SearchFirst(Pattern, 0, result);
+	Assign(Pattern, LastFileName, ok);
+    }
+    //Assign(DTABuffer.name, FileName, ok);
+    return result >= 0;
 }
 
 unsigned long FileLength(char *Filename)
 {
-	int result;
-	SearchFirst(Filename, 0, result);
-	FileError = result < 0;
-	if (FileError) /* nicht gefunden */
-		return 0;
-	else
-		return DTABuffer.size;
+    int result;
+    SearchFirst(Filename, 0, result);
+    FileError = result < 0;
+    if (FileError) /* nicht gefunden */
+	return 0;
+    else
+	return 0; //DTABuffer.size;
 }
 
 int OpenFile(char *Name)
 {
-	int Handle;
-	Open(Name, 0, Handle);
-	FileError = Handle < 0;
-	return Handle;
+    int Handle;
+    Open(Name, 0, Handle);
+    FileError = Handle < 0;
+    return Handle;
 }
 
 void CloseFile(int Handle)
 {
-	FileError = !Close(Handle);
+    FileError = !Close(Handle);
 }
 
 void DeleteFile(char *Name)
 {
-	FileError = Delete(Name);
+    FileError = Delete(Name);
 }
 
 int CreateFile(char *Name)
 {
-	int Handle;
-	char path[128], file[128];
+    int Handle;
+    char path[128], file[128];
+    Create(Name, 0, Handle);
+    if (Handle == -34) { /* Path not found */
+	SplitPath(Name, path, file);
+	path[LENGTH(path)-1] = '\0';
+	if (!(DirCreate(path)));
 	Create(Name, 0, Handle);
-	if (Handle == -34) { /* Path not found */
-		SplitPath(Name, path, file);
-		path[LENGTH(path)-1] = '\0';
-		if (!(DirCreate(path)));
-		Create(Name, 0, Handle);
-	}
-	FileError = Handle < 0;
-	return Handle;
+    }
+    FileError = Handle < 0;
+    return Handle;
 }
 
-void ReadFile(int Handle, unsigned long Bytes, void *Ptr);
+void ReadFile(int Handle, unsigned long Bytes, void *Ptr)
 {
-	unsigned long Count;
-	Count = Bytes;
-	Read(Handle, Bytes, Ptr);
-	FileError = Bytes != Count;
+    unsigned long Count;
+    Count = Bytes;
+    Read(Handle, Bytes, Ptr);
+    FileError = Bytes != Count;
 }
 
 void WriteFile(int Handle, unsigned long Bytes, void *Ptr)
 {
-	unsigned long Count;
-	Count = Bytes;
-	Write(Handle, Bytes, Ptr);
-	FileError = Bytes != Count;
+    unsigned long Count;
+    Count = Bytes;
+    Write(Handle, Bytes, Ptr);
+    FileError = Bytes != Count;
 }
 
 void FileSeek(int Handle, unsigned long pos)
 {
-	long ret;
-	Seek(pos, Handle, beginning, ret);
-	FileError = ret != pos;
+    long ret;
+    //Seek(pos, Handle, beginning, ret);
+    FileError = ret != pos;
 }
 
 void RenameFile(char *s, char *d)
 {
-	Rename(s, d);
+    Rename(s, d);
 }
 
 int SelectFile(char *msg, char *path, char *file)
 {
-	int ok;
-	int result;
-	char pathandfile[128];
-
-	Assign(path, EasyGEM1.SelectMask, ok);
-	Assign(file, pathandfile, ok);
-	GrafMouse(arrow, NIL);
-	EasyGEM1.SelectFile(msg, pathandfile, ok);
-	GrafMouse(bee, NIL);
-	if (!ok) return FALSE;
-	SplitPath(pathandfile, ActPath, file);
-	SetDefaultPath(ActPath, result);
-	return TRUE;
+    int ok;
+    int result;
+    char pathandfile[128];
+    
+    /*
+    Assign(path, EasyGEM1.SelectMask, ok);
+    Assign(file, pathandfile, ok);
+    GrafMouse(arrow, NIL);
+    EasyGEM1.SelectFile(msg, pathandfile, ok);
+    GrafMouse(bee, NIL);
+    if (!ok) return FALSE;
+    SplitPath(pathandfile, ActPath, file);
+    SetDefaultPath(ActPath, result);
+    */
+    return 1;
 }
 
 
 /* Eingaberoutinen **************************************************/
 
-BITSET WaitInput(unsigned x, unsigend y, BITSET *b, char *ch, int WarteZeit)
+BITSET WaitInput(unsigned x, unsigned y, BITSET *b, char *ch, int WarteZeit)
 {
-	EventSet flags, events;
-	unsigned mouse;
-	MessageBuffer msg;
-	Rectangle rect;
-	Point mLoc;
-	MButtonSet mButtons;
-	SpecialKeySet keyState;
-	GemChar key;
-	unsigned doneClicks;
-	int ok;
-	unsigned long time;
-
-
-	void RedrawWindow(Rectangle frame)
-	{
-		Rectangle r, s;
-		UpdateWindow(TRUE);
-		r = WindowRectList(win, firstElem);
-		while (r.w > 0 && r.h > 0) {
-			if (RcIntersect(frame, r)) {
-				GrafMouse(mouseOff, NIL);
-				/* Pufferkoordinaten */
-				s.x = r.x - work.x + XOff;
-				s.y = r.y - work.y + YOff;
-				s.w = r.w; s.h = r.h;
-				if (ScreenPlanes == 1)
-					CopyOpaque(ScreenHandle, BufferMFDBAdr, ScreenMFDBAdr,
-						s, r, onlyS);
-				else
-					CopyTrans(ScreenHandle, BufferMFDBAdr, ScreenMFDBAdr,
-						s, r, replaceWrt, 1, 0);
-				GrafMouse(mouseOn, NIL);
-			}
-			r = WindowRectList(win, nextElem);
-		}
-		UpdateWindow(FALSE);
+    //EventSet flags, events;
+    unsigned mouse;
+    //MessageBuffer msg;
+    //Rectangle rect;
+    //Point mLoc;
+    ///MButtonSet mButtons;
+    //SpecialKeySet keyState;
+    //GemChar key;
+    unsigned doneClicks;
+    int ok;
+    unsigned long time;
+    
+    
+    void RedrawWindow(Rectangle frame)
+    {
+	Rectangle r, s;
+	UpdateWindow(TRUE);
+	r = WindowRectList(win, firstElem);
+	while (r.w > 0 && r.h > 0) {
+	    if (RcIntersect(frame, r)) {
+		GrafMouse(mouseOff, NIL);
+		/* Pufferkoordinaten */
+		s.x = r.x - work.x + XOff;
+		s.y = r.y - work.y + YOff;
+		s.w = r.w; s.h = r.h;
+		if (ScreenPlanes == 1)
+		    CopyOpaque(ScreenHandle, BufferMFDBAdr, ScreenMFDBAdr,
+			       s, r, onlyS);
+		else
+		    CopyTrans(ScreenHandle, BufferMFDBAdr, ScreenMFDBAdr,
+			      s, r, replaceWrt, 1, 0);
+		GrafMouse(mouseOn, NIL);
+	    }
+	    r = WindowRectList(win, nextElem);
 	}
-
-	void SetSlider(void)
-	{
-		int pos, size, oldpos, oldsize;
-		size = 1000 * (long)work.w / 640;
-		pos = 0;
-		if (work.w < 640)
-			pos = 1000 * (long)XOff / (640 - work.w);
-		oldpos = WindowSliderValue(win, horPosition);
-		oldsize = WindowSliderValue(win, horSize);
-		if (oldpos != pos)
-			SetWindowSlider(win, horPosition, pos);
-		if (oldsize != size)
-			SetWindowSlider(win, horSize, size);
-		size = 1000 * (long)work.h / 400;
-		pos = 0;
-		if (work.h < 400)
-			pos = 1000 * (long)YOff / (400 - work.h);
-		oldpos = WindowSliderValue(win, vertPosition);
-		oldsize = WindowSliderValue(win, vertSize);
-		if (oldpos != pos)
-			SetWindowSlider(win, vertPosition, pos);
-		if (oldsize != size)
-			SetWindowSlider(win, vertSize, size);
+	UpdateWindow(FALSE);
+    }
+    
+    void SetSlider(void)
+    {
+	int pos, size, oldpos, oldsize;
+	size = 1000 * (long)work.w / 640;
+	pos = 0;
+	if (work.w < 640)
+	    pos = 1000 * (long)XOff / (640 - work.w);
+	oldpos = WindowSliderValue(win, horPosition);
+	oldsize = WindowSliderValue(win, horSize);
+	if (oldpos != pos)
+	    SetWindowSlider(win, horPosition, pos);
+	if (oldsize != size)
+	    SetWindowSlider(win, horSize, size);
+	size = 1000 * (long)work.h / 400;
+	pos = 0;
+	if (work.h < 400)
+	    pos = 1000 * (long)YOff / (400 - work.h);
+	oldpos = WindowSliderValue(win, vertPosition);
+	oldsize = WindowSliderValue(win, vertSize);
+	if (oldpos != pos)
+	    SetWindowSlider(win, vertPosition, pos);
+	if (oldsize != size)
+	    SetWindowSlider(win, vertSize, size);
+    }
+    
+    void VollBild(void)
+    {
+	if (type == 0) { /* Fenster wieder normal */
+	    CloseWindow(win); DeleteWindow(win);
+	    type = nameBar | closer | fuller | mover | sizer | upArrow
+		| downArrow | vertSlider | leftArrow | rightArrow
+		| horSlider;
+	    CreateWindow(type, desk, win);
+	    SetWindowString(win, nameStr, &WName);
+	    OpenWindow(win, save);
+	    if (MenuAdr) MenuBar(MenuAdr, TRUE);
+	} else {
+	    save = WindowSize(win, borderSize);
+	    CloseWindow(win); DeleteWindow(win);
+	    if (MenuAdrL) MenuBar(MenuAdr, FALSE);
+	    type = 0;
+	    CreateWindow(type, desk, win);
+	    work.x = Max(ScreenWidth / 2 - 320, 0);
+	    work.y = Max(ScreenHeight / 2 - 200, 0);
+	    work.w = Min(640, ScreenWidth);
+	    work.h = Min(400, ScreenHeight);
+	    curr = CalcWindow(calcBorder, type, work);
+	    OpenWindow(win, curr);
+	    XOff = 0; YOff = 0;
 	}
-
-	void VollBild(void)
-	{
-		if (type == 0) { /* Fenster wieder normal */
-			CloseWindow(win); DeleteWindow(win);
-			type = nameBar | closer | fuller | mover | sizer | upArrow
-				| downArrow | vertSlider | leftArrow | rightArrow
-				| horSlider;
-			CreateWindow(type, desk, win);
-			SetWindowString(win, nameStr, &WName);
-			OpenWindow(win, save);
-			if (MenuAdr) MenuBar(MenuAdr, TRUE);
-		} else {
-			save = WindowSize(win, borderSize);
-			CloseWindow(win); DeleteWindow(win);
-			if (MenuAdrL) MenuBar(MenuAdr, FALSE);
-			type = 0;
-			CreateWindow(type, desk, win);
-			work.x = Max(ScreenWidth / 2 - 320, 0);
-			work.y = Max(ScreenHeight / 2 - 200, 0);
-			work.w = Min(640, ScreenWidth);
-			work.h = Min(400, ScreenHeight);
-			curr = CalcWindow(calcBorder, type, work);
-			OpenWindow(win, curr);
-			XOff = 0; YOff = 0;
-		}
-		work = WindowSize(win, workSize);
-		RedrawWindow(work);
+	work = WindowSize(win, workSize);
+	RedrawWindow(work);
+    }
+    
+    void Ende(void)
+    {
+	int dummy;
+	Error("HASCS III wirklich beenden?", 0);
+    }
+    
+    void Correct(int x, int y, int w, int h)
+    {
+	w = Min(w, 640);
+	h = Min(h, 400);
+	x = Min(x, 640-w); x = Max(0, x); /* XOff */
+	y = Min(y, 400-h); y = Max(0, y); /* YOff */
+    }
+    
+    void Button(void);
+    {
+	ok = mLoc.x >= work.x && mLoc.y >= work.y
+	    && mLoc.x < work.x + work.w && mLoc.y < work.y + work.h;
+	if (ok) {
+	    x = mLoc.x - work.x + XOff;
+	    y = mLoc.y - work.y + YOff;
+	    if (msBut1 & mButtons) b |= (1<<0);
+	    if (msBut2 & mButtons) b |= (1<<1);
 	}
-
-	void Ende(void)
-	{
-		int dummy;
-		Error("HASCS III wirklich beenden?", 0);
-	}
-
-	void Correct(int x, int y, int w, int h)
-	{
-		w = Min(w, 640);
-		h = Min(h, 400);
-		x = Min(x, 640-w); x = Max(0, x); /* XOff */
-		y = Min(y, 400-h); y = Max(0, y); /* YOff */
-	}
-
-	void Button(void);
-	{
-		ok = mLoc.x >= work.x && mLoc.y >= work.y
-			&& mLoc.x < work.x + work.w && mLoc.y < work.y + work.h;
-		if (ok) {
-			x = mLoc.x - work.x + XOff;
-			y = mLoc.y - work.y + YOff;
-			if (msBut1 & mButtons) b |= (1<<0);
-			if (msBut2 & mButtons) b |= (1<<1);
-		}
-	}
-
-	void Keyboard(void)
-	{
-		int Redraw;
+    }
+    
+    void Keyboard(void)
+    {
+	int Redraw;
 		Redraw = FALSE;
 		switch (key.scan) {
 		case 0x4B : XOff += 16; Redraw = TRUE; break;
@@ -795,16 +781,16 @@ int PrinterStatus()
 
 void SystemInit(void)
 {
-	ShowError = TRUE;
-	FileError = FALSE;
-	LastFileName = "";
-	NewXMin = 40; NewYMin = 25; NewXMax = 0; NewYMax = 0;
-
-	BufferLen = 0;
-	BufferAdr = NULL;
-
-	AnzCache = 0; CacheCounter = 0;
-
-	losgelassen = TRUE;
-	mousetime = 1;
+    ShowError = TRUE;
+    FileError = FALSE;
+    LastFileName = "";
+    NewXMin = 40; NewYMin = 25; NewXMax = 0; NewYMax = 0;
+    
+    BufferLen = 0;
+    BufferAdr = NULL;
+    
+    AnzCache = 0; CacheCounter = 0;
+    
+    losgelassen = TRUE;
+    mousetime = 1;
 }

@@ -23,15 +23,16 @@
            10.0  16.09.94 Umsetzung auf Megamax Compiler
            11.0  13.10.94 GetBuffer, Cache
 */
+#define BITSET unsigned
 
 #define MausLinks   0 /* linker Mausknopf */
 #define MausRechts  1 /* rechter Mausknopf */
 #define MaxCache  100
 
 typedef struct {
-	int CacheId, CacheUsed, CacheInfo1, CacheInfo2;
-	void *CacheBuffer;
-	int CacheLength;
+    int CacheId, CacheUsed, CacheInfo1, CacheInfo2;
+    void *CacheBuffer;
+    int CacheLength;
 } CacheType;
 
 char Name[], Command[], ActPath[];
@@ -40,7 +41,7 @@ int ShowError; /* nicht fatale Fehlermeldungen anzeigen */
 
 unsigned NewXMin, NewXMax, NewYMin, NewYMax;
 
-CacheType CacheType Cache[MaxCache+1];
+CacheType Cache[MaxCache+1];
 unsigned AnzCache, CacheCounter, ErrorResult;
 
 /* Programmverwaltung ***********************************************/
@@ -81,7 +82,7 @@ int SelectFile(char *msg, char *path, char *file);
 
 /* Eingaben *********************************************************/
 
-void WaitInput(unsigned x, unsigend y, BITSET *b, char *ch, int WarteZeit);
+BITSET WaitInput(unsigned x, unsigned y, BITSET *b, char *ch, int WarteZeit);
 void WaitKey(void);
 void WaitTime(unsigned t);
 unsigned long GetTime();
