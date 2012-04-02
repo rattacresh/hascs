@@ -1,4 +1,6 @@
-IMPLEMENTATION MODULE HASCSSprite;
+//IMPLEMENTATION MODULE HASCSSprite;
+#include "HASCSSprite.h"
+
 				
 SpriteType aSprite;
 SpriteType SpriteBuffer[9];

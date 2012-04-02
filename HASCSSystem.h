@@ -36,11 +36,11 @@ const int MausRechts = 1; /* rechter Mausknopf */
 const int MaxCache = 100;
 
 // TYPE
-struct CacheType = {
+typedef struct {
   int CacheId, CacheUsed, CacheInfo1, CacheInfo2;
   ADDRESS CacheBuffer;
   int CacheLength;
-};
+} CacheType;
 
 // VAR
 char Name[], Command[], ActPath[];

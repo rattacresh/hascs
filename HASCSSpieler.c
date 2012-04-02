@@ -1,6 +1,8 @@
-IMPLEMENTATION MODULE HASCSSpieler;
+//IMPLEMENTATION MODULE HASCSSpieler;
+#include "HASCSSpieler.h"
 
-VAR Rueckgabe : CARDINAL;
+
+unsigned Rueckgabe;
 
 
 int SpielerFrei(unsigned x, unsigned y)
