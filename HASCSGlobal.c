@@ -1,4 +1,9 @@
-/* HASCSGlobal module */
+#include "HASCSGlobal.h" /* HASCSGlobal module */
+
+#include "HASCSOutput.h"
+#include "HASCSGraphics.h"
+#include "HASCSSystem.h"
+#include "Screen.h"
 
 int ScreenReserved;
 

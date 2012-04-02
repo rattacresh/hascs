@@ -1,6 +1,10 @@
-/* HASCSMonster module */
+#include "HASCSMonster.h" /* HASCSMonster module */
 
-#include "HASCSMonster.h"
+#include "HASCSSystem.h"
+#include "HASCSOutput.h"
+#include "HASCSGraphics.h"
+#include "HASCSGlobal.h"
+#include "Dialog.h"
 
 
 int sign(int i)

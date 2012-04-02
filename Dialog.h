@@ -24,7 +24,6 @@
    #DELETE                                  Objekt(e) löschen
 */
 
-// FROM HASCSGlobal IMPORT MonsterTyp, GegenstandTyp, ParameterTyp;
 #include "HASCSGlobal.h"
 
 

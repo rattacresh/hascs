@@ -1,6 +1,4 @@
-/* HASCSSystem module */
-#include "HASCSSystem.h"
-
+#include "HASCSSystem.h" /* HASCSSystem module */
 
 DeviceHandle ScreenHandle;
 int ScreenWidth, ScreenHeight, ScreenPlanes;

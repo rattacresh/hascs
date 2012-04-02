@@ -1,4 +1,15 @@
-/* HASCSGame module */
+#include "HASCSGame.h" /* HASCSGame module */
+
+#include "HASCSSystem.h"
+#include "HASCSGraphics.h"
+#include "HASCSOutput.h"
+#include "HASCSGlobal.h"
+#include "HASCSMonster.h"
+#include "HASCSSpieler.h"
+#include "HASCSDisk.h"
+#include "HASCSMagic.h"
+#include "Dialog.h"
+#include "Sound.h"
 
 unsigned Rueckgabe, oldx, oldy, Weite;
 int dx[93], dy[93];

@@ -1,5 +1,10 @@
-/* HASCSSprite module */
-#include "HASCSSprite.h"
+#include "HASCSSprite.h" /* HASCSSprite module */
+
+#include "HASCSSystem.h"
+#include "HASCSGraphics.h"
+#include "HASCSDisk.h"
+#include "HASCSOutput.h"
+#include "HASCSGlobal.h"
 
 				
 SpriteType aSprite;

@@ -2,7 +2,6 @@
 #define HASCSSPIELER_H
 
 
-//FROM HASCSGlobal IMPORT GegenstandTyp;
 #include "HASCSGlobal.h"
 
 

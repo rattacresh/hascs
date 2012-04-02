@@ -1,5 +1,8 @@
-/* HASCSOutput module */
-#include "HASCSOutput.h"
+#include "HASCSOutput.h" /* HASCSOutput module */
+
+#include "HASCSGraphics.h"
+#include "HASCSSystem.h"
+#include "Sound.h"
 
 /* Textausgabe für HASCS */
 

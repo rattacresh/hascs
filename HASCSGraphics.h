@@ -8,27 +8,22 @@
 */
 
 
-#define MaxSprites 160;
+#define MaxSprites 160
 
-//TYPE SpriteType = ARRAY [0..15] OF BITSET;
 typedef BITSET SpriteType[16];
 
-// SpriteArrayType = ARRAY [0..MaxSprites-1] OF SpriteType;
 typedef SpriteType SpriteArrayType[MaxSprites];
 
 SpriteArrayType FelderSprite, MonsterSprite, SystemSprite, GegenSprite;
 
 /* setzt eine Sprite in einen 40 mal 25 Bildschirm */
-// SetSprite : PROCEDURE (CARDINAL, CARDINAL, VAR SpriteType); 
-void (*SetSprite) (unsigned, unsigned, SpriteType*);
+void (*SetSprite)(unsigned, unsigned, SpriteType*);
 
 /* setzt einen Buchstaben in einen 80 mal 25 Bildschirm */
-// SetChar : PROCEDURE (CARDINAL, CARDINAL, CHAR);
-void (*SetChar) (unsigned, unsigned, char);
+void (*SetChar)(unsigned, unsigned, char);
 
 /* setzt einen 4x4 Ausschnitt eines Sprites */
-// SetSpritePart : PROCEDURE (CARDINAL, CARDINAL, CARDINAL, VAR SpriteType);
-void (*SetSpritePart) (unsigned, unsigned, unsigned, SpriteType*);
+void (*SetSpritePart)(unsigned, unsigned, unsigned, SpriteType*);
 
 /* ein Spritefeld invertieren */
 void InvertFeld(unsigned x, unsigned y);

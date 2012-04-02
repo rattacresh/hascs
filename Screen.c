@@ -1,5 +1,9 @@
-/* Screen module */
-#include "Screen.h"
+#include "Screen.h" /* Screen module */
+
+#include "HASCSGraphics.h"
+#include "HASCSOutput.h"
+#include "HASCSGlobal.h"
+#include "HASCSSystem.h"
 
 
 /************************************************************************/

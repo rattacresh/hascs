@@ -1,6 +1,11 @@
-/* HASCSDisk module */
+#include "HASCSDisk.h" /* HASCSDisk module */
 
-/* allgemeine Importe */
+/* HASCS Importe */
+#include "HASCSGlobal.h"
+#include "HASCSGraphics.h"
+#include "HASCSSystem.h"
+#include "HASCSOutput"
+
 
 #define BufferSize 40000
 

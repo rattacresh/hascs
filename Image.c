@@ -1,6 +1,10 @@
-/* Image module */
-#include "Image.h"
+#include "Image.h" /* Image module */
 
+#include "HASCSSystem.h"
+#include "HASCSDisk.h"
+#include "HASCSOutput.h"
+#include "HASCSGraphics.h"
+#include "HASCSGlobal.h"
 
 typedef struct {
 	unsigned Version,

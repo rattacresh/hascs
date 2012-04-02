@@ -18,21 +18,21 @@
 
 */
 
-#define MaxText 200;      /* maximale Anzahl Texte */
+#define MaxText 200      /* maximale Anzahl Texte */
 
 typedef struct {  
-  char tring[61];
-  unsigned Nummer, Sample;
+	char tring[61];
+	unsigned Nummer, Sample;
 } TextTyp;
 
 
 unsigned TextMode;       /* 0 = normal, 1 = HASCS */
-TextTyp Text[MaxText];   /* Ausgabetexte */
+TextTyp Text[MaxText+1];   /* Ausgabetexte */
 unsigned AnzahlTexte;
   
 unsigned MaxX; /* letzte mögliche Cursorposition zur Ausgabe */
 
-void  (*PrintChar) (char); /* ZeichenAusgabe */
+void  (*PrintChar)(char); /* ZeichenAusgabe */
 
 /* Bildschirmsteuerung */
 

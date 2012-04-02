@@ -1,4 +1,4 @@
-/* Dialog Module */
+#include "Dialog.h" /* Dialog module */
 /*
    Version 0.1   06.03.93
            0.2   19.03.93 FindLabel
@@ -27,7 +27,14 @@
            4.00  20.09.94 Megamax Umstellung, Tokenisierung
 */
 
-#include "Dialog.h"
+#include "HASCSGlobal.h"
+#include "HASCSGraphics.h"
+#include "HASCSOutput.h"
+#include "HASCSSystem.h"
+#include "HASCSDisk.h"
+#include "HASCSGame.h"
+#include "Image.h"
+#include "Sound.h"
 
 
 #define MaxCommand (1 + sizeof Command / sizeof *Command) /* Kommandos */

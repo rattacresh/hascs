@@ -1,9 +1,5 @@
-#ifndef HASCS_SYSTEM_H
-#define HASCS_SYSTEM_H
-
-// DEFINITION MODULE HASCSSystem;
-
-// FROM SYSTEM IMPORT ADDRESS;
+#ifndef HASCSSYSTEM_H
+#define HASCSSYSTEM_H
 
 /*
 
@@ -28,29 +24,24 @@
            11.0  13.10.94 GetBuffer, Cache
 */
 
-// CONST
+#define MausLinks   0 /* linker Mausknopf */
+#define MausRechts  1 /* rechter Mausknopf */
+#define MaxCache  100
 
-#define MausLinks  0; /* linker Mausknopf */
-#define MausRechts  1; /* rechter Mausknopf */
-#define NULL ADDRESS(0);
-#define MaxCache  100;
-
-// TYPE
 typedef struct {
 	int CacheId, CacheUsed, CacheInfo1, CacheInfo2;
 	void *CacheBuffer;
 	int CacheLength;
 } CacheType;
 
-// VAR
 char Name[], Command[], ActPath[];
-int FileError; /* Flag: Fehler bei Fileroutinen */
-int ShowError; /* Flag: nicht fatale Fehlermeldungen anzeigen */
+int FileError; /* Fehler bei Fileroutinen */
+int ShowError; /* nicht fatale Fehlermeldungen anzeigen */
 
-int NewXMin, NewXMax, NewYMin, NewYMax;
+unsigned NewXMin, NewXMax, NewYMin, NewYMax;
 
-CacheType Cache[]; // ARRAY [1..MaxCache] OF CacheType;
-int AnzCache, CacheCounter, ErrorResult;
+CacheType CacheType Cache[MaxCache+1];
+unsigned AnzCache, CacheCounter, ErrorResult;
 
 /* Programmverwaltung ***********************************************/
 

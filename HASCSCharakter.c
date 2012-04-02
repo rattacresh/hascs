@@ -1,6 +1,11 @@
-/* HASCSCharakter module */
+#include "HASCSCharakter.h" /* HASCSCharakter module */
 
 /* Erschaffung eines neuen Charakters */
+
+#include "HASCSGraphics.h"
+#include "HASCSSystem.h"
+#include "HASCSGlobal.h"
+#include "HASCSOutput.h"
 
 
 int CreateCharakter(SpielerTyp *Spieler)

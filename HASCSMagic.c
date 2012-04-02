@@ -1,5 +1,9 @@
-/* HASCSMagic module */
-#include "HASCSMagic.h"
+#include "HASCSMagic.h" /* HASCSMagic module */
+
+#include "HASCSGlobal.h"
+#include "HASCSGraphics.h"
+#include "HASCSMonster.h"
+#include "HASCSSystem.h"
 
 int Vision(unsigned Weite, unsigned Art, unsigned *lx, unsigned *ly)
 {

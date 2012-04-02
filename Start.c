@@ -1,6 +1,13 @@
-/* Start module */
-#include "Start.h"
+#include "Start.h" /* Start module */
 
+#include "HASCSSystem.h"
+#include "HASCSGame.h"
+#include "HASCSDisk.h"
+#include "HASCSGlobal.h"
+#include "HASCSOutput.h"
+#include "Dialog.h"
+#include "Screen.h"
+#include "Sound.h"
 
 unsigned Auswahl, SpriteAnzahl, d, s;
 int Ok, OnceMore;

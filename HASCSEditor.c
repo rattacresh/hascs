@@ -1,4 +1,4 @@
-/* HASCSEditor module */
+#include "HASCSEditor.h" /* HASCSEditor module */
 
 /* HASCS EDITOR III
 

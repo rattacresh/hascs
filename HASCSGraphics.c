@@ -1,6 +1,6 @@
-/* HASCSGraphics module */
+#include "HASCSGraphics.h" /* HASCSGraphics module */
 
-#include "HASCSGraphics.h"
+#include "HASCSSystem.h"
 
 
 

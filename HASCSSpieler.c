@@ -1,6 +1,15 @@
-/* HASCSSpieler module */
-#include "HASCSSpieler.h"
+#include "HASCSSpieler.h" /* HASCSSpieler module */
 
+#include "HASCSSystem.h"
+#include "HASCSGraphics.h"
+#include "HASCSGlobal.h"
+#include "HASCSDisk.h"
+#include "HASCSOutput.h"
+#include "HASCSMagic.h"
+#include "HASCSMonster.h"
+#include "Dialog.h"
+#include "Screen.h"
+#include "Sound.h"
 
 unsigned Rueckgabe;
 

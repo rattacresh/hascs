@@ -1,6 +1,6 @@
-/* Sound module */
-#include "Sound.h"
+#include "Sound.h" /* Sound module */
 
+#include "HASCSSystem.h"
 
 /* Hardware Register für DMA Sound */
 #define sndmactl (*(volatile unsigned char *)0xFF8901) /* Sound-DMA-Control Register */

@@ -1,7 +1,6 @@
 #ifndef HASCSMONSTER_H
 #define HASCSMONSTER_H
 
-//FROM HASCSGlobal IMPORT MonsterTyp, GegenstandTyp;
 #include "HASCSGlobal.h"
 
 /* Prüft, ob Monster m das Feld x, y betreten kann */
