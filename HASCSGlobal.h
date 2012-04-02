@@ -1,0 +1,397 @@
+#ifndef HASCSGLOBAL_H
+#define HASCSGLOBAL_H
+
+/* Definitions-Modul der Datenstrukturen für HASCS II
+
+   written by Alexander Kirchner
+
+   Version 1.00 02.04.88 komplette Neuerstellung
+           2.00 05.04.88 Parameter wie Gegenstände
+           3.00 09.05.88 Dialog eingeführt
+           3.10 21.05.88 Text eingeführt
+           3.11 22.05.88 neue Feldertypen Lava, Sumpf
+           3.12 26.05.88 Dialoge und Texte zusammengeführt
+           3.20 28.05.88 Gegenstand Licht
+           3.30 24.07.88 Basiswertsteigerung durch Lernen
+           3.40 24.03.89 Teleport bei Dialogen
+           4.00 30.06.89 Variable Textausgaben
+           5.00 23.01.90 Charisma, männlich/weiblich, AutoDialog
+           5.10 15.02.90 Reittier
+           5.20 22.02.90 nicht angreifbare Monster
+           5.30 13.03.90 neue Dialogaktionen
+           5.40 14.05.90 Gegenstandsdialoge
+           6.00 29.05.90 Druckerausgabe, Levelüberprüfung etc.
+           6.01 10.06.90 Levelsprites, Monsterblocker
+           6.02 25.06.90 Hungerfelder
+           6.03 16.07.90 Parameterfelder und Monster auf 200 erhöht
+           6.04 28.08.90 Dialogaktionen Spieler TP, Spieler Nahrung
+           6.05 14.09.90 Dialogaktion Zufall, neue Charakterklassen
+           6.10 21.09.90 Zugzähler, Dialogaktion Zugabfrage
+           6.20 19.11.90 Dialogaktion Speichern
+           6.25 20.01.91 Dialogaktion LevelDialog
+           6.30 17.05.91 Dialogaktion GegenHand, LevelParameter
+           6.40 24.07.91 Parameterfeld Licht
+           6.41 25.07.91 Level sichtbar
+           6.50 30.07.91 Spieler Sprite, Dialogaktionen
+           7.00 14.09.91 Dialogaktionen, Lichtfeld, Spieler Stati
+           7.10 23.09.91 Tageszeiten, Spieler Typ
+           7.20 09.05.92 Automapping
+           7.30 22.05.92 Bilder in Dialogen
+           7.40 15.07.92 Prüfsummenabrage für Bilder, Konfigurationsdatei
+           8.00 13.09.92 Programmaufruf in Dialogen
+           8.10 28.02.93 Dialogaktion Test Beritten
+           8.20 17.05.93 Dialogaktion Ziel Monster, Wait
+           9.00 04.08.93 Sichtbereich 23 x 23 Felder
+          10.00 10.08.93 Umstellung auf neue Dialoge
+          10.10 30.12.93 Ringe in Spezialbits
+          11.00 11.08.94 Gegenstands-/Monsterklassen
+*/
+
+//FROM HASCSGraphics IMPORT MaxSprites, SpriteType;
+#include "HASCSGraphics.h"
+
+
+#define MaxGegen 200;      /* maximale Anzahl Gegenstände pro Level */
+#define MaxMonster 200;   /* maximale Anzahl Monster pro Level */
+#define MaxPar 200;       /* maximale Anzahl Parameterfelder pro Level */
+#define MaxRuck 20;       /* maximale Anzahl Gegenstände im Rucksack */
+#define MaxBreite 199;    /* maximale Levelbreite */
+#define MaxHoehe 199;     /* maximale Levelhöhe */
+#define MaxFlags 20;      /* maximale Schalterzahl */
+#define MaxNahrung 200;   /* maximale Nahrung */
+
+#define MaxSichtweite 11; /* maximale Sichtweite */
+#define MaxSichtmal2 22;  /* 2 * MaxSichtweite */
+#define SichtMitteX 12;   /* Koordinaten der Mitte des Sichtbereiches */
+#define SichtMitteY 12;
+
+/* Spieler Stati **********************************************************/
+
+#define SSchild 0;
+#define SSchwimmt 1;
+#define SFlink 2;
+#define SSchutz 3;
+#define SZaubern 4;
+#define SUnsichtbar 5;
+#define SFeuer 6;
+#define SVersteinert 7;
+#define SKraft 8;
+#define SBetrunken 9;
+#define SLicht 10;
+
+#define STot 12;
+#define SAusruhen 13;
+#define SReitet 14;
+#define SMann 15;
+
+/* Spieler Typen **********************************************************/
+
+#define SKrieger 0;
+#define SAbenteurer 1;
+#define SMagier 2;
+#define SPriester 3;
+#define SAmazone 4;
+
+/* Gegenstände ************************************************************/
+
+#define GRing 1;
+#define GZauberstab 2;
+#define GPergament 3;
+#define GPhiole 4;
+#define GWaffe 5;
+#define GRuestung 6;
+#define GGold 7;
+#define GSchluessel 8;
+#define GNahrung 9;
+#define GLicht 10;
+
+#define GMagisch 0;
+#define GVerflucht 1;
+#define GErkannt 2;
+#define GChance 3;
+  
+/* Felder mit Parametern **************************************************/
+
+#define FLeiterBeide 1;
+#define FLeiterHoch 2;
+#define FLeiterRunter 3;
+#define FTuerOffen 4;
+#define FTuerZu 5;
+#define FTuerVerschlossen 6;
+#define FTeleport 7;
+#define FDialog 8;
+#define FFalle 9;
+#define FFeldAenderung 10;
+#define FMonsterStatus 11;
+#define FLicht 12;
+#define FSound 13;
+#define FBild 14;
+
+/* Feldereigenschaften in Felder[i].Spezial *******************************/
+
+#define FeldBegehbar 0;
+#define FeldDurchsichtig 1;
+#define FeldWasser 2;       /* 8-14 Schadenspunkte */
+#define FeldLava 3;         /* 11-20 Punkte Schaden beim Betreten */
+#define FeldSumpf 4;        /* 50 % Chance für Bewegung */
+#define FeldAntiMonster 5;  /* nicht begehbar für Monster */
+#define FeldHunger 6;       /* eine Nahrungseinheit pro Zug */
+#define FeldSchirm 7;       /* Feld ist für Fernkampf nicht zu durchdringen */
+  
+/* Leveleigenschaften in Level[x,y].Spezial *******************************/
+
+#define LevelMonster 0;     /* hier steht ein Monster */
+#define LevelBekannt 1;     /* sichtbar für den Spieler */
+#define LevelGegenstand 2;  /* hier liegt ein Gegenstand */
+#define LevelParameter 3;   /* hier ist ein Parameterfeld */
+#define LevelSichtbar 4;    /* dieses Feld ist beleuchtet */
+#define LevelKarte 5;       /* Dieses Feld ist in der Karte */
+#define LevelSpieler 6;     /* von diesen Feldern wird der Spieler gesehen */
+
+#define LevelNoSave 0;      /* Speichern nicht erlaubt */
+#define LevelNoMap 1;       /* keine automatische Karte */
+#define LevelNotZyklisch 2; /* Level nicht zyklisch */
+#define LevelMonType 3;     /* Monstertypen werden aggressiv */
+#define LevelMonAll 4;      /* alle Monster werden aggressiv */
+#define LevelAutoDialog 5;  /* Dialog bei Rand｜erschreitung */
+
+/* Monstereigenschaften in Monster[i].Spezial *****************************/
+
+#define MonsterMagisch 0;      /* ist magisch */
+#define MonsterSchnell 1;      /* bewegt sich doppelt so schnell */
+#define MonsterFern 2;         /* kann Fernkampf */
+#define MonsterTuer 3;         /* kann T〉en 杷fnen */
+#define MonsterFlieg 4;        /* geht auch über Wasser */
+#define MonsterWasser 5;       /* geht nur in Wasser */
+#define MonsterGeist 6;        /* geht durch alles durch */
+#define MonsterFeuer 7;        /* geht nur durch Feuer/Lava */
+#define MonsterReitbar 8;      /* kann geritten werden */
+#define MonsterImmun 9;        /* kann nicht angegriffen werden */
+#define MonsterPariert 10;     /* kann parieren */
+#define MonsterUnsichtbar 11;  /* ist unsichtbar */
+#define MonsterLangsam 12;     /* Monster bewegt sich nur mit 50% pro Zug */
+
+
+typedef char String20Typ[21]; /* allgemeine String Typen */
+typedef char String60Typ[60];
+
+// CardSet = SET OF CARDINAL[1..999]; /* Menge der alten Levels */
+typedef unsigned CardSet[1000]; /* Menge der alten Levels */
+
+typedef struct {
+  unsigned x, y;           /* Koordinaten */
+  String20Typ Name;        /* Bezeichnung */
+  BITSET Flags;            /* magisch, verlfucht ... */
+  unsigned Dialog, Sprite; /* Dialognummer, Spritenummer */
+  BITSET Spezial;          /* Sondereigenschaften */
+
+  unsigned KennNummer union {
+    struct GRing {
+      unsigned Ring, RingWirkung, RingDauer; 
+    };
+    struct GZauberstab {
+      unsigned Zauberstab, ZStabWirkung, ZStabAbw;
+    };
+    struct GPergament {
+      unsigned Pergament, PergamentWirkung, PergamentAnwendungen;
+    };
+
+  };
+} GegenstandTyp;
+
+
+
+
+  GegenstandTyp =
+    RECORD
+      x, y : CARDINAL; /* Koordinaten */
+      Name : String20Typ; /* Bezeichnung */
+      Flags : BITSET; /* magisch, verlfucht ... */
+      Dialog, Sprite : CARDINAL; /* Dialognummer, Spritenummer */
+      Spezial : BITSET; /* Sondereigenschaften */
+      CASE KennNummer : CARDINAL OF /* maximal 3 CARDINALs */
+        GRing :
+          Ring, RingWirkung, RingDauer : CARDINAL;
+      | GZauberstab :
+          Zauberstab, ZStabWirkung, ZStabAbw : CARDINAL;
+      | GPergament :
+          Pergament, PergamentWirkung, PergamentAnwendungen : CARDINAL;
+      | GPhiole :
+          Phiole, PhioleWirkung, PhioleAnwendungen : CARDINAL;
+      | GWaffe :
+          WaffenSchaden, WaffenBonus, WaffenAnwendungen : CARDINAL;
+      | GRuestung :
+          RuestSchutz, RuestBonus, RuestAnwendungen : CARDINAL;
+      | GGold :
+          Gold : CARDINAL;
+      | GSchluessel :
+          SchluesselX, SchluesselY, SchluesselLevel : CARDINAL;
+      | GNahrung :
+          Nahrung : CARDINAL;
+      | GLicht :
+          LichtArt, LichtWeite, LichtDauer : CARDINAL;
+      ELSE
+        DialogNr, DialogWirkung, DialogAnzahl : CARDINAL;
+      END; /* CASE */
+    END; /* RECORD */
+
+typedef struct {
+  String20Typ Name;
+  BITSET Spezial; /* begehbar, durchsichtig, Wasser etc. */
+} FeldTyp;
+
+  ParameterTyp = 
+    RECORD
+      x, y : CARDINAL;
+      CASE Art : CARDINAL OF /* maximal 6 CARDINALs */
+        FLeiterBeide :
+          xhoch, yhoch, Levelhoch,
+          xrunter, yrunter, Levelrunter : CARDINAL;
+      | FLeiterHoch,
+        FLeiterRunter,
+        FTeleport :
+          ZielX, ZielY, ZielLevel : CARDINAL;
+      | FFalle :
+          Schaden, Anzahl, Chance1, Chance2, Flag : CARDINAL;
+      | FDialog, FSound, FBild :
+          Nummer, Zaehler, automatisch : CARDINAL;
+      | FFeldAenderung :
+          FeldX, FeldY, FeldNummer, ParNummer : CARDINAL;
+      | FTuerOffen,
+        FTuerZu,
+        FTuerVerschlossen :
+          SpriteOffen, SpriteZu, SpriteVerschlossen : CARDINAL;
+      | FMonsterStatus :
+          alterTyp, alterStatus, neuerStatus : CARDINAL;
+      | FLicht :
+          Weite, Dauer : CARDINAL;
+      END;
+    END;
+
+  MonsterTyp =
+    RECORD
+      Name : String20Typ;
+      Trefferwurf, Schaden, Bonus, x, y, Typ, Status, TP,
+      Sprich : CARDINAL;
+      Spezial : BITSET; /* Spezialfähigkeiten */
+    END;
+
+  SpielerTyp =
+    RECORD
+      Name : String20Typ;
+      x, y, TPMax, TP, Gold, Nahrung, Grad,
+      St, Ko, Ge, In, Zt, Ch,
+      Sprite, Sichtweite,
+      AnzGegenstaende, LevelNumber, Lernen : CARDINAL;
+      Status, Permanent, Typ : BITSET;
+      EP, EPnext, Moves : LONGCARD;
+      ReitTier : MonsterTyp;
+      rechteHand, linkeHand, Ruestung, Ring : GegenstandTyp;
+      Rucksack       : ARRAY [1..MaxRuck] OF GegenstandTyp;
+      Flags          : ARRAY [1..MaxFlags] OF CARDINAL;
+      OldLevels      : CardSet;
+    END;
+
+  LevelTyp =
+    RECORD
+      Feld : CARDINAL;
+      Spezial : BITSET;
+    END;
+
+
+VAR 
+
+/* Level-Variablen ********************************************************/
+
+    Level : ARRAY [0..MaxBreite],[0..MaxHoehe] OF LevelTyp;
+    LevelBreite, LevelHoehe : CARDINAL;
+    LevelName, LevelSprites : String20Typ;
+    LevelFlags : BITSET;
+    LevelSichtweite, LevelDialog, LevelMaxMonster : CARDINAL;
+
+/* Daten-Felder ***********************************************************/
+
+    Felder       : ARRAY [0..MaxSprites-1] OF FeldTyp;
+    Gegenstand   : ARRAY [1..MaxGegen] OF GegenstandTyp;
+    Monster      : ARRAY [1..MaxMonster] OF MonsterTyp;
+    Parameter    : ARRAY [1..MaxPar] OF ParameterTyp;
+
+    MonsterKlasse : ARRAY [0..MaxSprites-1] OF MonsterTyp;
+    GegenKlasse   : ARRAY [0..MaxSprites-1] OF GegenstandTyp;
+
+/* Screen-Variablen *******************************************************/
+
+    SichtBereich : ARRAY [0..MaxSichtmal2],
+                         [0..MaxSichtmal2] OF LevelTyp;
+    OldScreen    : ARRAY [0..MaxSichtmal2],
+                         [0..MaxSichtmal2] OF CARDINAL;
+
+/* allgemeine Variablen ***************************************************/
+
+    Spieler      : SpielerTyp;
+    AnzahlGegen,
+    AnzahlMonster,
+    AnzahlParameter : CARDINAL;
+
+    Editor, /* Editiermodus */
+    DruckerAusgabe, /* Dialogausgabe auf Drucker */
+    SoundAusgabe, /* Ton an */
+    DebugMode /* Sonderfunktionen während des Spieles */ : BOOLEAN;
+
+/* Bildschirm-Ausgaben ****************************************************/
+
+PROCEDURE SetNewSprite (x, y : CARDINAL);
+PROCEDURE SetOldSprite (x, y : CARDINAL);
+PROCEDURE MakeShoot(VAR qx, qy : CARDINAL; zx, zy, time : CARDINAL;
+                    mode : BOOLEAN) : BOOLEAN;
+PROCEDURE FillRectangle (x0, y0, x1, y1 : INTEGER; VAR Sprite : SpriteType);
+PROCEDURE RestoreScreen ();
+PROCEDURE ReserveScreen (x1, y1, x2, y2 : CARDINAL);
+
+PROCEDURE PrintCharakter (Was : CARDINAL);
+PROCEDURE PrintMenue ();
+PROCEDURE PrintGegenstand (g : GegenstandTyp);
+PROCEDURE PrintLevelName (VAR s : ARRAY OF CHAR);
+
+PROCEDURE DisplayCharakter (s : SpielerTyp);
+
+/* Hilfsprozeduren ********************************************************/
+
+PROCEDURE FindMonster (mx, my : CARDINAL) : CARDINAL;
+PROCEDURE FindGegenstand (x, y : CARDINAL) : CARDINAL;
+PROCEDURE FindParameter (x, y : CARDINAL) : CARDINAL;
+PROCEDURE DeleteMonster (mx, my : CARDINAL);
+PROCEDURE DeleteGegenstand (gx, gy : CARDINAL);
+PROCEDURE DeleteParameter(px, py : CARDINAL);
+PROCEDURE NewMonster (mx, my : CARDINAL; VAR m : MonsterTyp);
+PROCEDURE NewGegenstand (gx, gy : CARDINAL; VAR g : GegenstandTyp);
+PROCEDURE NewParameter (px, py : CARDINAL; VAR p : ParameterTyp);
+
+/* Spieler ****************************************************************/
+
+PROCEDURE W6 (i : CARDINAL) : CARDINAL;
+PROCEDURE SchutzWurf (x : CARDINAL) : BOOLEAN;
+PROCEDURE SetLightRange () : CARDINAL;
+PROCEDURE SetOneLight (x, y, w : INTEGER; on : BOOLEAN);
+PROCEDURE SetLightLevel (clear : BOOLEAN);
+PROCEDURE GetBasiswert (n : CARDINAL) : CARDINAL;
+PROCEDURE ChangeBasiswert (n : CARDINAL; x : INTEGER);
+
+PROCEDURE Erfahrung (Punkte : CARDINAL);
+PROCEDURE TrefferPunkte (Punkte : CARDINAL; Plus : BOOLEAN);
+
+PROCEDURE NimmGegenstand (px, py : CARDINAL; Einmal : BOOLEAN;
+                          VAR g : GegenstandTyp) : BOOLEAN;
+PROCEDURE LegeGegenstand (px, py : CARDINAL;
+                          g : GegenstandTyp) : BOOLEAN;
+
+
+/* Koordinatentransformationen ********************************************/
+
+PROCEDURE NormalKoords (xh, yh : INTEGER; VAR i, j : CARDINAL);
+PROCEDURE SichtLevelUmrechnung (x, y : CARDINAL; VAR i, j : CARDINAL);
+PROCEDURE LevelSichtUmrechnung (x, y : CARDINAL; VAR i, j : CARDINAL) :
+                               BOOLEAN;
+
+#endif /* HASCSGLOBAL_H */
+
