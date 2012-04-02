@@ -172,8 +172,6 @@ void PrintCharakter(unsigned What)
 	unsigned i, n, cx, cy;
 	FillRectangle(25, 1, 38, 11, SystemSprite[0]);
 
-	WITH  DO
-
 	n = Length(Spieler.Name);
 	FillRectangle(25, 0, 38, 0, SystemSprite[9]);
 	TextMode = 1; PrintAt(32 - n / 2, 0, Spieler.Name); TextMode = 0;

@@ -23,7 +23,7 @@ int Vision(unsigned Weite, unsigned Art, unsigned *lx, unsigned *ly)
 		y1 = YOff + y + Spieler.y - (Anzahl / 2);
 		if (LevelNotZyklisch & LevelFlags) { /* nicht zyklisch */
 			zeigen = x1 >= 0 && x1 <= LevelBreite
-				&& y1 >= 0 && y1 <= LevelHoehe);
+				&& y1 >= 0 && y1 <= LevelHoehe;
 		}
 		NormalKoords(x1, y1, xl, yl);
 		if ((1<<0) & Art) { /* Karte */

@@ -1,4 +1,4 @@
-//IMPLEMENTATION MODULE HASCSSystem;
+/* HASCSSystem module */
 #include "HASCSSystem.h"
 
 
@@ -225,15 +225,15 @@ InOut.WriteString("  Bytes = "); InOut.WriteLNum(Bytes, 10, 1, ' ');
 */
 
 	i = GetCache(id);
-	if (i != 0) { FreeCache(i) }
+	if (i != 0) FreeCache(i);
 	adr = NULL;
 	do {
-		if (AnzCache < MaxCache) { Alloc(Bytes, adr) }
+		if (AnzCache < MaxCache) Alloc(Bytes, adr);
 		if (adr == NULL) {
 			i = LRUCache();
 			FreeCache(i);
 		}
-	} while (!adr != NULL;
+	} while (adr == NULL);
 	CacheCounter++;
 	AnzCache++;
 	Cache[AnzCache].CacheId = id;
@@ -259,7 +259,7 @@ int LoadAndRun(char *Prg, char *Arg)
 	int i, l;
 	int ok;
 	Rectangle save;
-{
+
 	if (StrEqual(Prg, "EDITOR.PRG") || StrEqual(Prg, "HASCSSPR.PRG")
 	 || StrEqual(Prg, "HASCSIII.PRG"))
 	{
@@ -342,7 +342,7 @@ int FileName(char *Pattern, char *FileName)
 	if (StrEqual(LastFileName, Pattern))
 		SearchNext(result);
 	else {
-		SearchFirst(Pattern, FileAttrSet{}, result);
+		SearchFirst(Pattern, 0, result);
 		Assign(Pattern, LastFileName, ok);
 	}
 	Assign(DTABuffer.name, FileName, ok);
@@ -786,7 +786,7 @@ void Error(char *s, int Mode)
 
 void PrinterOut(char ch)
 {
-	do { } while (!PrnOS();
+	do { } while (!PrnOS());
 	PrnOut(ch);
 }
 

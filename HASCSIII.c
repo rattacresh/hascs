@@ -1,4 +1,4 @@
-MODULE HASCSIII;
+/* HASCSIII module */
 
 int main(void)
 {

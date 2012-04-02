@@ -1,4 +1,4 @@
-//IMPLEMENTATION MODULE Start;
+/* Start module */
 #include "Start.h"
 
 

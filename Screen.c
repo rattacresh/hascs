@@ -1,4 +1,4 @@
-//IMPLEMENTATION MODULE Screen;
+/* Screen module */
 #include "Screen.h"
 
 
@@ -67,7 +67,7 @@ void DrawObject(unsigned i)
 	WITH DScreen.Obj[i] DO
 		ox = DScreen.x + DScreen.Obj[i].x;
 		oy = DScreen.y + DScreen.Obj[i].y;
-		if ((Editable|Selectable|Exit} & DScreen.Obj[i].Flags)
+		if ((Editable|Selectable|Exit) & DScreen.Obj[i].Flags)
 			FillRectangle(ox, oy, ox + DScreen.Obj[i].w - 1, oy + DScreen.Obj[i].h - 1, SystemSprite[0]);
 		
 		if (SpriteFill & DScreen.Obj[i].Flags) {
@@ -143,7 +143,7 @@ unsigned FindFlags(unsigned start, BITSET f)
 {
 	unsigned i;
 	for (i = start; i <= DScreen.n; i++)
-		if (DScreen.Obj[i].Flags * f != {})
+		if (DScreen.Obj[i].Flags * f != 0)
 			return i;
 	return 0;
 }

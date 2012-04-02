@@ -424,7 +424,7 @@ unsigned DoGame(void)
 			}
 		} else
 			WaitTime(0); /* Neuzeichnen */
-	} while (!Rueckgabe != 0;
+	} while (Rueckgabe == 0)
 
 	return Rueckgabe;
 
@@ -437,7 +437,7 @@ void FindeSteigungen(void)
 	void NeueSteigung(int nx, int ny)
 	{
 		unsigned i;
-		if ((x == 0 && ny == 0) return;
+		if (x == 0 && ny == 0) return;
 		for (i = 1; i <= AnzahlSteigungen; i++) {
 			if ((dx[i] * ny == dy[i] * nx)) {
 				if (ABS(nx) > ABS(dx[i])

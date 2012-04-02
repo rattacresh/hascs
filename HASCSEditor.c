@@ -127,21 +127,18 @@ void PrintFeld(unsigned i, j)
 
 	NormalKoords(i - XOff, j - YOff, x, y);
 	if (x > 24 || y > 24) return;
-	WITH Level[i,j] DO
-		SetSprite(x, y, FelderSprite[Feld]);
-		if (LevelMonster IN Spezial)
-			n = Max(FindMonster(i, j), 1);
-			SetSprite(x, y, MonsterSprite[Monster[n].Typ]);
-		ELSIF LevelGegenstand IN Spezial)
-			n = Max(FindGegenstand(i, j), 1);
-			SetSprite(x, y, SystemSprite[Gegenstand[n].Sprite]);
-		END;
-		if (((Modus = 1) AND (LevelMonster IN Spezial)) OR
-			 ((Modus = 2) AND (LevelGegenstand IN Spezial)) OR
-			 ((Modus = 3) AND (LevelParameter IN Spezial)))
-			InvertFeld(x, y);
-		END;
-	END;
+	SetSprite(x, y, FelderSprite[Feld]);
+	if (LevelMonster IN Level[i][j].Spezial) {
+		n = Max(FindMonster(i, j), 1);
+		SetSprite(x, y, MonsterSprite[Monster[n].Typ]);
+	} else if (LevelGegenstand & Level[i][j].Spezial) {
+		n = Max(FindGegenstand(i, j), 1);
+		SetSprite(x, y, SystemSprite[Gegenstand[n].Sprite]);
+	}
+	if ((Level[i][j].Modus == 1 && LevelMonster & Level[i][j].Spezial) 
+       	 || (Level[i][j].Modus == 2 && LevelGegenstand & Level[i][j].Spezial)
+	 || (Level[i][j].Modus == 3 && LevelParameter & Level[i][j].Spezial))
+		InvertFeld(x, y);
 }
 
 void PrintLevelPart(void);

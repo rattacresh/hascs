@@ -1,4 +1,4 @@
-IMPLEMENTATION MODULE HASCSDisk;
+/* HASCSDisk module */
 
 /* allgemeine Importe */
 
@@ -361,11 +361,11 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 		WriteFile(h, sizeof shortlength, &shortlength);
 		WriteFile(h, shortlength, Buffer);
 
-		Count = sizeof (MonsterTyp) * AnzahlMonster);
+		Count = sizeof (MonsterTyp) * AnzahlMonster;
 		WriteBlock(h, Count, &Monster);
-		Count = sizeof (GegenstandTyp) * AnzahlGegen);
+		Count = sizeof (GegenstandTyp) * AnzahlGegen;
 		WriteBlock(h, Count, &Gegenstand);
-		Count = sizeof ParameterTyp * AnzahlParameter);
+		Count = sizeof ParameterTyp * AnzahlParameter;
 		WriteBlock(h, Count, &Parameter);
 		
 		if (!Editor) { /* Karte speichern */
@@ -693,7 +693,7 @@ void ReadLevel(char *Name)
 		case 'G' : ReadGegen(); break;
 		case 'P' : ReadParameter(); break;
 		}
-	} while (NextLine(p);
+	} while (NextLine(p));
 }
 
 

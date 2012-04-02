@@ -109,7 +109,7 @@ int MonsterParade(MonsterTyp *m, GegenstandTyp *w, unsigned Treffer)
 {
 	if (MonsterPariert & ~m.Spezial)
 		return FALSE;
-	if ((GMagisch & w.Spezial && MonsterMagisch & ~m.Spezial)
+	if (GMagisch & w.Spezial && MonsterMagisch & ~m.Spezial)
 		return FALSE;
 	else
 		return Zufall(20) + m.Trefferwurf >= m.Treffer;
@@ -519,7 +519,7 @@ void MonsterBewegung(void)
 				 } */
 				break;
 			case 8 : WegBewegung(i); break;
-			case 9 : if ({SUnsichtbar, SVersteinert} * Spieler.Status == {}) {
+			case 9 : if ((SUnsichtbar|SVersteinert) & Spieler.Status == 0) {
 					Aktivierung(i);
 				}
 				break;

@@ -278,7 +278,7 @@ void DoEdit(void)
 					PrintAllSprites(GegenSprite);
 				}
 				break;
-			case 10... 11 : GotoXY(60,11);
+			case 10...11 : GotoXY(60,11);
 				InputString(SpriteDatei[Index], 18);
 				MakeScreen(SpriteArray);
 			}
@@ -302,7 +302,7 @@ void DoEdit(void)
 				}
 				break;
 			case 8 : ChangeColors(aSprite, Farbe, Farbe2); break;
-			case 10,11 : GotoXY(55,11);
+			case 10...11 : GotoXY(55,11);
 				InputString(SpriteDatei[Index],14);
 				MakeScreen(SpriteArray);
 				break;
@@ -374,7 +374,7 @@ void DoEdit(void)
 		      && MausY >= 10 && MausY <= 13)
 			MenueWahl(0, MausY);
 		if (MausLinks & MausButton) {
-			if ((MausX < 16 && MausY < 16)) {
+			if (MausX < 16 && MausY < 16) {
 				SetSprite(MausX, MausY, SystemSprite[Farbe]);
 				EditSprite(aSprite, MausX, MausY, Farbe);
 				PaintDemoSprites();
@@ -432,7 +432,7 @@ void SpriteEdit(char *s)
 	Changes = FALSE;
 
 	for (y = 0; y <= 15; y++)
-		aSprite [y] = {};
+		aSprite[y] = 0;
 
 	for (y = 0; y <= 8; y++)
 		SpriteBuffer[y] = SystemSprite[4];

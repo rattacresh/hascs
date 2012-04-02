@@ -1,4 +1,4 @@
-//IMPLEMENTATION MODULE HASCSSpieler;
+/* HASCSSpieler module */
 #include "HASCSSpieler.h"
 
 
@@ -498,13 +498,13 @@ void Benutze(GegenstandTyp *r)
 					NormalKoords(
 						Zufall(2 * Wirkung + 1) + m->x - Wirkung - 1,
 						Zufall(2 * Wirkung + 1) + m->y - Wirkung - 1, i, j);
-				} while (!MonsterFrei(m, i, j);
+				} while (!MonsterFrei(m, i, j));
 				nm = *m; DeleteMonster(x, y); NewMonster(i, j, nm);
 				return;
-			case10 : DoMonsterDialog(Wirkung, m);
+			case 10 : DoMonsterDialog(Wirkung, m);
 				return;
-			BeginOutput(); Print(Name); Print("#628#"); EndOutput();
 		}
+		BeginOutput(); Print(Name); Print("#628#"); EndOutput();
 
 		if (ZaubernGelungen()) {
 			OutputText("#624#"); /* Wohin... */
@@ -757,30 +757,28 @@ void  InfoFeld(unsigned x, unsigned y)
 
 	if (Near(x, y && LevelParameter & Level[x,y].Spezial)) {
 		i = FindParameter(x, y);
-		WITH  DO
-			if (Parameter[i].Art == FFalle) {
-				if (SucheFalle(Parameter[i])) {
-					return
+		if (Parameter[i].Art == FFalle) {
+			if (SucheFalle(Parameter[i])) {
+				return
+			}
+		} else if ((Parameter[i].Art == FDialog || Parameter[i].Art == FBild || Parameter[i].Art == FSound)) {
+			if ((Parameter[i].automatisch == 0)) {
+				if (Parameter[i].Art == FDialog) DoParameterDialog(Nummer, Parameter[i])
+				else if (Parameter[i].Art == FSound) PlaySoundN(Nummer);
+				else if (Parameter[i].Art == FBild) ShowPicture(Nummer, TRUE);
+				if (Parameter[i].Zaehler > 0) {
+					Parameter[i].Zaehler--;
+					if (Parameter[i].Zaehler == 0)
+						Parameter[i].Art = 0;
 				}
-			} else if ((Parameter[i].Art == FDialog || Parameter[i].Art == FBild || Parameter[i].Art == FSound)) {
-				if ((Parameter[i].automatisch == 0)) {
-					if (Parameter[i].Art == FDialog) DoParameterDialog(Nummer, Parameter[i])
-					else if (Parameter[i].Art == FSound) PlaySoundN(Nummer);
-					else if (Parameter[i].Art == FBild) ShowPicture(Nummer, TRUE);
-					if (Parameter[i].Zaehler > 0) {
-						Parameter[i].Zaehler--;
-						if (Parameter[i].Zaehler == 0)
-							Parameter[i].Art = 0;
-					}
-					return;
-				}
-			} else if (Parameter[i].Art == FTuerOffen) {
-				Level[x, y].Feld = Parameter[i].SpriteZu;
-				Parameter[i].Art = FTuerZu;
-				OutputText("#543#"); /* Du schließt die Tür! */
-				Rueckgabe = 3;
 				return;
 			}
+		} else if (Parameter[i].Art == FTuerOffen) {
+			Level[x, y].Feld = Parameter[i].SpriteZu;
+			Parameter[i].Art = FTuerZu;
+			OutputText("#543#"); /* Du schließt die Tür! */
+			Rueckgabe = 3;
+			return;
 		}
 	}
 	BeginOutput;
@@ -1037,4 +1035,3 @@ unsigned SpielerBewegung(unsigned x, unsigned y, BITSET t)
 
 }
 
-END HASCSSpieler.

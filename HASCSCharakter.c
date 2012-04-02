@@ -1,4 +1,4 @@
-IMPLEMENTATION MODULE HASCSCharakter;
+/* HASCSCharakter module */
 
 /* Erschaffung eines neuen Charakters */
 
