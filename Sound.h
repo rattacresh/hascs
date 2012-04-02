@@ -33,7 +33,7 @@ SoundType SoundOff;
 char SoundPath[128];
 int SoundAusgabe;
 
-void (*PlaySound) (*SoundType);
+void (*PlaySound)(SoundType *);
 
 int LoadSound(unsigned n, SoundType s);
 

@@ -37,7 +37,7 @@ void ExecuteDialog();
 
 void DoDialog(unsigned n);
 
-void DoMonsterDialog(unsinged n, MonsterTyp *m);
+void DoMonsterDialog(unsigned n, MonsterTyp *m);
 
 void DoGegenstandDialog(unsigned n, GegenstandTyp *g);
 

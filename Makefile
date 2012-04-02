@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g3 -O2 -Wall
+CFLAGS = -g3 -O2 -Wall -DBITSET=unsigned -Dsize_t=unsigned -DCHAR_BIT=8
 LIBS = -lefence
 HASCSEDITOR_SOURCE = \
 	Dialog.c HASCSGame.c HASCSMagic.c HASCSSprite.c Sound.c \

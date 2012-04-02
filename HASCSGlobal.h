@@ -228,7 +228,7 @@ typedef struct {
 	BITSET Spezial; /* Spezialfähigkeiten */
 } MonsterTyp;
 
-struct {
+typedef struct {
 	String20Typ Name;
 	unsigned x, y, TPMax, TP, Gold, Nahrung, Grad,
 		St, Ko, Ge, In, Zt, Ch,
@@ -306,17 +306,17 @@ unsigned FindParameter(unsigned x, unsigned y);
 void DeleteMonster(unsigned mx, unsigned my);
 void DeleteGegenstand(unsigned gx, unsigned gy);
 void DeleteParameter(unsigned px, unsigned py);
-void NewMonster(unsigned mx, unsigned my; MonsterTyp *m);
-void NewGegenstand(unsigned gx, unsigned gy; GegenstandTyp *g);
-void NewParameter(unsigned px, unsigned py; ParameterTyp *p);
+void NewMonster(unsigned mx, unsigned my, MonsterTyp *m);
+void NewGegenstand(unsigned gx, unsigned gy, GegenstandTyp *g);
+void NewParameter(unsigned px, unsigned py, ParameterTyp *p);
 
 /* Spieler ****************************************************************/
 
 unsigned W6(unsigned i);
-int SchutzWurf(x : CARDINAL);
+int SchutzWurf(unsigned x);
 unsigned SetLightRange();
 void SetOneLight(int x, int y, int w, int on);
-void SetLightLevel(clear : BOOLEAN);
+void SetLightLevel(int clear);
 unsigned GetBasiswert(unsigned n);
 unsigned ChangeBasiswert(unsigned n, int x);
 

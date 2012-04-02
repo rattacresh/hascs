@@ -70,9 +70,9 @@ typedef String80Type *StringPtr;
 typedef unsigned CharSet[(1 << CHAR_BIT) / sizeof (unsigned)];
 typedef char *CharPtr;
 
-typedef (*ActionProc)(CharPtr);
+typedef void (*ActionProc)(CharPtr);
 typedef struct {
-	char name[21]
+	char name[21];
 	ActionProc action;
 } CommandType;
 typedef struct {
@@ -80,7 +80,7 @@ typedef struct {
 	unsigned operation;
 } OperatorType;
 typedef struct {
-	char name[21]
+	char name[21];
 	void *loc;
 	unsigned number;
 	unsigned type;
@@ -89,8 +89,8 @@ typedef struct {
 	unsigned LabelNumber;
 	void *LabelAddress;
 } LabelType;
-                    
-CommandType Command[] = {
+
+static CommandType Command[] = {
 	/* Kommandos */
 	{"", Nothing},
 	{"GOTO", Goto},
@@ -116,7 +116,7 @@ CommandType Command[] = {
 	{"CALL", Call},
 };
 
-OperatorType Operator[] = {
+static OperatorType Operator[] = {
 	/* Operatoren */
 	{":=", 1},
 	{"+", 2},
@@ -135,7 +135,7 @@ OperatorType Operator[] = {
 };
 
 
-VariableType Variable[] = {
+static VariableType Variable[] = {
 	/* Variablen */
 	
 	{"SPIELER.TP", &Spieler.TP, 0, NumberToken},
@@ -258,35 +258,35 @@ VariableType Variable[] = {
 	{"Z", &LocalVar[25], 0, NumberToken},
 };
 
-unsigned fx, fy, fw, fh, i; /* Fensterausmaße in Sprites */
-unsigned ZeilenAus, ZeilenPos = 1, Redraw,
+static unsigned fx, fy, fw, fh, i; /* Fensterausmaße in Sprites */
+static unsigned ZeilenAus, ZeilenPos = 1, Redraw,
     DialogBreite, DialogHoehe, DialogNummer = 9999,
     x, y, w, h;
-unsigned long DialogLaenge;
-CharPtr DialogBuffer; /* Dialogpuffer */
-int Continue, OpenWindow; /* Dialogausführung */
-String80Type ein;
-unsigned long DebugLevel;
-CharSet VarSet = "abcdefghijklmnopqrstuvwxyz"
+static unsigned long DialogLaenge;
+static CharPtr DialogBuffer; /* Dialogpuffer */
+static int Continue, OpenWindow; /* Dialogausführung */
+static String80Type ein;
+static unsigned long DebugLevel;
+static CharSet VarSet = "abcdefghijklmnopqrstuvwxyz"
 		 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		 ".0123456789";
 	OpSet = ":=+-|&<>*/~#";
 	NumberSet = "0123456789";
 
-MonsterType *SelectedMonster = NULL;
-GegenstandTyp *SelectedGegenstand = NULL;
-ParameterTyp *SelectedParameter = NULL;
+static static MonsterType *SelectedMonster = NULL;
+static GegenstandTyp *SelectedGegenstand = NULL;
+static ParameterTyp *SelectedParameter = NULL;
 
-LabelType ReturnAddress[MaxGosub+1]; /* GOSUB Stack */
-unsigned ReturnLevel;
+static LabelType ReturnAddress[MaxGosub+1]; /* GOSUB Stack */
+static unsigned ReturnLevel;
 
-LabelType Labels[MaxLabel+1]; /* Label Adressen */
-unsigned LabelAnzahl;
+static LabelType Labels[MaxLabel+1]; /* Label Adressen */
+static unsigned LabelAnzahl;
     
-String80Type DialogText[MaxZeilen + 1]; /* Texte für Hyperclick */
+static String80Type DialogText[MaxZeilen + 1]; /* Texte für Hyperclick */
 
-unsigned LocalVar[26];
-char LocalVarName[2];
+static unsigned LocalVar[26];
+static char LocalVarName[2];
     
 /* Forward Deklarationen ************************************************/
 
