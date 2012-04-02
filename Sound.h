@@ -18,16 +18,14 @@ const int MaxSounds = 50;
 
 typedef char *CharPtr;
 
-struct SoundType = {
-  // Sound-Routinen müssen komplett neu geschrieben werden, weswegen ich den folgenden Code
-  // nicht übrsetze - Lew
-  //CASE : BOOLEAN OF
-  //TRUE : Buffer : CharPtr; /* Zeiger auf Sample */
-  //| FALSE: b3, b2, b1, b0 : BYTE;
-  //END;
- unsigned Length;
- int Frequency;  /* Frequenz in Herz */
-};
+typedef struct {
+	union {
+		CharPtr Buffer; /* Zeiger auf Sample */
+		unsigned char b[4];
+	};
+	unsigned Length;
+	int Frequency;  /* Frequenz in Herz */
+} SoundType;
   
 
 SoundType SoundOff;
