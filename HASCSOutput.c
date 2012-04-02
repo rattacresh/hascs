@@ -66,7 +66,7 @@ void BWStringOut(char *s, size_t n)
 	}
 }
 
-PROCEDURE Cls();
+void Cls()
 {
 	/* Bildschirm löschen */
 	unsigned x, y;
@@ -165,7 +165,6 @@ void Print(char *s)
 
 
 void PrintAt(unsigned x, unsigned y, char *s)
-/* String an x, y ausgeben */
 {
 	GotoXY(x,y); Print(s);
 }
@@ -205,8 +204,8 @@ unsigned StringToCard(char *s);
 }
 
 
-void PrintCard(unsigned c, unsigned l)
 /* CARDINAL Zahl mit der Länge l ausgeben */
+void PrintCard(unsigned c, unsigned l)
 {
 	char s[21];
 	CardToString(c, l, s); Print(s);
