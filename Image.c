@@ -1,4 +1,4 @@
-IMPLEMENTATION MODULE Image;
+// IMPLEMENTATION MODULE Image;
 
 typedef struct {
 	unsigned Version,
