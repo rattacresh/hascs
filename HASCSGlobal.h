@@ -51,292 +51,236 @@
 #include "HASCSGraphics.h"
 
 
-#define MaxGegen 200;      /* maximale Anzahl Gegenstände pro Level */
-#define MaxMonster 200;   /* maximale Anzahl Monster pro Level */
-#define MaxPar 200;       /* maximale Anzahl Parameterfelder pro Level */
-#define MaxRuck 20;       /* maximale Anzahl Gegenstände im Rucksack */
-#define MaxBreite 199;    /* maximale Levelbreite */
-#define MaxHoehe 199;     /* maximale Levelhöhe */
-#define MaxFlags 20;      /* maximale Schalterzahl */
-#define MaxNahrung 200;   /* maximale Nahrung */
+#define MaxGegen 200      /* maximale Anzahl Gegenstände pro Level */
+#define MaxMonster 200   /* maximale Anzahl Monster pro Level */
+#define MaxPar 200       /* maximale Anzahl Parameterfelder pro Level */
+#define MaxRuck 20       /* maximale Anzahl Gegenstände im Rucksack */
+#define MaxBreite 199    /* maximale Levelbreite */
+#define MaxHoehe 199     /* maximale Levelhöhe */
+#define MaxFlags 20      /* maximale Schalterzahl */
+#define MaxNahrung 200   /* maximale Nahrung */
 
-#define MaxSichtweite 11; /* maximale Sichtweite */
-#define MaxSichtmal2 22;  /* 2 * MaxSichtweite */
-#define SichtMitteX 12;   /* Koordinaten der Mitte des Sichtbereiches */
-#define SichtMitteY 12;
+#define MaxSichtweite 11 /* maximale Sichtweite */
+#define MaxSichtmal2 22  /* 2 * MaxSichtweite */
+#define SichtMitteX 12   /* Koordinaten der Mitte des Sichtbereiches */
+#define SichtMitteY 12
 
 /* Spieler Stati **********************************************************/
 
-#define SSchild 0;
-#define SSchwimmt 1;
-#define SFlink 2;
-#define SSchutz 3;
-#define SZaubern 4;
-#define SUnsichtbar 5;
-#define SFeuer 6;
-#define SVersteinert 7;
-#define SKraft 8;
-#define SBetrunken 9;
-#define SLicht 10;
+#define SSchild 0
+#define SSchwimmt 1
+#define SFlink 2
+#define SSchutz 3
+#define SZaubern 4
+#define SUnsichtbar 5
+#define SFeuer 6
+#define SVersteinert 7
+#define SKraft 8
+#define SBetrunken 9
+#define SLicht 10
 
-#define STot 12;
-#define SAusruhen 13;
-#define SReitet 14;
-#define SMann 15;
+#define STot 12
+#define SAusruhen 13
+#define SReitet 14
+#define SMann 15
 
 /* Spieler Typen **********************************************************/
 
-#define SKrieger 0;
-#define SAbenteurer 1;
-#define SMagier 2;
-#define SPriester 3;
-#define SAmazone 4;
+#define SKrieger 0
+#define SAbenteurer 1
+#define SMagier 2
+#define SPriester 3
+#define SAmazone 4
 
 /* Gegenstände ************************************************************/
 
-#define GRing 1;
-#define GZauberstab 2;
-#define GPergament 3;
-#define GPhiole 4;
-#define GWaffe 5;
-#define GRuestung 6;
-#define GGold 7;
-#define GSchluessel 8;
-#define GNahrung 9;
-#define GLicht 10;
+#define GRing 1
+#define GZauberstab 2
+#define GPergament 3
+#define GPhiole 4
+#define GWaffe 5
+#define GRuestung 6
+#define GGold 7
+#define GSchluessel 8
+#define GNahrung 9
+#define GLicht 10
 
-#define GMagisch 0;
-#define GVerflucht 1;
-#define GErkannt 2;
-#define GChance 3;
+#define GMagisch 0
+#define GVerflucht 1
+#define GErkannt 2
+#define GChance 3
   
 /* Felder mit Parametern **************************************************/
 
-#define FLeiterBeide 1;
-#define FLeiterHoch 2;
-#define FLeiterRunter 3;
-#define FTuerOffen 4;
-#define FTuerZu 5;
-#define FTuerVerschlossen 6;
-#define FTeleport 7;
-#define FDialog 8;
-#define FFalle 9;
-#define FFeldAenderung 10;
-#define FMonsterStatus 11;
-#define FLicht 12;
-#define FSound 13;
-#define FBild 14;
+#define FLeiterBeide 1
+#define FLeiterHoch 2
+#define FLeiterRunter 3
+#define FTuerOffen 4
+#define FTuerZu 5
+#define FTuerVerschlossen 6
+#define FTeleport 7
+#define FDialog 8
+#define FFalle 9
+#define FFeldAenderung 10
+#define FMonsterStatus 11
+#define FLicht 12
+#define FSound 13
+#define FBild 14
 
 /* Feldereigenschaften in Felder[i].Spezial *******************************/
 
-#define FeldBegehbar 0;
-#define FeldDurchsichtig 1;
-#define FeldWasser 2;       /* 8-14 Schadenspunkte */
-#define FeldLava 3;         /* 11-20 Punkte Schaden beim Betreten */
-#define FeldSumpf 4;        /* 50 % Chance für Bewegung */
-#define FeldAntiMonster 5;  /* nicht begehbar für Monster */
-#define FeldHunger 6;       /* eine Nahrungseinheit pro Zug */
-#define FeldSchirm 7;       /* Feld ist für Fernkampf nicht zu durchdringen */
+#define FeldBegehbar 0
+#define FeldDurchsichtig 1
+#define FeldWasser 2       /* 8-14 Schadenspunkte */
+#define FeldLava 3         /* 11-20 Punkte Schaden beim Betreten */
+#define FeldSumpf 4        /* 50 % Chance für Bewegung */
+#define FeldAntiMonster 5  /* nicht begehbar für Monster */
+#define FeldHunger 6       /* eine Nahrungseinheit pro Zug */
+#define FeldSchirm 7       /* Feld ist für Fernkampf nicht zu durchdringen */
   
 /* Leveleigenschaften in Level[x,y].Spezial *******************************/
 
-#define LevelMonster 0;     /* hier steht ein Monster */
-#define LevelBekannt 1;     /* sichtbar für den Spieler */
-#define LevelGegenstand 2;  /* hier liegt ein Gegenstand */
-#define LevelParameter 3;   /* hier ist ein Parameterfeld */
-#define LevelSichtbar 4;    /* dieses Feld ist beleuchtet */
-#define LevelKarte 5;       /* Dieses Feld ist in der Karte */
-#define LevelSpieler 6;     /* von diesen Feldern wird der Spieler gesehen */
+#define LevelMonster 0     /* hier steht ein Monster */
+#define LevelBekannt 1     /* sichtbar für den Spieler */
+#define LevelGegenstand 2  /* hier liegt ein Gegenstand */
+#define LevelParameter 3   /* hier ist ein Parameterfeld */
+#define LevelSichtbar 4    /* dieses Feld ist beleuchtet */
+#define LevelKarte 5       /* Dieses Feld ist in der Karte */
+#define LevelSpieler 6     /* von diesen Feldern wird der Spieler gesehen */
 
-#define LevelNoSave 0;      /* Speichern nicht erlaubt */
-#define LevelNoMap 1;       /* keine automatische Karte */
-#define LevelNotZyklisch 2; /* Level nicht zyklisch */
-#define LevelMonType 3;     /* Monstertypen werden aggressiv */
-#define LevelMonAll 4;      /* alle Monster werden aggressiv */
-#define LevelAutoDialog 5;  /* Dialog bei Rand｜erschreitung */
+#define LevelNoSave 0      /* Speichern nicht erlaubt */
+#define LevelNoMap 1       /* keine automatische Karte */
+#define LevelNotZyklisch 2 /* Level nicht zyklisch */
+#define LevelMonType 3     /* Monstertypen werden aggressiv */
+#define LevelMonAll 4      /* alle Monster werden aggressiv */
+#define LevelAutoDialog 5  /* Dialog bei Rand｜erschreitung */
 
 /* Monstereigenschaften in Monster[i].Spezial *****************************/
 
-#define MonsterMagisch 0;      /* ist magisch */
-#define MonsterSchnell 1;      /* bewegt sich doppelt so schnell */
-#define MonsterFern 2;         /* kann Fernkampf */
-#define MonsterTuer 3;         /* kann T〉en 杷fnen */
-#define MonsterFlieg 4;        /* geht auch über Wasser */
-#define MonsterWasser 5;       /* geht nur in Wasser */
-#define MonsterGeist 6;        /* geht durch alles durch */
-#define MonsterFeuer 7;        /* geht nur durch Feuer/Lava */
-#define MonsterReitbar 8;      /* kann geritten werden */
-#define MonsterImmun 9;        /* kann nicht angegriffen werden */
-#define MonsterPariert 10;     /* kann parieren */
-#define MonsterUnsichtbar 11;  /* ist unsichtbar */
-#define MonsterLangsam 12;     /* Monster bewegt sich nur mit 50% pro Zug */
+#define MonsterMagisch 0      /* ist magisch */
+#define MonsterSchnell 1      /* bewegt sich doppelt so schnell */
+#define MonsterFern 2         /* kann Fernkampf */
+#define MonsterTuer 3         /* kann T〉en 杷fnen */
+#define MonsterFlieg 4        /* geht auch über Wasser */
+#define MonsterWasser 5       /* geht nur in Wasser */
+#define MonsterGeist 6        /* geht durch alles durch */
+#define MonsterFeuer 7        /* geht nur durch Feuer/Lava */
+#define MonsterReitbar 8      /* kann geritten werden */
+#define MonsterImmun 9        /* kann nicht angegriffen werden */
+#define MonsterPariert 10     /* kann parieren */
+#define MonsterUnsichtbar 11  /* ist unsichtbar */
+#define MonsterLangsam 12     /* Monster bewegt sich nur mit 50% pro Zug */
 
 
 typedef char String20Typ[21]; /* allgemeine String Typen */
-typedef char String60Typ[60];
+typedef char String60Typ[61];
 
 // CardSet = SET OF CARDINAL[1..999]; /* Menge der alten Levels */
 typedef unsigned CardSet[1000]; /* Menge der alten Levels */
 
 typedef struct {
-  unsigned x, y;           /* Koordinaten */
-  String20Typ Name;        /* Bezeichnung */
-  BITSET Flags;            /* magisch, verlfucht ... */
-  unsigned Dialog, Sprite; /* Dialognummer, Spritenummer */
-  BITSET Spezial;          /* Sondereigenschaften */
+	unsigned x, y;           /* Koordinaten */
+	String20Typ Name;        /* Bezeichnung */
+	BITSET Flags;            /* magisch, verlfucht ... */
+	unsigned Dialog, Sprite; /* Dialognummer, Spritenummer */
+	BITSET Spezial;          /* Sondereigenschaften */
 
-  unsigned KennNummer union {
-    struct GRing {
-      unsigned Ring, RingWirkung, RingDauer; 
-    };
-    struct GZauberstab {
-      unsigned Zauberstab, ZStabWirkung, ZStabAbw;
-    };
-    struct GPergament {
-      unsigned Pergament, PergamentWirkung, PergamentAnwendungen;
-    };
-
-  };
+	unsigned KennNummer;
+	union { /* maximal 3 unsigned ints */
+		struct { unsigned Ring, RingWirkung, RingDauer; };
+		struct { unsigned Zauberstab, ZStabWirkung, ZStabAbw; };
+		struct { unsigned Pergament, PergamentWirkung, PergamentAnwendungen; };
+		struct { unsigned Phiole, PhioleWirkung, PhioleAnwendungen; };
+		struct { unsigned WaffenSchaden, WaffenBonus, WaffenAnwendungen; };
+		struct { unsigned RuestSchutz, RuestBonus, RuestAnwendungen; };
+		struct { unsigned Gold; };
+		struct { unsigned SchluesselX, SchluesselY, SchluesselLevel; };
+		struct { unsigned Nahrung; };
+		struct { unsigned LichtArt, LichtWeite, LichtDauer; };
+		struct { unsigned DialogNr, DialogWirkung, DialogAnzahl; };
+	};
 } GegenstandTyp;
 
-
-
-
-  GegenstandTyp =
-    RECORD
-      x, y : CARDINAL; /* Koordinaten */
-      Name : String20Typ; /* Bezeichnung */
-      Flags : BITSET; /* magisch, verlfucht ... */
-      Dialog, Sprite : CARDINAL; /* Dialognummer, Spritenummer */
-      Spezial : BITSET; /* Sondereigenschaften */
-      CASE KennNummer : CARDINAL OF /* maximal 3 CARDINALs */
-        GRing :
-          Ring, RingWirkung, RingDauer : CARDINAL;
-      | GZauberstab :
-          Zauberstab, ZStabWirkung, ZStabAbw : CARDINAL;
-      | GPergament :
-          Pergament, PergamentWirkung, PergamentAnwendungen : CARDINAL;
-      | GPhiole :
-          Phiole, PhioleWirkung, PhioleAnwendungen : CARDINAL;
-      | GWaffe :
-          WaffenSchaden, WaffenBonus, WaffenAnwendungen : CARDINAL;
-      | GRuestung :
-          RuestSchutz, RuestBonus, RuestAnwendungen : CARDINAL;
-      | GGold :
-          Gold : CARDINAL;
-      | GSchluessel :
-          SchluesselX, SchluesselY, SchluesselLevel : CARDINAL;
-      | GNahrung :
-          Nahrung : CARDINAL;
-      | GLicht :
-          LichtArt, LichtWeite, LichtDauer : CARDINAL;
-      ELSE
-        DialogNr, DialogWirkung, DialogAnzahl : CARDINAL;
-      END; /* CASE */
-    END; /* RECORD */
-
 typedef struct {
-  String20Typ Name;
-  BITSET Spezial; /* begehbar, durchsichtig, Wasser etc. */
+	String20Typ Name;
+	BITSET Spezial; /* begehbar, durchsichtig, Wasser etc. */
 } FeldTyp;
 
-  ParameterTyp = 
-    RECORD
-      x, y : CARDINAL;
-      CASE Art : CARDINAL OF /* maximal 6 CARDINALs */
-        FLeiterBeide :
-          xhoch, yhoch, Levelhoch,
-          xrunter, yrunter, Levelrunter : CARDINAL;
-      | FLeiterHoch,
-        FLeiterRunter,
-        FTeleport :
-          ZielX, ZielY, ZielLevel : CARDINAL;
-      | FFalle :
-          Schaden, Anzahl, Chance1, Chance2, Flag : CARDINAL;
-      | FDialog, FSound, FBild :
-          Nummer, Zaehler, automatisch : CARDINAL;
-      | FFeldAenderung :
-          FeldX, FeldY, FeldNummer, ParNummer : CARDINAL;
-      | FTuerOffen,
-        FTuerZu,
-        FTuerVerschlossen :
-          SpriteOffen, SpriteZu, SpriteVerschlossen : CARDINAL;
-      | FMonsterStatus :
-          alterTyp, alterStatus, neuerStatus : CARDINAL;
-      | FLicht :
-          Weite, Dauer : CARDINAL;
-      END;
-    END;
-
-  MonsterTyp =
-    RECORD
-      Name : String20Typ;
-      Trefferwurf, Schaden, Bonus, x, y, Typ, Status, TP,
-      Sprich : CARDINAL;
-      Spezial : BITSET; /* Spezialfähigkeiten */
-    END;
-
-  SpielerTyp =
-    RECORD
-      Name : String20Typ;
-      x, y, TPMax, TP, Gold, Nahrung, Grad,
-      St, Ko, Ge, In, Zt, Ch,
-      Sprite, Sichtweite,
-      AnzGegenstaende, LevelNumber, Lernen : CARDINAL;
-      Status, Permanent, Typ : BITSET;
-      EP, EPnext, Moves : LONGCARD;
-      ReitTier : MonsterTyp;
-      rechteHand, linkeHand, Ruestung, Ring : GegenstandTyp;
-      Rucksack       : ARRAY [1..MaxRuck] OF GegenstandTyp;
-      Flags          : ARRAY [1..MaxFlags] OF CARDINAL;
-      OldLevels      : CardSet;
-    END;
-
-  LevelTyp =
-    RECORD
-      Feld : CARDINAL;
-      Spezial : BITSET;
-    END;
+typedef struct {
+	unsigned x, y;
+	unsigned Art;
+	union { /* maximal 6 CARDINALs */
+		unsigned xhoch, yhoch, Levelhoch, xrunter, yrunter, Levelrunter;
+		unsigned ZielX, ZielY, ZielLevel;
+		unsigned Schaden, Anzahl, Chance1, Chance2, Flag;
+		unsigned Nummer, Zaehler, automatisch;
+		unsigned FeldX, FeldY, FeldNummer, ParNummer;
+		unsigned SpriteOffen, SpriteZu, SpriteVerschlossen;
+		unsigned alterTyp, alterStatus, neuerStatus;
+		unsigned Weite, Dauer;
+	};
+} ParameterTyp;
 
 
-VAR 
+typedef struct {
+	String20Typ Name;
+	unsigned Trefferwurf, Schaden, Bonus, x, y, Typ, Status, TP;
+	unsigned Sprich;
+	BITSET Spezial; /* Spezialfähigkeiten */
+} MonsterTyp;
+
+struct {
+	String20Typ Name;
+	unsigned x, y, TPMax, TP, Gold, Nahrung, Grad,
+		St, Ko, Ge, In, Zt, Ch,
+		Sprite, Sichtweite,
+		AnzGegenstaende, LevelNumber, Lernen;
+	BITSET Status, Permanent, Typ;
+	unsigned long EP, EPnext, Moves;
+	MonsterTyp ReitTier;
+	GegenstandTyp rechteHand, linkeHand, Ruestung, Ring;
+	GegenstandTyp Rucksack[MaxRuck+1];
+	unsigned Flags[MaxFlags+1];
+	CardSet OldLevels;
+} SpielerTyp;
+
+typedef struct {
+	unsigned Feld;
+	BITSET Spezial;
+} LevelTyp;
+
 
 /* Level-Variablen ********************************************************/
 
-    Level : ARRAY [0..MaxBreite],[0..MaxHoehe] OF LevelTyp;
-    LevelBreite, LevelHoehe : CARDINAL;
-    LevelName, LevelSprites : String20Typ;
-    LevelFlags : BITSET;
-    LevelSichtweite, LevelDialog, LevelMaxMonster : CARDINAL;
+LevelTyp Level[MaxBreite+1][MaxHoehe+1];
+unsigned LevelBreite, LevelHoehe;
+String20Typ LevelName, LevelSprites;
+BITSET LevelFlags;
+unsigned LevelSichtweite, LevelDialog, LevelMaxMonster;
 
 /* Daten-Felder ***********************************************************/
 
-    Felder       : ARRAY [0..MaxSprites-1] OF FeldTyp;
-    Gegenstand   : ARRAY [1..MaxGegen] OF GegenstandTyp;
-    Monster      : ARRAY [1..MaxMonster] OF MonsterTyp;
-    Parameter    : ARRAY [1..MaxPar] OF ParameterTyp;
+FeldTyp Felder[MaxSprites];
+GegenstandTyp Gegenstand[MaxGegen+1];
+MonsterTyp Monster[MaxMonster+1];
+ParameterTyp Parameter[MaxPar+1];
 
-    MonsterKlasse : ARRAY [0..MaxSprites-1] OF MonsterTyp;
-    GegenKlasse   : ARRAY [0..MaxSprites-1] OF GegenstandTyp;
+MonsterTyp MonsterKlasse[MaxSprites];
+GegenstandTyp GegenKlasse[MaxSprites];
 
 /* Screen-Variablen *******************************************************/
 
-    SichtBereich : ARRAY [0..MaxSichtmal2],
-                         [0..MaxSichtmal2] OF LevelTyp;
-    OldScreen    : ARRAY [0..MaxSichtmal2],
-                         [0..MaxSichtmal2] OF CARDINAL;
+LevelTyp SichtBereich[MaxSichtmal2+1][MaxSichtmal2+1];
+unsigned OldScreen [MaxSichtmal2+1][MaxSichtmal2+1];
 
 /* allgemeine Variablen ***************************************************/
 
-    Spieler      : SpielerTyp;
-    AnzahlGegen,
-    AnzahlMonster,
-    AnzahlParameter : CARDINAL;
-
-    Editor, /* Editiermodus */
-    DruckerAusgabe, /* Dialogausgabe auf Drucker */
-    SoundAusgabe, /* Ton an */
-    DebugMode /* Sonderfunktionen während des Spieles */ : BOOLEAN;
+SpielerTyp Spieler;
+unsigned AnzahlGegen, AnzahlMonster, AnzahlParameter;
+int Editor, /* Editiermodus */
+	DruckerAusgabe, /* Dialogausgabe auf Drucker */
+	SoundAusgabe, /* Ton an */
+	DebugMode; /* Sonderfunktionen während des Spieles */
 
 /* Bildschirm-Ausgaben ****************************************************/
 
