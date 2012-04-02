@@ -2,7 +2,7 @@
 #define HASCSMONSTER_H
 
 //FROM HASCSGlobal IMPORT MonsterTyp, GegenstandTyp;
-#inlcude "HASCSGlobal.h"
+#include "HASCSGlobal.h"
 
 /* Prüft, ob Monster m das Feld x, y betreten kann */
 int MonsterFrei(MonsterTyp *m, unsigned xl, unsigned yl);
