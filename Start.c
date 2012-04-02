@@ -7,6 +7,7 @@ int Ok, OnceMore;
 
 
 int ReadConfig()
+{
 	char Path[129];
 
 	void MakeAbsolute(char *p)
