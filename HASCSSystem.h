@@ -106,4 +106,3 @@ void PrinterOut(char ch);
 int PrinterStatus();
 
 #endif /* HASCS_SYSTEM */ 
-
