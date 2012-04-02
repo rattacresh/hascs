@@ -79,6 +79,10 @@ void InitWorkstation(char *WinName)
 	}
 	
 	SDL_WM_SetCaption(WinName, WinName);    
+	unsigned char test[] = {0x22, 0x22, 0x22, 0x22};
+	SDL_Surface *surf = SDL_CreateRGBSurfaceFrom(test, 4*8,1,1,4,0,0,0,0);
+	SDL_Rect  dst = {0,0,4,1};
+	SDL_BlitSurface(surf, NULL, ScreenHandle, &dst);
 }
 
 
