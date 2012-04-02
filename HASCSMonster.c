@@ -1,3 +1,6 @@
+#include "HASCSMonster.h"
+
+
 int sign(int i)
 {
 	if (i < 0) return -1;

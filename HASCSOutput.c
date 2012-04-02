@@ -1,4 +1,6 @@
-IMPLEMENTATION MODULE HASCSOutput;
+//IMPLEMENTATION MODULE HASCSOutput;
+#include "HASCSOutput.h"
+
 
 /* Textausgabe für HASCS */
 

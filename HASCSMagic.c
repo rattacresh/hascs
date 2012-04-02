@@ -1,5 +1,5 @@
-IMPLEMENTATION MODULE HASCSMagic;
-
+//IMPLEMENTATION MODULE HASCSMagic;
+#include "HASCSMagic.h"
 
 int Vision(unsigned Weite, unsigned Art, unsigned *lx, unsigned *ly)
 {
