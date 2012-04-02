@@ -14,23 +14,23 @@
    #GOTO <Var>                              Verzweigung
    #LABEL <Var>                             Sprungmarke
    #IF <Ausdruck> THEN <Kommando>           Bedingungsabfrage
-   #WINDOW <Var>, <Var>, <Var>, <Var>       Fenstergr”že (x, y, w, h)
+   #WINDOW <Var>, <Var>, <Var>, <Var>       Fenstergröße (x, y, w, h)
    #LET <Var> = <Ausdruck>                  Zuweisung
    #WAIT <Var>                              Warten (Zeit, Taste)
    #PICTURE <String>                        Bild anzeigen
    #SELECT <Var>, <Var>, <Var>              Objekt(e) selektieren
    #AIM                                     Spielerselektion
    #COPY                                    Objekt(e) kopieren
-   #DELETE                                  Objekt(e) l”schen
+   #DELETE                                  Objekt(e) löschen
 */
 
 // FROM HASCSGlobal IMPORT MonsterTyp, GegenstandTyp, ParameterTyp;
 #include "HASCSGlobal.h"
 
 
-#define IniDialog    1000;
-#define FelderDialog 1001;
-#define ConfigDialog 1002;
+#define IniDialog    1000
+#define FelderDialog 1001
+#define ConfigDialog 1002
 
 int LoadDialog(unsigned n, int coded);
 
