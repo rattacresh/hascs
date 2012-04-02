@@ -37,9 +37,9 @@ const int MaxCache = 100;
 
 // TYPE
 typedef struct {
-  int CacheId, CacheUsed, CacheInfo1, CacheInfo2;
-  ADDRESS CacheBuffer;
-  int CacheLength;
+	int CacheId, CacheUsed, CacheInfo1, CacheInfo2;
+	void *CacheBuffer;
+	int CacheLength;
 } CacheType;
 
 // VAR
