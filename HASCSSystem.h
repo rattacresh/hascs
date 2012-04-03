@@ -1,6 +1,8 @@
 #ifndef HASCSSYSTEM_H
 #define HASCSSYSTEM_H
 
+#include <stdint.h>
+
 /*
 
     Systemabhängige Programmfunktionen für HASCS II
