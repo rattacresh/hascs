@@ -19,10 +19,11 @@ int XOff, YOff;
 //void *MenuAdr;
 
 SDL_Surface *ScreenMFDB, *BufferMFDB, *PicMFDB;
-unsigned char *CompatScreenMFDB, *CompatBufferMFDB, *CompatPicMFDB;
 int CompatBufferMFDB_set = 0;
 int CompatPicMFDB_set = 0;
-//PtrMemFormDef ScreenMFDBAdr, BufferMFDBAdr, PicMFDBAdr;
+unsigned char *MonoScreen, *MonoBuffer, *MonoPic;
+unsigned int MonoBuffer_w, MonoBuffer_h;
+unsigned int MonoPic_w, MonoPic_h;
 
 //SearchRec DTABuffer;
 char *LastFileName;
@@ -313,19 +314,6 @@ int LoadAndRun(char *Prg, char *Arg)
 
 /* Bildschirmverwaltung *********************************************/
 
-/**
- * Die internen kompitibilitäts-monochrome-Bildschirmpuffer werden
- * durch externe Stellen (HASCSGraphics) geändert. Die tatsächlichen
- * SDL-Puffer bekommen davon nichts mit. Bevor eine Anzeige geschehen
- * kann, muss diese Funktion UpdateBuffers() aufgerufen werden, die
- * die beiden Puffer synchronisiert.
- */
-void UpdateBuffers() {
-	if (CompatPicMFDB_set)
-		PicMFDB = SDL_CreateRGBSurfaceFrom(CompatPicMFDB, PicMFDB->w, PicMFDB->h, 1, PicMFDB->w/8, 0, 0, 0, 0);
-	if (CompatBufferMFDB_set)
-		BufferMFDB = SDL_CreateRGBSurfaceFrom(CompatBufferMFDB, BufferMFDB->w, BufferMFDB->h, 1, BufferMFDB->w/8, 0, 0, 0, 0);
-}
 
 void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 {
@@ -341,11 +329,11 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 	  destRect.w = width; 
 	  destRect.h = height;
 
-	  UpdateBuffers();
-	  if (direction == 4)   // Pic    -> Buffer 
-		  SDL_BlitSurface(PicMFDB, &sourceRect, BufferMFDB, &destRect);
-	  else                  // Buffer -> Buffer 
-		  SDL_BlitSurface(BufferMFDB, &sourceRect, BufferMFDB, &destRect);       
+	  if (direction == 4) {     // Pic    -> Buffer 
+		  SDL_BlitSurface(PicMFDB, &sourceRect, BufferMFDB, &destRect);	  
+	  } else {                  // Buffer -> Buffer 
+		  SDL_BlitSurface(BufferMFDB, &sourceRect, BufferMFDB, &destRect);	  
+	  }
 }
 
 /**
@@ -355,8 +343,9 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 void SetPicture(unsigned width, unsigned height, void *Picture)
 {
 	PicMFDB = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, width/8, 0, 0, 0, 0);
-	CompatPicMFDB = Picture;
-	CompatPicMFDB_set = 1;
+	MonoPic = Picture;
+	MonoPic_w = width;
+	MonoPic_h = height;
 	printf("PicMFDB wurde gesetzt\n");
 }
 
@@ -367,8 +356,9 @@ void SetPicture(unsigned width, unsigned height, void *Picture)
 void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
 	BufferMFDB = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, width/8, 0, 0, 0, 0);
-	CompatBufferMFDB = Buffer;
-	CompatBufferMFDB_set = 1;
+	MonoBuffer = Buffer;
+	MonoBuffer_w = width;
+	MonoBuffer_h = height;
 	printf("BufferMFDB wurde gesetzt\n");
 }
 
@@ -523,7 +513,6 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 	{
 		// Ich zeichne einfach das gesamte Fenster neu und
 		// ignoriere den Frame:
-		UpdateBuffers();
 		SDL_BlitSurface(BufferMFDB, NULL, ScreenMFDB, NULL);
 		SDL_Flip(ScreenMFDB);
 		
