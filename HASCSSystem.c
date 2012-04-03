@@ -21,6 +21,7 @@ int XOff, YOff;
 //void *MenuAdr;
 
 SDL_Surface *ScreenMFDB, *BufferMFDB, *PicMFDB;
+unsigned char *CompatScreenMFDB, *CompatBufferMFDB, *CompatPicMFDB;
 //PtrMemFormDef ScreenMFDBAdr, BufferMFDBAdr, PicMFDBAdr;
 
 //SearchRec DTABuffer;
@@ -310,6 +311,11 @@ int LoadAndRun(char *Prg, char *Arg)
 
 /* Bildschirmverwaltung *********************************************/
 
+void UpdateBuffers() {
+	PicMFDB = SDL_CreateRGBSurfaceFrom(CompatPicMFDB, PicMFDB->w, PicMFDB->h, 1, PicMFDB->w/8, 0, 0, 0, 0);
+	BufferMFDB = SDL_CreateRGBSurfaceFrom(CompatBufferMFDB, BufferMFDB->w, BufferMFDB->h, 1, BufferMFDB->w/8, 0, 0, 0, 0);
+}
+
 void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 {
 	  SDL_Rect sourceRect, destRect;
@@ -323,23 +329,25 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 	  destRect.y = dy;
 	  destRect.w = width; 
 	  destRect.h = height;
-	  /*
-	  if (direction == 4) // Pic    -> Buffer 
-		  CopyOpaque(ScreenHandle, PicMFDBAdr, BufferMFDBAdr,
-			     sourceRect, destRect, onlyS);
-	  else                // Buffer -> Buffer 
-		  CopyOpaque(ScreenHandle, BufferMFDBAdr, BufferMFDBAdr,
-			     sourceRect, destRect, onlyS);
-	  */
+
+	  UpdateBuffers();
+	  if (direction == 4) {   // Pic    -> Buffer 
+		  SDL_BlitSurface(PicMFDB, &sourceRect, BufferMFDB, &destRect);
+	  } else {                // Buffer -> Buffer 
+		  SDL_BlitSurface(BufferMFDB, &sourceRect, BufferMFDB, &destRect);
+	  }
+
 }
 
 void SetPicture(unsigned width, unsigned height, void *Picture)
 {
+	CompatPicMFDB = Picture;
 	PicMFDB = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, ScreenWidth/8, 0, 0, 0, 0);
 }
 
 void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
+	CompatBufferMFDB = Buffer;
 	BufferMFDB = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, ScreenWidth/8, 0, 0, 0, 0);
 }
 
