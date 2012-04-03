@@ -31,9 +31,9 @@
 #define MaxCache  100
 
 typedef struct {
-    int CacheId, CacheUsed, CacheInfo1, CacheInfo2;
-    void *CacheBuffer;
-    int CacheLength;
+	int CacheId, CacheUsed, CacheInfo1, CacheInfo2;
+	void *CacheBuffer;
+	int CacheLength;
 } CacheType;
 
 char *Name, *Command, *ActPath;
