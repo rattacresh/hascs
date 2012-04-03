@@ -286,7 +286,6 @@ static unsigned LabelAnzahl;
 static String80Type DialogText[MaxZeilen + 1]; /* Texte für Hyperclick */
 
 static unsigned LocalVar[26];
-static char LocalVarName[2];
     
 /* Forward Deklarationen ************************************************/
 
