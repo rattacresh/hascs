@@ -2,7 +2,6 @@
 #define HASCSSYSTEM_H
 
 #include <stdint.h>
-#include <SDL/SDL.h>
 
 /*
 
@@ -27,8 +26,8 @@
            11.0  13.10.94 GetBuffer, Cache
 */
 
-#define MausLinks   1 /* linker Mausknopf */
-#define MausRechts  3 /* rechter Mausknopf */
+#define MausLinks   (1<<1) /* linker Mausknopf */
+#define MausRechts  (1<<3) /* rechter Mausknopf */
 #define MaxCache  100
 
 typedef struct {
