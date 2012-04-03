@@ -485,7 +485,7 @@ int SelectFile(char *msg, char *path, char *file)
 
 /* Eingaberoutinen **************************************************/
 
-BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, SDLKey *ref_ch, int WarteZeit)
+BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, int WarteZeit)
 {
     
 	void RedrawWindow(void* frame)
@@ -745,7 +745,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, SDLKey *ref_ch
                 break;
         case SDL_KEYDOWN:
 		printf("The %s key was pressed (Code %i)!\n",
-		       SDL_GetKeyName(event.key.keysym.sym), event.key.keysym.sym);
+		       SDL_GetKeyName(event.key.keysym.sym), event.key.keysym.sym);		
 		*ref_ch = event.key.keysym.sym;
 		break;
         case SDL_QUIT:
@@ -787,7 +787,7 @@ void WaitTime(unsigned t)
 {
 	unsigned mx, my; 
 	BITSET mb; 
-	SDLKey mch;
+	char mch;
 	WaitInput(&mx, &my, &mb, &mch, t); /* Redraw! */
 }
 
