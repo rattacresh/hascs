@@ -485,17 +485,16 @@ int SelectFile(char *msg, char *path, char *file)
 
 /* Eingaberoutinen **************************************************/
 
+void RedrawWindow(void* frame)
+{
+	// Ich zeichne einfach das gesamte Fenster neu und
+	// ignoriere den Frame:
+	SDL_BlitSurface(BufferMFDB, NULL, ScreenMFDB, NULL);
+	SDL_Flip(ScreenMFDB);
+}
+
 BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, int WarteZeit)
 {
-    
-	void RedrawWindow(void* frame)
-	{
-		// Ich zeichne einfach das gesamte Fenster neu und
-		// ignoriere den Frame:
-		SDL_BlitSurface(BufferMFDB, NULL, ScreenMFDB, NULL);
-		SDL_Flip(ScreenMFDB);
-	}
-     
 	RedrawWindow(NULL);
 
 	SDL_Event event;
@@ -530,35 +529,32 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 
 
 /**
- * Wartet auf einen Tastendruck. Sollte auch den Bildschirm
- * neuzeichnen! TODO!
+ * Wartet auf einen Tastendruck. Zeichnet auch den Fensterinhalt neu.
  */
 void WaitKey(void)
 {
+	RedrawWindow(NULL);
+
 	SDL_Event event;
-	
 	while (event.type != SDL_KEYDOWN) {
 		SDL_WaitEvent(&event);
 		if (event.type == SDL_QUIT) {
 			ExitWorkstation(0);
 			exit(0);
 		}
-	}
-	
-	//unsigned x, y; BITSET s; char ch;
-	//WaitInput(x, y, &s, ch, -1);
+	}       
 }
 
 /**
- * Diese Funktion wartet nicht nur, sie sollte vor Allem auch den
- * Bildschirminhalt neuzeichnen! TODO!
+ * Wartet t Einheiten und zeichnet vorher den Fensterinhalt neu. Die
+ * (von Alexander gedachten) Einheiten von t sind mit unbekannt! Ich
+ * übergebe das mal einfach so an usleep.
  */
 void WaitTime(unsigned t)
 {
-	unsigned mx, my; 
-	BITSET mb; 
-	char mch;
-	WaitInput(&mx, &my, &mb, &mch, t); /* Redraw! */
+	RedrawWindow(NULL);
+	if (t > 0)
+		usleep(t);
 }
 
 
