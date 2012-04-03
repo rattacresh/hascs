@@ -9,9 +9,6 @@
 
 int ScreenWidth, ScreenHeight; //, ScreenPlanes;
 
-/* Oberfläche, auf der wir herumzeichnen. */
-SDL_Surface *ScreenHandle;
-
 char WName[60];
 //WElementSet type;
 unsigned win;
@@ -26,7 +23,7 @@ unsigned char *CompatScreenMFDB, *CompatBufferMFDB, *CompatPicMFDB;
 //PtrMemFormDef ScreenMFDBAdr, BufferMFDBAdr, PicMFDBAdr;
 
 //SearchRec DTABuffer;
-char LastFileName[60];
+char *LastFileName;
 
 unsigned char *BufferAdr;
 unsigned long BufferLen;
@@ -76,8 +73,8 @@ void InitWorkstation(char *WinName)
 	ScreenWidth = 640; // paramptr->rasterWidth + 1;
 	ScreenHeight = 400; // paramptr->rasterHeight + 1;
 	
-	ScreenHandle = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_HWSURFACE);
-	if (ScreenHandle == NULL) {
+	ScreenMFDB = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_HWSURFACE);
+	if (ScreenMFDB == NULL) {
 		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung 640*400 öffnen: %s\n", SDL_GetError());
 		exit(1);
 	}
@@ -91,8 +88,8 @@ void InitWorkstation(char *WinName)
 	for (i = 0; i < ScreenWidth*ScreenHeight/8; i++)
 		background[i] = ~(0x01 << (i % 8));
 	tmp_surf = SDL_CreateRGBSurfaceFrom(background, ScreenWidth, ScreenHeight, 1, ScreenWidth/8, 0, 0, 0, 0);
-	SDL_BlitSurface(tmp_surf, NULL, ScreenHandle, NULL);
-	SDL_Flip(ScreenHandle);
+	SDL_BlitSurface(tmp_surf, NULL, ScreenMFDB, NULL);
+	SDL_Flip(ScreenMFDB);
 
 	/*
 #if 0
@@ -810,7 +807,10 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 #undef b
 #undef ch
 
-
+/**
+ * Wartet auf einen Tastendruck. Sollte auch den Bildschirm
+ * neuzeichnen! TODO!
+ */
 void WaitKey(void)
 {
 	SDL_Event event;
@@ -827,7 +827,10 @@ void WaitKey(void)
 	//WaitInput(x, y, &s, ch, -1);
 }
 
-
+/**
+ * Diese Funktion wartet nicht nur, sie sollte vor Allem auch den
+ * Bildschirminhalt neuzeichnen! TODO!
+ */
 void WaitTime(unsigned t)
 {
 	//unsigned mx, my; BITSET mb; char mch;
@@ -897,7 +900,7 @@ void SystemInit(void)
 {
 	ShowError = 1;
 	FileError = 0;
-	//LastFileName = "";
+	LastFileName = "";
 	NewXMin = 40; 
 	NewYMin = 25; 
 	NewXMax = 0; 
