@@ -1,6 +1,7 @@
 #ifndef HASCSGRAPHICS_H
 #define HASCSGRAPHICS_H
 
+#include <inttypes.h>
 /*
    Grafik- und Textausgaben auf den HASCS II Bildschirm.
 
