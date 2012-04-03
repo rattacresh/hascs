@@ -20,6 +20,8 @@ int XOff, YOff;
 
 SDL_Surface *ScreenMFDB, *BufferMFDB, *PicMFDB;
 unsigned char *CompatScreenMFDB, *CompatBufferMFDB, *CompatPicMFDB;
+int CompatBufferMFDB_set = 0;
+int CompatPicMFDB_set = 0;
 //PtrMemFormDef ScreenMFDBAdr, BufferMFDBAdr, PicMFDBAdr;
 
 //SearchRec DTABuffer;
@@ -317,8 +319,10 @@ int LoadAndRun(char *Prg, char *Arg)
  * die beiden Puffer synchronisiert.
  */
 void UpdateBuffers() {
-	PicMFDB = SDL_CreateRGBSurfaceFrom(CompatPicMFDB, PicMFDB->w, PicMFDB->h, 1, PicMFDB->w/8, 0, 0, 0, 0);
-	BufferMFDB = SDL_CreateRGBSurfaceFrom(CompatBufferMFDB, BufferMFDB->w, BufferMFDB->h, 1, BufferMFDB->w/8, 0, 0, 0, 0);
+	if (CompatPicMFDB_set)
+		PicMFDB = SDL_CreateRGBSurfaceFrom(CompatPicMFDB, PicMFDB->w, PicMFDB->h, 1, PicMFDB->w/8, 0, 0, 0, 0);
+	if (CompatBufferMFDB_set)
+		BufferMFDB = SDL_CreateRGBSurfaceFrom(CompatBufferMFDB, BufferMFDB->w, BufferMFDB->h, 1, BufferMFDB->w/8, 0, 0, 0, 0);
 }
 
 void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
@@ -350,6 +354,8 @@ void SetPicture(unsigned width, unsigned height, void *Picture)
 {
 	PicMFDB = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, width/8, 0, 0, 0, 0);
 	CompatPicMFDB = Picture;
+	CompatPicMFDB_set = 1;
+	printf("PicMFDB wurde gesetzt\n");
 }
 
 /**
@@ -360,6 +366,8 @@ void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
 	BufferMFDB = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, width/8, 0, 0, 0, 0);
 	CompatBufferMFDB = Buffer;
+	CompatBufferMFDB_set = 1;
+	printf("BufferMFDB wurde gesetzt\n");
 }
 
 
@@ -511,32 +519,34 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
     
 	void RedrawWindow(void* frame)
 	{
+		// Ich zeichne einfach das gesamte Fenster neu und
+		// ignoriere den Frame:
 		UpdateBuffers();
 		SDL_BlitSurface(BufferMFDB, NULL, ScreenMFDB, NULL);
 		SDL_Flip(ScreenMFDB);
 		
 		/*
-		  Rectangle r, s;
-		  UpdateWindow(TRUE);
-		  r = WindowRectList(win, firstElem);
-		  while (r.w > 0 && r.h > 0) {
-		  if (RcIntersect(frame, r)) {
-		  GrafMouse(mouseOff, NIL);
-		  // Pufferkoordinaten 
-		  s.x = r.x - work.x + XOff;
-		  s.y = r.y - work.y + YOff;
-		  s.w = r.w; s.h = r.h;
-		  if (ScreenPlanes == 1)
-		  CopyOpaque(ScreenHandle, BufferMFDBAdr, ScreenMFDBAdr,
-		  s, r, onlyS);
-		  else
-		  CopyTrans(ScreenHandle, BufferMFDBAdr, ScreenMFDBAdr,
-		  s, r, replaceWrt, 1, 0);
-		  GrafMouse(mouseOn, NIL);
-		  }
-		  r = WindowRectList(win, nextElem);
-		  }
-		  UpdateWindow(FALSE);
+		Rectangle r, s;
+		UpdateWindow(TRUE);
+		r = WindowRectList(win, firstElem);
+		while (r.w > 0 && r.h > 0) {
+			if (RcIntersect(frame, r)) {
+				GrafMouse(mouseOff, NIL);
+				// Pufferkoordinaten 
+				s.x = r.x - work.x + XOff;
+				s.y = r.y - work.y + YOff;
+				s.w = r.w; s.h = r.h;
+				if (ScreenPlanes == 1)
+					CopyOpaque(ScreenHandle, BufferMFDBAdr, ScreenMFDBAdr,
+						   s, r, onlyS);
+				else
+					CopyTrans(ScreenHandle, BufferMFDBAdr, ScreenMFDBAdr,
+						  s, r, replaceWrt, 1, 0);
+				GrafMouse(mouseOn, NIL);
+			}
+			r = WindowRectList(win, nextElem);
+		}
+		UpdateWindow(FALSE);
 		*/
 	}
     
@@ -805,6 +815,10 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 	} while (!ok);
 	GrafMouse(bee, NIL);
 	*/
+
+	RedrawWindow(NULL);
+	if (WarteZeit > 0)
+		usleep(WarteZeit);
 }
 #undef x
 #undef y 
@@ -837,9 +851,8 @@ void WaitKey(void)
  */
 void WaitTime(unsigned t)
 {
-	//unsigned mx, my; BITSET mb; char mch;
-	//WaitInput(mx, my, mb, mch, t); /* Redraw! */
-	usleep(t);
+	unsigned mx, my; BITSET mb; char mch;
+	WaitInput(mx, my, mb, mch, t); /* Redraw! */
 }
 
 
