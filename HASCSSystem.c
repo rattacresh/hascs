@@ -511,6 +511,10 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
     
 	void RedrawWindow(void* frame)
 	{
+		UpdateBuffers();
+		SDL_BlitSurface(BufferMFDB, NULL, ScreenMFDB, NULL);
+		SDL_Flip(ScreenMFDB);
+		
 		/*
 		  Rectangle r, s;
 		  UpdateWindow(TRUE);
