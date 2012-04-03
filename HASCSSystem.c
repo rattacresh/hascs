@@ -14,7 +14,7 @@ char WName[60];
 //WElementSet type;
 unsigned win;
 		
-//Rectangle desk, work, curr, full, save;
+SDL_Rect desk, work, curr, full, save;
 int XOff, YOff;
 		
 //void *MenuAdr;
@@ -99,10 +99,12 @@ void InitWorkstation(char *WinName)
 	*/
 
 	unsigned char test[640*400/8];
+
 	int i;
 	for (i = 0; i < 640*400/8; i++)
-		test[i] = 0x55 << (i/(640/8)%2);
-	SDL_Surface *surf = SDL_CreateRGBSurfaceFrom(test, 640,400,1,640/8,0,0,0,0);
+		test[i] = 0xfe << (i % 8);
+
+	SDL_Surface *surf = SDL_CreateRGBSurfaceFrom(test, 640, 400, 1, 640/8, 0, 0, 0, 0);
 #if 0
 	SDL_Color colors[256];
 	for (i = 0; i < 256; i++)
