@@ -9,6 +9,7 @@ int main(void)
 
 	OutlineBar(27, 10, 38, 11);
 	HorzLine(40, 200, 600);
+	VertLine(140, 140, 100);
 	InvertFeld(10,10);
 	
 	WaitTime(0); // Redraw screen

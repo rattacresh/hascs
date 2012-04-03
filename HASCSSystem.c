@@ -343,7 +343,9 @@ void SetPicture(unsigned width, unsigned height, void *Picture)
  */
 void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
-	BufferMFDB = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, width/8, 0, 0, 0, 0);
+	unsigned pitch = width/8;
+	printf("width %i height %i pitch %i\n", width, height, pitch);
+	BufferMFDB = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, pitch, 0, 0, 0, 0);
 	MonoBuffer = Buffer;
 	MonoBuffer_w = width;
 	MonoBuffer_h = height;
