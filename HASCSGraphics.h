@@ -10,47 +10,44 @@
 
 #define MaxSprites 160
 
-//typedef BITSET SpriteType[16];
-typedef unsigned char SpriteType[16*16/8];
-typedef unsigned char *SpritePtr;
+typedef BITSET SpriteType[16];
 
 typedef SpriteType SpriteArrayType[MaxSprites];
 
 SpriteArrayType FelderSprite, MonsterSprite, SystemSprite, GegenSprite;
 
 /* setzt eine Sprite in einen 40 mal 25 Bildschirm */
-void (*SetSprite)(unsigned, unsigned, SpritePtr);
+void (*SetSprite)(unsigned, unsigned, SpriteType*);
 
 /* setzt einen Buchstaben in einen 80 mal 25 Bildschirm */
 void (*SetChar)(unsigned, unsigned, char);
 
 /* setzt einen 4x4 Ausschnitt eines Sprites */
-void (*SetSpritePart)(unsigned, unsigned, unsigned, SpritePtr);
+void (*SetSpritePart)(unsigned, unsigned, unsigned, SpriteType*);
 
 /* ein Spritefeld invertieren */
 void InvertFeld(unsigned x, unsigned y);
 
-/* umrahmt das Rechteck mit einer oder zwei Linien */
 void OutlineBar(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
+/* umrahmt das Rechteck mit einer oder zwei Linien */
 void DOutlineBar(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
 
-/* Modus fÃ¼r Sprite setzen: ersetzen, oder, und ... */
+/* Modus für Sprite setzen: ersetzen, oder, und ... */
 unsigned SetSpriteMode(unsigned mode);
 
 
 /* setzt Punkt x, y im Sprite auf Farbe c */
-void EditSprite(SpritePtr Sprite, unsigned x,unsigned y,unsigned c);
+void EditSprite(SpriteType *Sprite, unsigned x,unsigned y,unsigned c);
 
 /* ermittelt die Farbe des Punktes x, y im Sprite */
-unsigned GetSprite(SpritePtr Sprite, unsigned x, unsigned y);
+unsigned GetSprite(SpriteType *Sprite, unsigned x, unsigned y);
 
 
 /* kopiert Bildauschnitt eine Zeile nach oben */
 void ScrollUp(unsigned x, unsigned y, unsigned w, unsigned h);
 
-/* FÃ¼llt Bildschirmausschnitt */
+/* Füllt Bildschirmausschnitt */
 void Fill(unsigned x, unsigned y, unsigned w, unsigned h, unsigned pattern);
 
-void GraphicsInit(void);
 
 #endif /* HASCSGRAPHICS_H */

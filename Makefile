@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g3 -O2 -DBITSET=unsigned -Dxsize_t=unsigned -DXCHAR_BIT=8
+CFLAGS = -g3 -O2 -DBITSET=uint16_t -Duint16_t="unsigned short" -funsigned-char
 LIBS = 
 HASCSEDITOR_SOURCE = \
 	Dialog.c HASCSGame.c HASCSMagic.c HASCSSprite.c Sound.c \
@@ -19,7 +19,8 @@ SDLDEMO_OBJS := $(SDLDEMO_GEN:.c=.o) $(SDLDEMO_SOURCE:.c=.o)
 OBJS = $(HASCSEDITOR_OBJS) $(HASCSIII_OBJS) $(SDLDEMO_OBJS)
 SOURCE = $(HASCSEDITOR_SOURCE) $(HASCSIII_SOURCE) $(SDLDEMO_SOURCE)
 
-TARGETS = HASCSEditor HASCSIII SDLDemo
+#TARGETS = SDLDemo HASCSEditor HASCSIII
+TARGETS = SDLDemo
 
 all: $(TARGETS)
 

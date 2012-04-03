@@ -3,7 +3,7 @@
 
 /*
 
-    SystemabhÃ¤ngige Programmfunktionen fÃ¼r HASCS II
+    Systemabhängige Programmfunktionen für HASCS II
 
     written by Alexander Kirchner
 
@@ -23,7 +23,6 @@
            10.0  16.09.94 Umsetzung auf Megamax Compiler
            11.0  13.10.94 GetBuffer, Cache
 */
-#define BITSET unsigned
 
 #define MausLinks   0 /* linker Mausknopf */
 #define MausRechts  1 /* rechter Mausknopf */

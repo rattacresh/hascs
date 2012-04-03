@@ -3,23 +3,26 @@
 #include "HASCSSystem.h"
 
 
-//#define Black ((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7)(1<<8)|(1<<9)|(1<<10)|(1<<11)|(1<<12)|(1<<13)|(1<<14)|(1<<15))
-#define Black 0xff; // ???
 
-//BITSET Bildschirm[16000];
-unsigned char Bildschirm[640*400/8]; /* virtueller Bildschirm */
+#define Black ((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7) \
+	|(1<<8)|(1<<9)|(1<<10)|(1<<11)|(1<<12)|(1<<13)|(1<<14)|(1<<15))
 
-unsigned char *Bild2, /*0..31999*/
-	*Sprite2; /*0..31 */
-BITSET mask[4];
+BITSET Bildschirm[16000]; /* virtueller Bildschirm */
+BITSET mask[4] = {
+	(1<<15)|(1<<14)|(1<<13)|(1<<12),
+	(1<<11)|(1<<10)|(1<< 9)|(1<< 8),
+	(1<< 7)|(1<< 6)|(1<< 5)|(1<< 4),
+	(1<< 3)|(1<< 2)|(1<< 1)|(1<< 0)
+};
 
 /* Setzt ein 16 x 16 Sprite auf Monochrombildschirm */
-void SetMonoSprite(unsigned x, unsigned y, SpritePtr Sprite)
+void SetMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
+#define Sprite (*ref_Sprite)
 {
-	unsigned i, j;
+	register unsigned i,j;
 	i = y * 640 + x;
 	for (j = 0; j <= 15; j++) {
-		Bildschirm[i] = Sprite[j];
+		Bildschirm[i] = htons(Sprite[j]);
 		i += 40;
 	}
 	if (NewXMin > x) NewXMin = x;
@@ -27,33 +30,38 @@ void SetMonoSprite(unsigned x, unsigned y, SpritePtr Sprite)
 	if (NewXMax < x) NewXMax = x;
 	if (NewYMax < y) NewYMax = y;
 }
+#undef Sprite
 
 /* Setzt ein 16 x 16 Sprite auf Monochrombildschirm(Oder Modus) */
-void OrMonoSprite(unsigned x, unsigned y, SpritePtr Sprite)
+void OrMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
+#define Sprite (*ref_Sprite)
 {
-	unsigned i, j;
+	register unsigned i, j;
 	i = y * 640 + x;
 	for (j = 0; j <= 15; j++) {
-		Bildschirm[i] = Bildschirm[i] | Sprite[j];
+		Bildschirm[i] = htons(ntohs(Bildschirm[i]) | Sprite[j]);
 		i += 40;
 	}
 	if (NewXMin > x) NewXMin = x;
 	if (NewYMin > y) NewYMin = y;
 	if (NewXMax < x) NewXMax = x;
 	if (NewYMax < y) NewYMax = y;
-} 
-
+}
+#undef Sprite
 
 void SetMonoChar(unsigned x,unsigned y, char ch)
 {
-	/*register*/ unsigned i,j,h;
+	register unsigned i,h,m;
 
-	i = y * 1280 + x;
-	Sprite2 = GegenSprite[ch / 2];
-	j = ch % 2;
+	i = y * 640 + x/2;
+	m = x % 2 ? 0x00ff : 0xff00;
 	for (h = 0; h <= 15; h++) {
-		Bild2[i] = Sprite2[j];
-		i += 80; j += 2;
+		Bildschirm[i] = htons((ntohs(Bildschirm[i]) & m)
+			| (x % 2 ? (ch%2 ? GegenSprite[ch / 2][h] << 8
+					 : GegenSprite[ch / 2][h] & 0xff00)
+			         : (ch%2 ? GegenSprite[ch / 2][h] & 0x00ff
+					 : GegenSprite[ch / 2][h] >> 8)));
+		i += 40;
 	}
 	x = x / 2;
 	if (NewXMin > x) NewXMin = x;
@@ -62,10 +70,11 @@ void SetMonoChar(unsigned x,unsigned y, char ch)
 	if (NewYMax < y) NewYMax = y;
 }
 
-void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, unsigned char *Sprite)
+void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, SpriteType *ref_Sprite)
+#define Sprite (*ref_Sprite)
 {
-	/*register*/ unsigned i,j;
-	/*register*/ BITSET m;
+	register unsigned i,j;
+	register BITSET m;
 	unsigned z[4];
 	j = f / 4 * 4;
 	for (i = 0; i <= 3; i++) {
@@ -83,25 +92,29 @@ void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, unsigned char *Sprite)
 	}
 	j = y * 160 + x / 4; m = mask[x % 4];
 	for (i = 0; i <= 3; i++) {
-		Bildschirm[j] = (Bildschirm[j] & ~m) | z[i];
+		Bildschirm[j] = htons((ntohs(Bildschirm[j]) & ~m) | z[i]);
 		j += 40;
 	}
 }
+#undef Sprite
 
 
-/* setzt Punkt x,y im Sprite auf Farbe c */
-void EditSprite(SpritePtr Sprite, unsigned x, unsigned y,unsigned c)
+void EditSprite(SpriteType *ref_Sprite, unsigned x,unsigned y,unsigned c)
+#define Sprite (*ref_Sprite)
 {
+	/* setzt Punkt x,y im Sprite auf Farbe c */
 	if (c == 0)
 		Sprite[y] &= ~(1<<(15 - x));
 	else
 		Sprite[y] |= 1<<(15 - x);
 }
+#undef Sprite
 
 
-/* ermittelt Farbe des Punktes x, y im Sprite */
-unsigned GetSprite(SpritePtr Sprite, unsigned x, unsigned y)
+unsigned GetSprite(SpriteType *ref_Sprite, unsigned x, unsigned y)
+#define Sprite (*ref_Sprite)
 {
+	/* ermittelt Farbe des Punktes x, y im Sprite */
 	unsigned c;
 	if ((1<<(15 - x)) & Sprite[y])
 		c = 1;
@@ -109,11 +122,12 @@ unsigned GetSprite(SpritePtr Sprite, unsigned x, unsigned y)
 		c = 0;
 	return c;
 }
+#undef Sprite
 
 
 void InvertFeld(unsigned x, unsigned y)
 {
-	/*register*/ unsigned i,j;
+	register unsigned i,j;
 
 	i = 640 * y + x;
 	for (j = 0; j <= 15; j++) {
@@ -132,11 +146,11 @@ void HorzLine(unsigned x, unsigned y, unsigned w)
 	b = 40 * y + x / 16;
 	while (w > 0) {
 		if ((x % 16) != 0 || w < 16) {
-			Bildschirm[b] |= (1 <<(15 - x % 16));
+			Bildschirm[b] = htons(ntohs(Bildschirm[b]) | (1 <<(15 - x % 16)));
 			x++; w--;
 			if (x % 16 == 0) b++;
 		} else if (w >= 16) {
-			Bildschirm[b] = Bildschirm[b] | Black;
+			Bildschirm[b] = htons(ntohs(Bildschirm[b]) | Black);
 			x += 16; w -= 16; b++;
 		}
 	}
@@ -146,9 +160,9 @@ void VertLine(unsigned x, unsigned y, unsigned h)
 {
 	unsigned b, m;
 	b = 40 * y + x / 16;
-	m = 15 - x % 16;
+	m = 1<<(15 - x % 16);
 	while (h > 0) {
-		Bildschirm[b] |= m;
+		Bildschirm[b] = htons(ntohs(Bildschirm[b]) | m);
 		b += 40; h--;
 	}
 }
@@ -190,7 +204,7 @@ unsigned SetSpriteMode(unsigned mode)
 
 void ScrollUp(unsigned x, unsigned y, unsigned w, unsigned h)
 {
-	/*register*/ unsigned a, i, j, k;
+	register unsigned a, i, j, k;
 	a = 640 * y + x;
 	for (k = 1; k <= h - 1; k++) /* h - 1 Zeilen hochschieben */
 		for (j = 0; j <= 15; j++) {
@@ -217,9 +231,9 @@ void Fill(unsigned x, unsigned y, unsigned w, unsigned h, unsigned pattern)
 	for (k = 1; k <= h; k++)
 		for (j = 0; j <= 15; j++) {
 			for (i = 0; i <= w - 1; i++)
-				Bildschirm[a+i] = pattern;
+				Bildschirm[a+i] = htons(pattern);
 			a += 40;
-		}	
+		}
 }
 
 
@@ -228,10 +242,6 @@ void GraphicsInit(void)
 	SetSprite     = SetMonoSprite;
 	SetChar       = SetMonoChar;
 	SetSpritePart = SetMonoSpritePart;
-	Bild2         = Bildschirm;
 	SetBuffer(640, 400, &Bildschirm);
-	mask[0] = (1<<15)|(1<<14)|(1<<13)|(1<<12);
-	mask[1] = (1<<11)|(1<<10)|(1<< 9)|(1<< 8);
-	mask[2] = (1<< 7)|(1<< 6)|(1<< 5)|(1<< 4);
-	mask[3] = (1<< 3)|(1<< 2)|(1<< 1)|(1<< 0);
 }
+
