@@ -1,9 +1,9 @@
 /* HASCSSystem module */
 
 #include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+//#include <SDL/SDL_image.h>
 #include <limits.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include "HASCSSystem.h"
 
 int ScreenWidth, ScreenHeight; //, ScreenPlanes;
@@ -74,7 +74,7 @@ void InitWorkstation(char *WinName)
 	ScreenWidth = 640; // paramptr->rasterWidth + 1;
 	ScreenHeight = 400; // paramptr->rasterHeight + 1;
 	
-	ScreenHandle = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_SWSURFACE);
+	ScreenHandle = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_HWSURFACE);
 	if (ScreenHandle == NULL) {
 		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung 640*400 öffnen: %s\n", SDL_GetError());
 		exit(1);
@@ -82,38 +82,15 @@ void InitWorkstation(char *WinName)
 	
 	SDL_WM_SetCaption(WinName, WinName);    
 
-	/*
-	  SDL_Surface *image;
-	image = IMG_Load("/home/lew/Bilder/lews_hair.jpg");
-	if (image == NULL) {
-		fprintf(stderr, "Das Bild konnte nicht geladen werden:%s\n",
-			SDL_GetError());
-		exit(-1);
-	}
-	//SDL_BlitSurface(image, NULL, ScreenHandle, NULL);
-
-	SDL_Rect dst = {20,20,33,33};
-	SDL_Rect ast = {10,10,33,33};
-	SDL_BlitSurface(image, &ast, ScreenHandle, &dst);
-	
+	// Hintergrund füllen:
+	unsigned char background[ScreenWidth*ScreenHeight/8];
+	SDL_Surface *tmp_surf;
+	int i;
+	for (i = 0; i < ScreenWidth*ScreenHeight/8; i++)
+		background[i] = ~(0x01 << (i % 8));
+	tmp_surf = SDL_CreateRGBSurfaceFrom(background, ScreenWidth, ScreenHeight, 1, ScreenWidth/8, 0, 0, 0, 0);
+	SDL_BlitSurface(tmp_surf, NULL, ScreenHandle, NULL);
 	SDL_Flip(ScreenHandle);
-	*/
-
-	unsigned char test[640*400/8];
-	SDL_Surface *surf;
-
-	int i = 0;
-	while (i<200) {
-		++i;
-		int j;
-		for (j = 0; j < ScreenWidth*ScreenHeight/8; j++)
-			test[j] = ~(0x01 << (i % 8));
-		
-		surf = SDL_CreateRGBSurfaceFrom(test, ScreenWidth, ScreenHeight, 1, ScreenWidth/8, 0, 0, 0, 0);
-		SDL_BlitSurface(surf, NULL, ScreenHandle, NULL);
-		SDL_Flip(ScreenHandle);
-		usleep(50000);
-	}
 
 	/*
 #if 0
@@ -353,28 +330,14 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 
 void SetPicture(unsigned width, unsigned height, void *Picture)
 {
-	/*
-	  PicMFDB.start = Picture;
-	  PicMFDB.w = width;
-	  PicMFDB.h = height;
-	  PicMFDB.words = (w + 15) / 16;
-	  PicMFDB.standardForm = FALSE;
-	  PicMFDB.planes = 1;
-	  PicMFDBAdr = &PicMFDB;
-	*/
+	// Evtl. sollte der Speicher des alten PicMFDB freigegeben werden?!
+	PicMFDB = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, ScreenWidth/8, 0, 0, 0, 0);
 }
 
 void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
-	/*
-	  BufferMFDB.start = Buffer;
-	  BufferMFDB.w = width;
-	  BufferMFDB.h = height;
-	  BufferMFDB.words = (w+15) / 16;
-	  BufferMFDB.standardForm = FALSE;
-	  BufferMFDB.planes = 1;
-	  BufferMFDBAdr = &BufferMFDB;
-	*/
+	// Evtl. sollte der Speicher des alten BufferMFDB freigegeben werden?!
+	BufferMFDB = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, ScreenWidth/8, 0, 0, 0, 0);
 }
 
 
@@ -903,7 +866,10 @@ void SystemInit(void)
 	ShowError = 1;
 	FileError = 0;
 	//LastFileName = "";
-	NewXMin = 40; NewYMin = 25; NewXMax = 0; NewYMax = 0;
+	NewXMin = 40; 
+	NewYMin = 25; 
+	NewXMax = 0; 
+	NewYMax = 0;
     
 	BufferLen = 0;
 	BufferAdr = NULL;
