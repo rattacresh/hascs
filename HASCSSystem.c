@@ -106,10 +106,10 @@ void InitWorkstation(char *WinName)
 	while (i<200) {
 		++i;
 		int j;
-		for (j = 0; j < 640*400/8; j++)
+		for (j = 0; j < ScreenWidth*ScreenHeight/8; j++)
 			test[j] = ~(0x01 << (i % 8));
 		
-		surf = SDL_CreateRGBSurfaceFrom(test, 640, 400, 1, 640/8, 0, 0, 0, 0);
+		surf = SDL_CreateRGBSurfaceFrom(test, ScreenWidth, ScreenHeight, 1, ScreenWidth/8, 0, 0, 0, 0);
 		SDL_BlitSurface(surf, NULL, ScreenHandle, NULL);
 		SDL_Flip(ScreenHandle);
 		usleep(50000);
