@@ -35,10 +35,10 @@ void SetMonoSprite(unsigned x, unsigned y, SpritePtr Sprite)
 	if (NewYMax < y) NewYMax = y;
 }
 
-/* Setzt ein 16 x 16 Sprite auf Monochrombildschirm(Oder Modus) */
+/* Setzt ein 16 x 16 Sprite auf Monochrombildschirm(Oder Modus)
 void OrMonoSprite(unsigned x, unsigned y, SpritePtr Sprite)
 {
-	/*register*/ unsigned i, j;
+	unsigned i, j;
 	i = y * 640 + x;
 	for (j = 0; j <= 15; j++) {
 		Bildschirm[i] = Bildschirm[i] | Sprite[j];
@@ -48,7 +48,8 @@ void OrMonoSprite(unsigned x, unsigned y, SpritePtr Sprite)
 	if (NewYMin > y) NewYMin = y;
 	if (NewXMax < x) NewXMax = x;
 	if (NewYMax < y) NewYMax = y;
-}
+} 
+*/
 
 void SetMonoChar(unsigned x,unsigned y, char ch)
 {
@@ -218,6 +219,7 @@ void ScrollUp(unsigned x, unsigned y, unsigned w, unsigned h)
 
 void Fill(unsigned x, unsigned y, unsigned w, unsigned h, unsigned pattern)
 {
+	/*
 	unsigned a, i, j, k;
 	a = 640 * y + x;
 	for (k = 1; k <= h; k++)
@@ -226,6 +228,7 @@ void Fill(unsigned x, unsigned y, unsigned w, unsigned h, unsigned pattern)
 				Bildschirm[a+i] = pattern;
 			a += 40;
 		}
+	*/
 }
 
 

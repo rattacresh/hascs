@@ -86,10 +86,12 @@ void InitWorkstation(char *WinName)
 	// Hintergrund füllen:
 	unsigned char background[ScreenWidth*ScreenHeight/8];
 	SDL_Surface *tmp_surf;
+	tmp_surf = SDL_CreateRGBSurfaceFrom(background, ScreenWidth, ScreenHeight, 1, ScreenWidth/8, 0, 0, 0, 0);
+
 	int i;
 	for (i = 0; i < ScreenWidth*ScreenHeight/8; i++)
-		background[i] = ~(0x01 << (i % 8));
-	tmp_surf = SDL_CreateRGBSurfaceFrom(background, ScreenWidth, ScreenHeight, 1, ScreenWidth/8, 0, 0, 0, 0);
+		background[i] = ~(0xfe << (i % 8));
+
 	SDL_BlitSurface(tmp_surf, NULL, ScreenMFDB, NULL);
 	SDL_Flip(ScreenMFDB);
 
