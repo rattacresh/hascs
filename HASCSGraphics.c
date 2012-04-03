@@ -4,18 +4,20 @@
 
 
 
-#define Black ((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7) \
-	(1<<8)|(1<<9)|(1<<10)|(1<<11)|(1<<12)|(1<<13)|(1<<14)|(1<<15))
+//#define Black ((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7)(1<<8)|(1<<9)|(1<<10)|(1<<11)|(1<<12)|(1<<13)|(1<<14)|(1<<15))
+#define Black 0xff;
 
-BITSET Bildschirm[16000]; /* virtueller Bildschirm */
+//BITSET Bildschirm[16000];
+unsigned char Bildschirm[640*400/8]; /* virtueller Bildschirm */
+
 unsigned char *Bild2, /*0..31999*/
 	*Sprite2; /*0..31 */
 BITSET mask[4];
 
-void SetMonoSprite(unsigned x,unsigned y, SpriteType *Sprite)
 /* Setzt ein 16 x 16 Sprite auf Monochrombildschirm */
+void SetMonoSprite(unsigned x, unsigned y, SpritePtr Sprite)
 {
-	/*register */ unsigned i,j;
+	unsigned i, j;
 	i = y * 640 + x;
 	for (j = 0; j <= 15; j++) {
 		Bildschirm[i] = Sprite[j];
@@ -27,9 +29,9 @@ void SetMonoSprite(unsigned x,unsigned y, SpriteType *Sprite)
 	if (NewYMax < y) NewYMax = y;
 }
 
-void OrMonoSprite(unsigned x,unsigned y, SpriteType *Sprite)
-{
 /* Setzt ein 16 x 16 Sprite auf Monochrombildschirm(Oder Modus) */
+void OrMonoSprite(unsigned x, unsigned y, SpritePtr Sprite)
+{
 	/*register*/ unsigned i, j;
 	i = y * 640 + x;
 	for (j = 0; j <= 15; j++) {
@@ -60,7 +62,7 @@ void SetMonoChar(unsigned x,unsigned y, char ch)
 	if (NewYMax < y) NewYMax = y;
 }
 
-void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, SpriteType *Sprite)
+void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, unsigned char *Sprite)
 {
 	/*register*/ unsigned i,j;
 	/*register*/ BITSET m;
@@ -87,7 +89,7 @@ void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, SpriteType *Sprite)
 }
 
 
-void EditSprite(SpriteType *Sprite, unsigned x,unsigned y,unsigned c)
+void EditSprite(SpritePtr Sprite, unsigned x, unsigned y,unsigned c)
 {
 	/* setzt Punkt x,y im Sprite auf Farbe c */
 	if (c == 0)
@@ -97,7 +99,7 @@ void EditSprite(SpriteType *Sprite, unsigned x,unsigned y,unsigned c)
 }
 
 
-unsigned GetSprite(SpriteType *Sprite, unsigned x, unsigned y)
+unsigned GetSprite(SpritePtr Sprite, unsigned x, unsigned y)
 {
 	/* ermittelt Farbe des Punktes x, y im Sprite */
 	unsigned c;
@@ -226,7 +228,7 @@ void GraphicsInit(void)
 	SetSprite     = SetMonoSprite;
 	SetChar       = SetMonoChar;
 	SetSpritePart = SetMonoSpritePart;
-	Bild2         = &Bildschirm;
+	Bild2         = Bildschirm;
 	SetBuffer(640, 400, &Bildschirm);
 	mask[0] = (1<<15)|(1<<14)|(1<<13)|(1<<12);
 	mask[1] = (1<<11)|(1<<10)|(1<< 9)|(1<< 8);

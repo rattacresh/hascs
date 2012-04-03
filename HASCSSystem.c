@@ -312,31 +312,34 @@ int LoadAndRun(char *Prg, char *Arg)
 
 void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 {
-	/*
-	  Rectangle sourceRect, destRect;
-    
-	  sourceRect.x = sx; sourceRect.y = sy;
-	  sourceRect.w = width; sourceRect.h = height;
-	  destRect.x = dx; destRect.y = dy;
-	  destRect.w = width; destRect.h = height;
-	  if (direction == 4) // Pic -> Buffer 
-	  CopyOpaque(ScreenHandle, PicMFDBAdr, BufferMFDBAdr,
-	  sourceRect, destRect, onlyS);
-	  else //  Buffer -> Buffer 
-	  CopyOpaque(ScreenHandle, BufferMFDBAdr, BufferMFDBAdr,
-	  sourceRect, destRect, onlyS);
-	*/
+	  SDL_Rect sourceRect, destRect;
+
+	  sourceRect.x = sx; 
+	  sourceRect.y = sy;
+	  sourceRect.w = width; 
+	  sourceRect.h = height;
+
+	  destRect.x = dx; 
+	  destRect.y = dy;
+	  destRect.w = width; 
+	  destRect.h = height;
+	  /*
+	  if (direction == 4) // Pic    -> Buffer 
+		  CopyOpaque(ScreenHandle, PicMFDBAdr, BufferMFDBAdr,
+			     sourceRect, destRect, onlyS);
+	  else                // Buffer -> Buffer 
+		  CopyOpaque(ScreenHandle, BufferMFDBAdr, BufferMFDBAdr,
+			     sourceRect, destRect, onlyS);
+	  */
 }
 
 void SetPicture(unsigned width, unsigned height, void *Picture)
 {
-	// Evtl. sollte der Speicher des alten PicMFDB freigegeben werden?!
 	PicMFDB = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, ScreenWidth/8, 0, 0, 0, 0);
 }
 
 void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
-	// Evtl. sollte der Speicher des alten BufferMFDB freigegeben werden?!
 	BufferMFDB = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, ScreenWidth/8, 0, 0, 0, 0);
 }
 
