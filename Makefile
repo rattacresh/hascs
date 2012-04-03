@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -g3 -O2 -Wall -DBITSET=unsigned -Dxsize_t=unsigned -DXCHAR_BIT=8
-LIBS = -lefence
+LIBS = 
 HASCSEDITOR_SOURCE = \
 	Dialog.c HASCSGame.c HASCSMagic.c HASCSSprite.c Sound.c \
 	HASCSCharakter.c HASCSGlobal.c HASCSMonster.c HASCSSystem.c Start.c \

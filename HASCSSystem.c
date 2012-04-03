@@ -1,10 +1,11 @@
 /* HASCSSystem module */
 
 #include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 #include <limits.h>
 #include "HASCSSystem.h"
 
-int ScreenWidth, ScreenHeight, ScreenPlanes;
+int ScreenWidth, ScreenHeight; //, ScreenPlanes;
 
 /* Oberfläche, auf der wir herumzeichnen. */
 SDL_Surface *ScreenHandle;
@@ -16,9 +17,9 @@ unsigned win;
 //Rectangle desk, work, curr, full, save;
 int XOff, YOff;
 		
-void *MenuAdr;
+//void *MenuAdr;
 
-//MemFormDef ScreenMFDB, BufferMFDB, PicMFDB;
+SDL_Surface *ScreenMFDB, *BufferMFDB, *PicMFDB;
 //PtrMemFormDef ScreenMFDBAdr, BufferMFDBAdr, PicMFDBAdr;
 
 //SearchRec DTABuffer;
@@ -74,11 +75,29 @@ void InitWorkstation(char *WinName)
 	
 	ScreenHandle = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_SWSURFACE);
 	if (ScreenHandle == NULL) {
-		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung 640*480 öffnen: %s\n", SDL_GetError());
+		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung 640*400 öffnen: %s\n", SDL_GetError());
 		exit(1);
 	}
 	
 	SDL_WM_SetCaption(WinName, WinName);    
+
+	/*
+	  SDL_Surface *image;
+	image = IMG_Load("/home/lew/Bilder/lews_hair.jpg");
+	if (image == NULL) {
+		fprintf(stderr, "Das Bild konnte nicht geladen werden:%s\n",
+			SDL_GetError());
+		exit(-1);
+	}
+	//SDL_BlitSurface(image, NULL, ScreenHandle, NULL);
+
+	SDL_Rect dst = {20,20,33,33};
+	SDL_Rect ast = {10,10,33,33};
+	SDL_BlitSurface(image, &ast, ScreenHandle, &dst);
+	
+	SDL_Flip(ScreenHandle);
+	*/
+
 	unsigned char test[640*400/8];
 	int i;
 	for (i = 0; i < 640*400/8; i++)
