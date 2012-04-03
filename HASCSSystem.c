@@ -3,7 +3,8 @@
 #include <SDL/SDL.h>
 //#include <SDL/SDL_image.h>
 #include <limits.h>
-//#include <unistd.h>
+#include <time.h>
+#include <unistd.h>
 #include "HASCSSystem.h"
 
 int ScreenWidth, ScreenHeight; //, ScreenPlanes;
@@ -341,21 +342,27 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 	  if (direction == 4)   // Pic    -> Buffer 
 		  SDL_BlitSurface(PicMFDB, &sourceRect, BufferMFDB, &destRect);
 	  else                  // Buffer -> Buffer 
-		  SDL_BlitSurface(BufferMFDB, &sourceRect, BufferMFDB, &destRect);
-	 
-
+		  SDL_BlitSurface(BufferMFDB, &sourceRect, BufferMFDB, &destRect);       
 }
 
+/**
+ * Übergibt ein existierendes monochrome-Bitmap an die Verwaltung von
+ * HASCSSystem.
+ */
 void SetPicture(unsigned width, unsigned height, void *Picture)
 {
-	CompatPicMFDB = Picture;
 	PicMFDB = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, width/8, 0, 0, 0, 0);
+	CompatPicMFDB = Picture;
 }
 
+/**
+ * Übergibt ein existierendes monochrome-Bitmap als Puffer an die
+ * Verwaltung von HASCSSystem.
+ */
 void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
-	CompatBufferMFDB = Buffer;
 	BufferMFDB = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, width/8, 0, 0, 0, 0);
+	CompatBufferMFDB = Buffer;
 }
 
 
@@ -491,6 +498,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 #define b (*ref_b)
 #define ch (*ref_ch)
 {
+	/*
 	//EventSet flags, events;
 	unsigned mouse;
 	//MessageBuffer msg;
@@ -502,7 +510,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 	unsigned doneClicks;
 	int ok;
 	unsigned long time;
-    
+	*/
     
 	void RedrawWindow(void* frame)
 	{
@@ -805,36 +813,42 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 
 void WaitKey(void)
 {
-	unsigned x, y; BITSET s; char ch;
+	SDL_Event event;
+	
+	while (event.type != SDL_KEYDOWN) {
+		SDL_WaitEvent(&event);
+		if (event.type == SDL_QUIT) {
+			ExitWorkstation(0);
+			exit(0);
+		}
+	}
+	
+	//unsigned x, y; BITSET s; char ch;
 	//WaitInput(x, y, &s, ch, -1);
 }
 
 
 void WaitTime(unsigned t)
 {
-	unsigned mx, my; BITSET mb; char mch;
+	//unsigned mx, my; BITSET mb; char mch;
 	//WaitInput(mx, my, mb, mch, t); /* Redraw! */
+	usleep(t);
 }
 
 
 unsigned long GetTime()
 {
-	//return SuperLPeek(0x04BA);
-	return 0;
+	return time(NULL);
 }
 
 unsigned Zufall(unsigned n)
 {
-	/*
-	if (n == 0) return 0;
-	return RandomCard(1, n);
-	*/
-	return 0;
+	return rand();
 }
 
 void SetzeZufall(unsigned long n)
 {
-	//Randomize(n);
+	srand(n);
 }
 
 
