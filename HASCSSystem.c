@@ -204,7 +204,7 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 	{
 		unsigned i, j, Min; 
 		int ok;
-		Min = INT_MAX; 
+		Min = UINT_MAX; 
 		j = 0;
 		for (i = 1; i <= AnzCache; i++)
 			if (Cache[i].CacheUsed <= Min) {
@@ -280,7 +280,7 @@ int LoadAndRun(char *Prg, char *Arg)
 	while (i > 0) {
 		Arg[i] = Arg[i-1]; i--;
 	}
-	Arg[0] = CHR(l);
+	Arg[0] = l;
 	*/
     
 	//if (type != 0 && MenuAdr != NIL)
@@ -288,7 +288,7 @@ int LoadAndRun(char *Prg, char *Arg)
 	//save = WindowSize(win, borderSize);
 	//CloseWindow(win);
     
-	//Pexec(loadExecute, &file, ADR(Arg), NULL, result);
+	//Pexec(loadExecute, file, Arg, NULL, result);
 	/*
 	if (result < 0) {
 		Concat("Programmstart nicht möglich: ",file, file, ok);
@@ -421,8 +421,8 @@ int CreateFile(char *Name)
 	Create(Name, 0, Handle);
 	if (Handle == -34) { // Path not found 
 		SplitPath(Name, path, file);
-		path[LENGTH(path)-1] = '\0';
-		if (!(DirCreate(path)));
+		path[(sizeof path)-1] = '\0';
+		if (!DirCreate(path));
 		Create(Name, 0, Handle);
 	}
 	FileError = Handle < 0;
