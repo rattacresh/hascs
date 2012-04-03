@@ -3,10 +3,10 @@
 
 #include "HASCSGlobal.h"
 
-/* PrÃ¼ft, ob Monster m das Feld x, y betreten kann */
+/* Prüft, ob Monster m das Feld x, y betreten kann */
 int MonsterFrei(MonsterTyp *m, unsigned xl, unsigned yl);
 
-/* Monster m erhÃ¶ht Damage Schaden */
+/* Monster m erhöht Damage Schaden */
 int HitMonster(MonsterTyp *m, unsigned Damage);
 
 /* Schutzwurf gegen Magie */
@@ -18,7 +18,7 @@ int MonsterParade(MonsterTyp *m, GegenstandTyp *w, unsigned Treffer);
 /* Ist vom Feld Sichbereich[sx, sy] der Spieler zu sehen? */
 int MonsterSiehtSpieler(unsigned sx, unsigned sy);
 
-/* fÃ¼hrt Monsterbewegung durch */
+/* führt Monsterbewegung durch */
 void MonsterBewegung(void);
 
 /* notwendig zum Erneuern des Sichtbereiches */

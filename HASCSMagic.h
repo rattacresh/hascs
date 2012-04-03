@@ -1,9 +1,9 @@
 #ifndef HASCSMAGIC_H
 #define HASCSMAGIC_H
 
-/* Definitionsmodul fÃ¼r HASCS II
+/* Definitionsmodul für HASCS II
 
-   enthÃ¤lt spezielle Prozeduren fÃ¼r die Magie
+   enthält spezielle Prozeduren für die Magie
 
    Version 1.00  15.04.88
            1.10  09.05.92 Automapping

@@ -15,7 +15,7 @@ int RuestungAnlegen(GegenstandTyp *r);
 
 void RuestungAblegen(GegenstandTyp *r);
 
-/* FÃ¼hrt die Spieleraktionen durch */
+/* Führt die Spieleraktionen durch */
 unsigned SpielerBewegung(unsigned x, unsigned y, BITSET t);
 
 

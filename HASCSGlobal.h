@@ -1,32 +1,32 @@
 #ifndef HASCSGLOBAL_H
 #define HASCSGLOBAL_H
 
-/* Definitions-Modul der Datenstrukturen fÃ¼r HASCS II
+/* Definitions-Modul der Datenstrukturen für HASCS II
 
    written by Alexander Kirchner
 
    Version 1.00 02.04.88 komplette Neuerstellung
-           2.00 05.04.88 Parameter wie GegenstÃ¤nde
-           3.00 09.05.88 Dialog eingefÃ¼hrt
-           3.10 21.05.88 Text eingefÃ¼hrt
+           2.00 05.04.88 Parameter wie Gegenstände
+           3.00 09.05.88 Dialog eingeführt
+           3.10 21.05.88 Text eingeführt
            3.11 22.05.88 neue Feldertypen Lava, Sumpf
-           3.12 26.05.88 Dialoge und Texte zusammengefÃ¼hrt
+           3.12 26.05.88 Dialoge und Texte zusammengeführt
            3.20 28.05.88 Gegenstand Licht
            3.30 24.07.88 Basiswertsteigerung durch Lernen
            3.40 24.03.89 Teleport bei Dialogen
            4.00 30.06.89 Variable Textausgaben
-           5.00 23.01.90 Charisma, mÃ¤nnlich/weiblich, AutoDialog
+           5.00 23.01.90 Charisma, männlich/weiblich, AutoDialog
            5.10 15.02.90 Reittier
            5.20 22.02.90 nicht angreifbare Monster
            5.30 13.03.90 neue Dialogaktionen
            5.40 14.05.90 Gegenstandsdialoge
-           6.00 29.05.90 Druckerausgabe, LevelÃ¼berprÃ¼fung etc.
+           6.00 29.05.90 Druckerausgabe, Levelüberprüfung etc.
            6.01 10.06.90 Levelsprites, Monsterblocker
            6.02 25.06.90 Hungerfelder
-           6.03 16.07.90 Parameterfelder und Monster auf 200 erhÃ¶ht
+           6.03 16.07.90 Parameterfelder und Monster auf 200 erhöht
            6.04 28.08.90 Dialogaktionen Spieler TP, Spieler Nahrung
            6.05 14.09.90 Dialogaktion Zufall, neue Charakterklassen
-           6.10 21.09.90 ZugzÃ¤hler, Dialogaktion Zugabfrage
+           6.10 21.09.90 Zugzähler, Dialogaktion Zugabfrage
            6.20 19.11.90 Dialogaktion Speichern
            6.25 20.01.91 Dialogaktion LevelDialog
            6.30 17.05.91 Dialogaktion GegenHand, LevelParameter
@@ -37,7 +37,7 @@
            7.10 23.09.91 Tageszeiten, Spieler Typ
            7.20 09.05.92 Automapping
            7.30 22.05.92 Bilder in Dialogen
-           7.40 15.07.92 PrÃ¼fsummenabrage fÃ¼r Bilder, Konfigurationsdatei
+           7.40 15.07.92 Prüfsummenabrage für Bilder, Konfigurationsdatei
            8.00 13.09.92 Programmaufruf in Dialogen
            8.10 28.02.93 Dialogaktion Test Beritten
            8.20 17.05.93 Dialogaktion Ziel Monster, Wait
@@ -50,12 +50,12 @@
 #include "HASCSGraphics.h"
 
 
-#define MaxGegen 200      /* maximale Anzahl GegenstÃ¤nde pro Level */
+#define MaxGegen 200      /* maximale Anzahl Gegenstände pro Level */
 #define MaxMonster 200   /* maximale Anzahl Monster pro Level */
 #define MaxPar 200       /* maximale Anzahl Parameterfelder pro Level */
-#define MaxRuck 20       /* maximale Anzahl GegenstÃ¤nde im Rucksack */
+#define MaxRuck 20       /* maximale Anzahl Gegenstände im Rucksack */
 #define MaxBreite 199    /* maximale Levelbreite */
-#define MaxHoehe 199     /* maximale LevelhÃ¶he */
+#define MaxHoehe 199     /* maximale Levelhöhe */
 #define MaxFlags 20      /* maximale Schalterzahl */
 #define MaxNahrung 200   /* maximale Nahrung */
 
@@ -66,32 +66,32 @@
 
 /* Spieler Stati **********************************************************/
 
-#define SSchild 0
-#define SSchwimmt 1
-#define SFlink 2
-#define SSchutz 3
-#define SZaubern 4
-#define SUnsichtbar 5
-#define SFeuer 6
-#define SVersteinert 7
-#define SKraft 8
-#define SBetrunken 9
-#define SLicht 10
+#define SSchild (1<<0)
+#define SSchwimmt (1<<1)
+#define SFlink (1<<2)
+#define SSchutz (1<<3)
+#define SZaubern (1<<4)
+#define SUnsichtbar (1<<5)
+#define SFeuer (1<<6)
+#define SVersteinert (1<<7)
+#define SKraft (1<<8)
+#define SBetrunken (1<<9)
+#define SLicht (1<<10)
 
-#define STot 12
-#define SAusruhen 13
-#define SReitet 14
-#define SMann 15
+#define STot (1<<12)
+#define SAusruhen (1<<13)
+#define SReitet (1<<14)
+#define SMann (1<<15)
 
 /* Spieler Typen **********************************************************/
 
-#define SKrieger 0
-#define SAbenteurer 1
-#define SMagier 2
-#define SPriester 3
-#define SAmazone 4
+#define SKrieger (1<<0)
+#define SAbenteurer (1<<1)
+#define SMagier (1<<2)
+#define SPriester (1<<3)
+#define SAmazone (1<<4)
 
-/* GegenstÃ¤nde ************************************************************/
+/* Gegenstände ************************************************************/
 
 #define GRing 1
 #define GZauberstab 2
@@ -104,10 +104,10 @@
 #define GNahrung 9
 #define GLicht 10
 
-#define GMagisch 0
-#define GVerflucht 1
-#define GErkannt 2
-#define GChance 3
+#define GMagisch (1<<0)
+#define GVerflucht (1<<1)
+#define GErkannt (1<<2)
+#define GChance (1<<3)
   
 /* Felder mit Parametern **************************************************/
 
@@ -128,47 +128,47 @@
 
 /* Feldereigenschaften in Felder[i].Spezial *******************************/
 
-#define FeldBegehbar 0
-#define FeldDurchsichtig 1
-#define FeldWasser 2       /* 8-14 Schadenspunkte */
-#define FeldLava 3         /* 11-20 Punkte Schaden beim Betreten */
-#define FeldSumpf 4        /* 50 % Chance fÃ¼r Bewegung */
-#define FeldAntiMonster 5  /* nicht begehbar fÃ¼r Monster */
-#define FeldHunger 6       /* eine Nahrungseinheit pro Zug */
-#define FeldSchirm 7       /* Feld ist fÃ¼r Fernkampf nicht zu durchdringen */
+#define FeldBegehbar (1<<0)
+#define FeldDurchsichtig (1<<1)
+#define FeldWasser (1<<2)       /* 8-14 Schadenspunkte */
+#define FeldLava (1<<3)         /* 11-20 Punkte Schaden beim Betreten */
+#define FeldSumpf (1<<4)        /* 50 % Chance für Bewegung */
+#define FeldAntiMonster (1<<5)  /* nicht begehbar für Monster */
+#define FeldHunger (1<<6)       /* eine Nahrungseinheit pro Zug */
+#define FeldSchirm (1<<7)       /* Feld ist für Fernkampf nicht zu durchdringen */
   
 /* Leveleigenschaften in Level[x,y].Spezial *******************************/
 
-#define LevelMonster 0     /* hier steht ein Monster */
-#define LevelBekannt 1     /* sichtbar fÃ¼r den Spieler */
-#define LevelGegenstand 2  /* hier liegt ein Gegenstand */
-#define LevelParameter 3   /* hier ist ein Parameterfeld */
-#define LevelSichtbar 4    /* dieses Feld ist beleuchtet */
-#define LevelKarte 5       /* Dieses Feld ist in der Karte */
-#define LevelSpieler 6     /* von diesen Feldern wird der Spieler gesehen */
+#define LevelMonster (1<<0)     /* hier steht ein Monster */
+#define LevelBekannt (1<<1)     /* sichtbar für den Spieler */
+#define LevelGegenstand (1<<2)  /* hier liegt ein Gegenstand */
+#define LevelParameter (1<<3)   /* hier ist ein Parameterfeld */
+#define LevelSichtbar (1<<4)    /* dieses Feld ist beleuchtet */
+#define LevelKarte (1<<5)       /* Dieses Feld ist in der Karte */
+#define LevelSpieler (1<<6)     /* von diesen Feldern wird der Spieler gesehen */
 
-#define LevelNoSave 0      /* Speichern nicht erlaubt */
-#define LevelNoMap 1       /* keine automatische Karte */
-#define LevelNotZyklisch 2 /* Level nicht zyklisch */
-#define LevelMonType 3     /* Monstertypen werden aggressiv */
-#define LevelMonAll 4      /* alle Monster werden aggressiv */
-#define LevelAutoDialog 5  /* Dialog bei Randï½œerschreitung */
+#define LevelNoSave (1<<0)      /* Speichern nicht erlaubt */
+#define LevelNoMap (1<<1)       /* keine automatische Karte */
+#define LevelNotZyklisch (1<<2) /* Level nicht zyklisch */
+#define LevelMonType (1<<3)     /* Monstertypen werden aggressiv */
+#define LevelMonAll (1<<4)      /* alle Monster werden aggressiv */
+#define LevelAutoDialog (1<<5)  /* Dialog bei Randüberschreitung */
 
 /* Monstereigenschaften in Monster[i].Spezial *****************************/
 
-#define MonsterMagisch 0      /* ist magisch */
-#define MonsterSchnell 1      /* bewegt sich doppelt so schnell */
-#define MonsterFern 2         /* kann Fernkampf */
-#define MonsterTuer 3         /* kann Tã€‰en æ·fnen */
-#define MonsterFlieg 4        /* geht auch Ã¼ber Wasser */
-#define MonsterWasser 5       /* geht nur in Wasser */
-#define MonsterGeist 6        /* geht durch alles durch */
-#define MonsterFeuer 7        /* geht nur durch Feuer/Lava */
-#define MonsterReitbar 8      /* kann geritten werden */
-#define MonsterImmun 9        /* kann nicht angegriffen werden */
-#define MonsterPariert 10     /* kann parieren */
-#define MonsterUnsichtbar 11  /* ist unsichtbar */
-#define MonsterLangsam 12     /* Monster bewegt sich nur mit 50% pro Zug */
+#define MonsterMagisch (1<<0)      /* ist magisch */
+#define MonsterSchnell (1<<1)      /* bewegt sich doppelt so schnell */
+#define MonsterFern (1<<2)         /* kann Fernkampf */
+#define MonsterTuer (1<<3)         /* kann Türen öffnen */
+#define MonsterFlieg (1<<4)        /* geht auch über Wasser */
+#define MonsterWasser (1<<5)       /* geht nur in Wasser */
+#define MonsterGeist (1<<6)        /* geht durch alles durch */
+#define MonsterFeuer (1<<7)        /* geht nur durch Feuer/Lava */
+#define MonsterReitbar (1<<8)      /* kann geritten werden */
+#define MonsterImmun (1<<9)        /* kann nicht angegriffen werden */
+#define MonsterPariert (1<<10)     /* kann parieren */
+#define MonsterUnsichtbar (1<<11)  /* ist unsichtbar */
+#define MonsterLangsam (1<<12)     /* Monster bewegt sich nur mit 50% pro Zug */
 
 
 typedef char String20Typ[21]; /* allgemeine String Typen */
@@ -208,15 +208,15 @@ typedef struct {
 typedef struct {
 	unsigned x, y;
 	unsigned Art;
-	union { /* maximal 6 CARDINALs */
-		unsigned xhoch, yhoch, Levelhoch, xrunter, yrunter, Levelrunter;
-		unsigned ZielX, ZielY, ZielLevel;
-		unsigned Schaden, Anzahl, Chance1, Chance2, Flag;
-		unsigned Nummer, Zaehler, automatisch;
-		unsigned FeldX, FeldY, FeldNummer, ParNummer;
-		unsigned SpriteOffen, SpriteZu, SpriteVerschlossen;
-		unsigned alterTyp, alterStatus, neuerStatus;
-		unsigned Weite, Dauer;
+	union { /* maximal 6 unsigned ints */
+		struct { unsigned xhoch, yhoch, Levelhoch, xrunter, yrunter, Levelrunter; };
+		struct { unsigned ZielX, ZielY, ZielLevel; };
+		struct { unsigned Schaden, Anzahl, Chance1, Chance2, Flag; };
+		struct { unsigned Nummer, Zaehler, automatisch; };
+		struct { unsigned FeldX, FeldY, FeldNummer, ParNummer; };
+		struct { unsigned SpriteOffen, SpriteZu, SpriteVerschlossen; };
+		struct { unsigned alterTyp, alterStatus, neuerStatus; };
+		struct { unsigned Weite, Dauer; };
 	};
 } ParameterTyp;
 
@@ -225,7 +225,7 @@ typedef struct {
 	String20Typ Name;
 	unsigned Trefferwurf, Schaden, Bonus, x, y, Typ, Status, TP;
 	unsigned Sprich;
-	BITSET Spezial; /* SpezialfÃ¤higkeiten */
+	BITSET Spezial; /* Spezialfähigkeiten */
 } MonsterTyp;
 
 typedef struct {
@@ -279,7 +279,7 @@ unsigned AnzahlGegen, AnzahlMonster, AnzahlParameter;
 int Editor, /* Editiermodus */
 	DruckerAusgabe, /* Dialogausgabe auf Drucker */
 	SoundAusgabe, /* Ton an */
-	DebugMode; /* Sonderfunktionen wÃ¤hrend des Spieles */
+	DebugMode; /* Sonderfunktionen während des Spieles */
 
 /* Bildschirm-Ausgaben ****************************************************/
 

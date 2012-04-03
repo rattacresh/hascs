@@ -3,16 +3,16 @@
 
 #define MaxObjects 100
 
-#define Exit  0 /* Flags */
-#define Editable  1
-#define Selectable  2
+#define Exit  (1<<0) /* Flags */
+#define Editable  (1<<1)
+#define Selectable  (1<<2)
 
-#define Outlined  8
-#define Inverted  9
-#define Edited  10
-#define Centered  11
-#define BigText  12
-#define SpriteFill  13
+#define Outlined  (1<<8)
+#define Inverted  (1<<9)
+#define Edited  (1<<10)
+#define Centered  (1<<11)
+#define BigText  (1<<12)
+#define SpriteFill  (1<<13)
 
 typedef struct {
 	unsigned x, y, w, h; /* relativ Position */

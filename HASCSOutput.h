@@ -4,14 +4,14 @@
 
 /*
 
-   Textausgabe fÃ¼r HASCS II
+   Textausgabe für HASCS II
 
    written by Alexander Kirchner
 
    Version 2.0  23.08.89
            2.1  21.09.90 PrintLongCard
            2.2  16.10.90 GetXY
-           2.3  27.01.91 Text-Datenstruktur ï½œernommen
+           2.3  27.01.91 Text-Datenstruktur übernommen
            3.0  29.06.91 Entfernung aller nicht HASCS Funktionen
            3.1  30.06.91 Stringfunktionen
            3.2  09.08.93 StringToInt,cap...
@@ -30,13 +30,13 @@ unsigned TextMode;       /* 0 = normal, 1 = HASCS */
 TextTyp Text[MaxText+1];   /* Ausgabetexte */
 unsigned AnzahlTexte;
   
-unsigned MaxX; /* letzte mÃ¶gliche Cursorposition zur Ausgabe */
+unsigned MaxX; /* letzte mögliche Cursorposition zur Ausgabe */
 
 void  (*PrintChar)(char); /* ZeichenAusgabe */
 
 /* Bildschirmsteuerung */
 
-void Cls(); /* Ganzen Bildschirm lÃ¶schen */
+void Cls(); /* Ganzen Bildschirm löschen */
 void GotoXY(unsigned x, unsigned y); /* Cursorpositionierung */
 void GetXY(unsigned x, unsigned y); /* aktuelle Cursorposition */
 
@@ -56,7 +56,7 @@ void InputClick(char *s, unsigned l, unsigned *x, unsigned *y, BITSET *b);
 /* Textfensterausgaben */
 
 void BeginOutput(void); /* Bereitet Ausgabe im Textfenster vor */
-void EndOutput(void);  /* SchlieÃŸt Ausgabe im Textfenster ab */
+void EndOutput(void);  /* Schließt Ausgabe im Textfenster ab */
 void OutputText(char *s); /* beides */
 void PrintOutput(); /* gesamtes Textfenster ausgeben */
 

@@ -2,7 +2,7 @@
 #define SOUND_H
 
 /*
-   Sound Routinen fÃ¼r HASCS III
+   Sound Routinen für HASCS III
    
    written by A. Kirchner
    
@@ -11,7 +11,7 @@
            1.0  19.09.94 Interruptplayer
 
 ACHTUNG: Am Programmende muss unbedingt "PlaySound(SoundOff)" aufgerufen
-         werden, wenn der Interruptplayer lÃ¤uft.
+         werden, wenn der Interruptplayer läuft.
 */
 
 const int MaxSounds = 50;

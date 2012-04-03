@@ -9,7 +9,7 @@
 
 unsigned CheckSum;
 
-/* lÃ¤dt ein Bild im GEM Image Format und liefert Breite und HÃ¶he */
+/* lädt ein Bild im GEM Image Format und liefert Breite und Höhe */
 int LoadImageN(unsigned n, unsigned w, unsigned h);
 
 /* speichert das aktuelle Level als GEM Image Bild in eine Datei */
