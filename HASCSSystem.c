@@ -46,11 +46,11 @@ int Min(int a, int b)
 	if (a < b) return a; else return b;
 }
 
-int RcIntersect(Rectangle *ref_p1, Rectangle *ref_p2)
+int RcIntersect(SDL_Rect *ref_p1, SDL_Rect *ref_p2)
 #define p1 (*ref_p1)
 #define p2 (*ref_p2)
 {
-	Rectangle r;
+	SDL_Rect r;
 
 	r.x = Max(p2.x, p1.x);
 	r.y = Max(p2.y, p1.y);
@@ -790,7 +790,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, SDLKey *ref_ch
 	do {
 		int wait_err = SDL_WaitEvent(&event);
 		if (wait_err == 0)
-			printf("Fehler beim Warten auf Events!\”");
+			printf("Fehler beim Warten auf Events!\n");
 	} while ((event.type == SDL_ACTIVEEVENT) || (event.type == SDL_MOUSEMOTION));
 
 	
@@ -845,7 +845,7 @@ void WaitTime(unsigned t)
 {
 	unsigned mx, my; 
 	BITSET mb; 
-	char mch;
+	SDLKey mch;
 	WaitInput(&mx, &my, &mb, &mch, t); /* Redraw! */
 }
 

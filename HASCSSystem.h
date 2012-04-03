@@ -2,6 +2,7 @@
 #define HASCSSYSTEM_H
 
 #include <stdint.h>
+#include <SDL/SDL.h>
 
 /*
 
@@ -83,7 +84,7 @@ int SelectFile(char *msg, char *path, char *file);
 
 /* Eingaben *********************************************************/
 
-BITSET WaitInput(unsigned *x, unsigned *y, BITSET *b, char *ch, int WarteZeit);
+BITSET WaitInput(unsigned *x, unsigned *y, BITSET *b, SDLKey *ch, int WarteZeit);
 void WaitKey(void);
 void WaitTime(unsigned t);
 unsigned long GetTime();
