@@ -80,7 +80,7 @@ void InitWorkstation(char *WinName)
 	
 	ScreenMFDB = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_HWSURFACE);
 	if (ScreenMFDB == NULL) {
-		fprintf(stderr, "Ich konnte kein Fenster mit der AuflÃ¶sung 640*400 Ã¶ffnen: %s\n", SDL_GetError());
+		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung 640*400 öffnen: %s\n", SDL_GetError());
 		exit(1);
 	}
 	
@@ -180,7 +180,7 @@ void FreeCache(unsigned n)
 {
 	/*
 	unsigned i;
-	if (n == 0) { // alles lÃ¶schen 
+	if (n == 0) { // alles löschen 
 		for (i = 1; i <= AnzCache; i++)
 			if (!Free(Cache[i].CacheBuffer))
 				Error("Fehler in der Speicherverwaltung(1)!", 0);
@@ -291,7 +291,7 @@ int LoadAndRun(char *Prg, char *Arg)
 	//Pexec(loadExecute, &file, ADR(Arg), NULL, result);
 	/*
 	if (result < 0) {
-		Concat("Programmstart nicht mÃ¶glich: ",file, file, ok);
+		Concat("Programmstart nicht möglich: ",file, file, ok);
 		Error(file, 1);
 	}
 	*/
@@ -331,7 +331,7 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 }
 
 /**
- * Ãœbergibt ein existierendes monochrome-Bitmap an die Verwaltung von
+ * Übergibt ein existierendes monochrome-Bitmap an die Verwaltung von
  * HASCSSystem.
  */
 void SetPicture(unsigned width, unsigned height, void *Picture)
@@ -344,7 +344,7 @@ void SetPicture(unsigned width, unsigned height, void *Picture)
 }
 
 /**
- * Ãœbergibt ein existierendes monochrome-Bitmap als Puffer an die
+ * Übergibt ein existierendes monochrome-Bitmap als Puffer an die
  * Verwaltung von HASCSSystem.
  */
 void SetBuffer(unsigned width, unsigned height, void *Buffer)
@@ -520,64 +520,6 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, SDLKey *ref_ch
 		*/
 	}
     
-	void SetSlider(void)
-	{
-		/*
-		  int pos, size, oldpos, oldsize;
-		  size = 1000 * (long)work.w / 640;
-		  pos = 0;
-		  if (work.w < 640)
-		  pos = 1000 * (long)XOff / (640 - work.w);
-		  oldpos = WindowSliderValue(win, horPosition);
-		  oldsize = WindowSliderValue(win, horSize);
-		  if (oldpos != pos)
-		  SetWindowSlider(win, horPosition, pos);
-		  if (oldsize != size)
-		  SetWindowSlider(win, horSize, size);
-		  size = 1000 * (long)work.h / 400;
-		  pos = 0;
-		  if (work.h < 400)
-		  pos = 1000 * (long)YOff / (400 - work.h);
-		  oldpos = WindowSliderValue(win, vertPosition);
-		  oldsize = WindowSliderValue(win, vertSize);
-		  if (oldpos != pos)
-		  SetWindowSlider(win, vertPosition, pos);
-		  if (oldsize != size)
-		  SetWindowSlider(win, vertSize, size);
-		*/
-	}
-    
-	void VollBild(void)
-	{
-		/*
-		  if (type == 0) { // Fenster wieder normal 
-		  CloseWindow(win); DeleteWindow(win);
-		  type = nameBar | closer | fuller | mover | sizer | upArrow
-		  | downArrow | vertSlider | leftArrow | rightArrow
-		  | horSlider;
-		  CreateWindow(type, desk, win);
-		  SetWindowString(win, nameStr, &WName);
-		  OpenWindow(win, save);
-		  if (MenuAdr) MenuBar(MenuAdr, TRUE);
-		  } else {
-		  save = WindowSize(win, borderSize);
-		  CloseWindow(win); DeleteWindow(win);
-		  if (MenuAdrL) MenuBar(MenuAdr, FALSE);
-		  type = 0;
-		  CreateWindow(type, desk, win);
-		  work.x = Max(ScreenWidth / 2 - 320, 0);
-		  work.y = Max(ScreenHeight / 2 - 200, 0);
-		  work.w = Min(640, ScreenWidth);
-		  work.h = Min(400, ScreenHeight);
-		  curr = CalcWindow(calcBorder, type, work);
-		  OpenWindow(win, curr);
-		  XOff = 0; YOff = 0;
-		  }
-		  work = WindowSize(win, workSize);
-		  RedrawWindow(work);
-		*/
-	}
-    
 	void Ende(void)
 	{
 		int dummy;
@@ -637,7 +579,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, SDLKey *ref_ch
 		  }
 		  ch = key.ascii;
 		  if (ch >= '1' && ch <= '9' && timer & flags)
-		  ch = '\0'; // Richtungstasten lÃ¶schen 
+		  ch = '\0'; // Richtungstasten löschen 
 		  ok = ch != '\0';
 		*/
 	}
@@ -765,7 +707,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, SDLKey *ref_ch
 				losgelassen = TRUE;
 				mouse = 257; // auf Klick warten 
 				mousetime = 1;
-			} else { // Maus gedrÃ¼ckt 
+			} else { // Maus gedrückt 
 				Button();
 				if (losgelassen)
 					mousetime = 1000;
@@ -776,7 +718,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, SDLKey *ref_ch
 		}
 		if (keyboard & events) Keyboard();
 		if (timer & events) {
-			mouse = 257; // auf gedrÃ¼ckte Maus warten 
+			mouse = 257; // auf gedrückte Maus warten 
 			ok = WarteZeit >= 0;
 			flags = keyboard | mouseButton | message;
 		}
