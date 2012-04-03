@@ -38,29 +38,31 @@ int losgelassen;
 
 int Max(int a, int b)
 {
-	if (a > b) { return a; } else { return b; }
+	if (a > b) return a; else return b;
 }
 
 int Min(int a, int b)
 {
-	if (a < b) { return a; } else { return b; }
+	if (a < b) return a; else return b;
 }
 
-/*
-int RcIntersect(Rectangle *p1, Rectangle *p2)
+int RcIntersect(Rectangle *ref_p1, Rectangle *ref_p2)
+#define p1 (*ref_p1)
+#define p2 (*ref_p2)
 {
-Rectangle r;
+	Rectangle r;
 
-    r.x = Max(p2.x, p1.x);
-    r.y = Max(p2.y, p1.y);
-    r.w = Min(p2.x + p2.w, p1.x + p1.w);
-    r.h = Min(p2.y + p2.h, p1.y + p1.h);
-    r.w = r.w - r.x;
-    r.h = r.h - r.y;
-    p2  = r;
-    return p2.w > 0 && p2.h > 0;
-    }
-*/
+	r.x = Max(p2.x, p1.x);
+	r.y = Max(p2.y, p1.y);
+	r.w = Min(p2.x + p2.w, p1.x + p1.w);
+	r.h = Min(p2.y + p2.h, p1.y + p1.h);
+	r.w = r.w - r.x;
+	r.h = r.h - r.y;
+	p2  = r;
+	return p2.w > 0 && p2.h > 0;
+}
+#undef p1
+#undef p2
 
 
  /* Programmverwaltung ***********************************************/
