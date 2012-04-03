@@ -3,6 +3,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <limits.h>
+#include <unistd.h>
 #include "HASCSSystem.h"
 
 int ScreenWidth, ScreenHeight; //, ScreenPlanes;
@@ -99,12 +100,21 @@ void InitWorkstation(char *WinName)
 	*/
 
 	unsigned char test[640*400/8];
+	SDL_Surface *surf;
 
-	int i;
-	for (i = 0; i < 640*400/8; i++)
-		test[i] = 0xfe << (i % 8);
+	int i = 0;
+	while (i<200) {
+		++i;
+		int j;
+		for (j = 0; j < 640*400/8; j++)
+			test[j] = ~(0x01 << (i % 8));
+		
+		surf = SDL_CreateRGBSurfaceFrom(test, 640, 400, 1, 640/8, 0, 0, 0, 0);
+		SDL_BlitSurface(surf, NULL, ScreenHandle, NULL);
+		SDL_Flip(ScreenHandle);
+		usleep(50000);
+	}
 
-	SDL_Surface *surf = SDL_CreateRGBSurfaceFrom(test, 640, 400, 1, 640/8, 0, 0, 0, 0);
 	/*
 #if 0
 
@@ -117,9 +127,7 @@ void InitWorkstation(char *WinName)
 	SDL_Rect  dst = {0,0,640,400};
 #endif
 */
-	SDL_BlitSurface(surf, NULL, ScreenHandle, NULL);
 
-	SDL_Flip(ScreenHandle);
 }
 
 
