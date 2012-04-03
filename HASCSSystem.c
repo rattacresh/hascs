@@ -311,6 +311,13 @@ int LoadAndRun(char *Prg, char *Arg)
 
 /* Bildschirmverwaltung *********************************************/
 
+/**
+ * Die internen kompitibilitäts-monochrome-Bildschirmpuffer werden
+ * durch externe Stellen (HASCSGraphics) geändert. Die tatsächlichen
+ * SDL-Puffer bekommen davon nichts mit. Bevor eine Anzeige geschehen
+ * kann, muss diese Funktion UpdateBuffers() aufgerufen werden, die
+ * die beiden Puffer synchronisiert.
+ */
 void UpdateBuffers() {
 	PicMFDB = SDL_CreateRGBSurfaceFrom(CompatPicMFDB, PicMFDB->w, PicMFDB->h, 1, PicMFDB->w/8, 0, 0, 0, 0);
 	BufferMFDB = SDL_CreateRGBSurfaceFrom(CompatBufferMFDB, BufferMFDB->w, BufferMFDB->h, 1, BufferMFDB->w/8, 0, 0, 0, 0);
@@ -331,24 +338,24 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 	  destRect.h = height;
 
 	  UpdateBuffers();
-	  if (direction == 4) {   // Pic    -> Buffer 
+	  if (direction == 4)   // Pic    -> Buffer 
 		  SDL_BlitSurface(PicMFDB, &sourceRect, BufferMFDB, &destRect);
-	  } else {                // Buffer -> Buffer 
+	  else                  // Buffer -> Buffer 
 		  SDL_BlitSurface(BufferMFDB, &sourceRect, BufferMFDB, &destRect);
-	  }
+	 
 
 }
 
 void SetPicture(unsigned width, unsigned height, void *Picture)
 {
 	CompatPicMFDB = Picture;
-	PicMFDB = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, ScreenWidth/8, 0, 0, 0, 0);
+	PicMFDB = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, width/8, 0, 0, 0, 0);
 }
 
 void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
 	CompatBufferMFDB = Buffer;
-	BufferMFDB = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, ScreenWidth/8, 0, 0, 0, 0);
+	BufferMFDB = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, width/8, 0, 0, 0, 0);
 }
 
 
