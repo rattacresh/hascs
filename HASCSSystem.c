@@ -80,7 +80,7 @@ void InitWorkstation(char *WinName)
 	
 	ScreenMFDB = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_HWSURFACE);
 	if (ScreenMFDB == NULL) {
-		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung 640*400 öffnen: %s\n", SDL_GetError());
+		fprintf(stderr, "Ich konnte kein Fenster mit der AuflÃ¶sung 640*400 Ã¶ffnen: %s\n", SDL_GetError());
 		exit(1);
 	}
 	
@@ -180,7 +180,7 @@ void FreeCache(unsigned n)
 {
 	/*
 	unsigned i;
-	if (n == 0) { // alles löschen 
+	if (n == 0) { // alles lÃ¶schen 
 		for (i = 1; i <= AnzCache; i++)
 			if (!Free(Cache[i].CacheBuffer))
 				Error("Fehler in der Speicherverwaltung(1)!", 0);
@@ -291,7 +291,7 @@ int LoadAndRun(char *Prg, char *Arg)
 	//Pexec(loadExecute, &file, ADR(Arg), NULL, result);
 	/*
 	if (result < 0) {
-		Concat("Programmstart nicht möglich: ",file, file, ok);
+		Concat("Programmstart nicht mÃ¶glich: ",file, file, ok);
 		Error(file, 1);
 	}
 	*/
@@ -319,15 +319,19 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 	  destRect.w = width; 
 	  destRect.h = height;
 
+	  int copy_err;
 	  if (direction == 4) {     // Pic    -> Buffer 
-		  SDL_BlitSurface(PicMFDB, &sourceRect, BufferMFDB, &destRect);	  
+		  copy_err = SDL_BlitSurface(PicMFDB, &sourceRect, BufferMFDB, &destRect);	  
 	  } else {                  // Buffer -> Buffer 
-		  SDL_BlitSurface(BufferMFDB, &sourceRect, BufferMFDB, &destRect);	  
+		  copy_err = SDL_BlitSurface(BufferMFDB, &sourceRect, BufferMFDB, &destRect);	  
 	  }
+	  
+	  if (copy_err)
+		  printf("Copy Error: %i\n", copy_err);
 }
 
 /**
- * Übergibt ein existierendes monochrome-Bitmap an die Verwaltung von
+ * Ãœbergibt ein existierendes monochrome-Bitmap an die Verwaltung von
  * HASCSSystem.
  */
 void SetPicture(unsigned width, unsigned height, void *Picture)
@@ -340,7 +344,7 @@ void SetPicture(unsigned width, unsigned height, void *Picture)
 }
 
 /**
- * Übergibt ein existierendes monochrome-Bitmap als Puffer an die
+ * Ãœbergibt ein existierendes monochrome-Bitmap als Puffer an die
  * Verwaltung von HASCSSystem.
  */
 void SetBuffer(unsigned width, unsigned height, void *Buffer)
@@ -481,25 +485,8 @@ int SelectFile(char *msg, char *path, char *file)
 
 /* Eingaberoutinen **************************************************/
 
-BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, int WarteZeit)
-#define x (*ref_x)
-#define y (*ref_y)
-#define b (*ref_b)
-#define ch (*ref_ch)
+BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, SDLKey *ref_ch, int WarteZeit)
 {
-	/*
-	//EventSet flags, events;
-	unsigned mouse;
-	//MessageBuffer msg;
-	//Rectangle rect;
-	//Point mLoc;
-	///MButtonSet mButtons;
-	//SpecialKeySet keyState;
-	//GemChar key;
-	unsigned doneClicks;
-	int ok;
-	unsigned long time;
-	*/
     
 	void RedrawWindow(void* frame)
 	{
@@ -596,8 +583,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 		int dummy;
 		Error("HASCS III wirklich beenden?", 0);
 	}
-#undef x
-#undef y 
+
 	void Correct(int x, int y, int w, int h)
 	{
 		w = Min(w, 640);
@@ -605,8 +591,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 		x = Min(x, 640-w); x = Max(0, x); /* XOff */
 		y = Min(y, 400-h); y = Max(0, y); /* YOff */
 	}
-#define x (*ref_x)
-#define y (*ref_y)
+
     
 	void Button(void);
 	{
@@ -652,7 +637,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 		  }
 		  ch = key.ascii;
 		  if (ch >= '1' && ch <= '9' && timer & flags)
-		  ch = '\0'; // Richtungstasten löschen 
+		  ch = '\0'; // Richtungstasten lÃ¶schen 
 		  ok = ch != '\0';
 		*/
 	}
@@ -780,7 +765,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 				losgelassen = TRUE;
 				mouse = 257; // auf Klick warten 
 				mousetime = 1;
-			} else { // Maus gedrückt 
+			} else { // Maus gedrÃ¼ckt 
 				Button();
 				if (losgelassen)
 					mousetime = 1000;
@@ -791,7 +776,7 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 		}
 		if (keyboard & events) Keyboard();
 		if (timer & events) {
-			mouse = 257; // auf gedrückte Maus warten 
+			mouse = 257; // auf gedrÃ¼ckte Maus warten 
 			ok = WarteZeit >= 0;
 			flags = keyboard | mouseButton | message;
 		}
@@ -800,13 +785,37 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 	*/
 
 	RedrawWindow(NULL);
+
+	SDL_Event event;
+	do {
+		int wait_err = SDL_WaitEvent(&event);
+		if (wait_err == 0)
+			printf("Fehler beim Warten auf Events!\â€");
+	} while ((event.type == SDL_ACTIVEEVENT) || (event.type == SDL_MOUSEMOTION));
+
+	
+	switch (event.type) {
+	case SDL_MOUSEBUTTONDOWN:
+		printf("Mouse button %d pressed at (%d,%d)\n", event.button.button, event.button.x, event.button.y);
+		*ref_x = event.button.x;
+		*ref_y = event.button.y;
+		*ref_b = event.button.button;
+                break;
+        case SDL_KEYDOWN:
+		printf("The %s key was pressed (Code %i)!\n",
+		       SDL_GetKeyName(event.key.keysym.sym), event.key.keysym.sym);
+		*ref_ch = event.key.keysym.sym;
+		break;
+        case SDL_QUIT:
+		ExitWorkstation(0);
+		exit(0);
+		break;
+	}
+
 	if (WarteZeit > 0)
 		usleep(WarteZeit);
 }
-#undef x
-#undef y 
-#undef b
-#undef ch
+
 
 /**
  * Wartet auf einen Tastendruck. Sollte auch den Bildschirm
@@ -834,8 +843,10 @@ void WaitKey(void)
  */
 void WaitTime(unsigned t)
 {
-	unsigned mx, my; BITSET mb; char mch;
-	WaitInput(mx, my, mb, mch, t); /* Redraw! */
+	unsigned mx, my; 
+	BITSET mb; 
+	char mch;
+	WaitInput(&mx, &my, &mb, &mch, t); /* Redraw! */
 }
 
 
