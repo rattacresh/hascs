@@ -105,14 +105,18 @@ void InitWorkstation(char *WinName)
 		test[i] = 0xfe << (i % 8);
 
 	SDL_Surface *surf = SDL_CreateRGBSurfaceFrom(test, 640, 400, 1, 640/8, 0, 0, 0, 0);
+	/*
 #if 0
+
 	SDL_Color colors[256];
 	for (i = 0; i < 256; i++)
 		colors[i].r = colors[i].g = colors[i].b = i;
 	colors[0].r = colors[0].g = colors[0].b  = 255;
 	SDL_SetPalette(surf, SDL_LOGPAL|SDL_PHYSPAL, colors, 0, 256);
+	
 	SDL_Rect  dst = {0,0,640,400};
 #endif
+*/
 	SDL_BlitSurface(surf, NULL, ScreenHandle, NULL);
 
 	SDL_Flip(ScreenHandle);
