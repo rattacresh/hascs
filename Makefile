@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g3 -O2 -Wall -DBITSET=unsigned -Dxsize_t=unsigned -DXCHAR_BIT=8
+CFLAGS = -g3 -O2  -DBITSET=unsigned -Dxsize_t=unsigned -DXCHAR_BIT=8
 LIBS = 
 HASCSEDITOR_SOURCE = \
 	Dialog.c HASCSGame.c HASCSMagic.c HASCSSprite.c Sound.c \
@@ -13,7 +13,7 @@ HASCSIII_SOURCE = \
 	HASCSDisk.c HASCSGraphics.c HASCSOutput.c Image.c \
 	HASCSIII.c HASCSSpieler.c Screen.c
 HASCSIII_OBJS := $(HASCSIII_GEN:.c=.o) $(HASCSIII_SOURCE:.c=.o)
-SDLDEMO_SOURCE = SDLDemo.c HASCSSystem.c
+SDLDEMO_SOURCE = SDLDemo.c HASCSSystem.c HASCSGraphics.c
 SDLDEMO_OBJS := $(SDLDEMO_GEN:.c=.o) $(SDLDEMO_SOURCE:.c=.o)
 
 OBJS = $(HASCSEDITOR_OBJS) $(HASCSIII_OBJS) $(SDLDEMO_OBJS)
