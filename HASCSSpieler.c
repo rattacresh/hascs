@@ -131,7 +131,7 @@ int GetButton(unsigned *x, unsigned *y)
 	BITSET m;
 	char ch;
 	WaitInput(x, y, m, ch, -1); x = x / 16; y = y / 16;
-	if (ch != 0) {
+	if (ch != '\0') {
 		x = MaxSichtweite; y = MaxSichtweite;
 		if (ch == "1") {x--; y++;}
 		else if (ch == "2") y++;

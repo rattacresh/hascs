@@ -164,9 +164,9 @@ unsigned  EditObject(unsigned e, char ch)
 			Input[Length(DScreen.Obj[e].Input)+1] = '\0';
 			Input[Length(DScreen.Obj[e].Input)] = ch;
 		}
-	} else if (ch == 10 && Length(Input) > 0) /* Backspace */
+	} else if (ch == '\010' && Length(Input) > 0) /* Backspace */
 		 DScreen.Obj[e].Input[Length(DScreen.Obj[e].Input)-1] = '\0';
-	else if (ch == 33)
+	else if (ch == '\033')
 		 DScreen.Obj[e].Input = "";
 }
 
@@ -202,10 +202,10 @@ unsigned HandleScreen(void)
 					WaitTime(0);
 				}
 			}
-		} else if (mch > '\0' && mch != 15 && edit != 0) {
+		} else if (mch > '\0' && mch != '\015' && edit != 0) {
 			EditObject(edit, mch);
 			DrawObject(edit);
-		} else if (mch == 15) {
+		} else if (mch == '\015') {
 			newedit = FindFlags(edit + 1, Editable);
 			if (newedit == 0)
 				ende = edit;

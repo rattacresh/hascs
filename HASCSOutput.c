@@ -32,7 +32,7 @@ void BWOut(char c)
 {
 	unsigned /*pos, i,*/ n;
 	if (TextMode == 0) {
-		if (c != 10) {
+		if (c != '\010') {
 			if (cx < MaxX) {
 				SetChar(cx, cy, c);
 				cx++;
@@ -55,7 +55,7 @@ void BWOut(char c)
 			n = 1;
 		else
 			n = 0;
-		if (c != 10) {
+		if (c != '\010') {
 			SetSprite(cx, cy, &SystemSprite[n]);
 			cx++;
 		} else
@@ -106,14 +106,14 @@ void PrintColors(int Chars, int Background)
 void CursorAn(void)
 /* Cursor anschalten */
 {
-	CharOut('_'); CharOut(10);
+	CharOut('_'); CharOut('\010');
 }
 
 
 void CursorAus(void)
 /* Cursor abschalten */
 {
-	CharOut(' '); CharOut(10);
+	CharOut(' '); CharOut('\010');
 }
 
 
@@ -249,25 +249,25 @@ void InputString(char *s, unsigned l)
 		i++;
 	}
 	CharOut('_');
-	CharOut(10);
+	CharOut('\010');
 	do {
 		WaitInput(&x, &y, &b, &ch, -1);
 		if (ch >= 32 && i < l) {
 			CharOut(ch); s[i] = ch; i++;
 			CharOut('_');
-			CharOut(10);
-		} else if (ch == 10 && i > 0) { /* Backspace */
-			CharOut(' '); CharOut(10); CharOut(10);
-			CharOut('_'); CharOut(10);
+			CharOut('\010');
+		} else if (ch == '\010' && i > 0) { /* Backspace */
+			CharOut(' '); CharOut('\010'); CharOut('\010');
+			CharOut('_'); CharOut('\010');
 			i--;
-		} else if ((ch == 33)) /* Escape */
+		} else if (ch == '\033') /* Escape */
 			while (i > 0) {
-				CharOut(' '); CharOut(10); CharOut(10);
-				CharOut('_'); CharOut(10);
+				CharOut(' '); CharOut('\010'); CharOut('\010');
+				CharOut('_'); CharOut('\010');
 				i--;
 			}
-	} while (ch != 15 && MausLinks & ~b); /* CR */
-	CharOut(' '); CharOut(10);
+	} while (ch != '\015' && MausLinks & ~b); /* CR */
+	CharOut(' '); CharOut('\010');
 	s[i] = '\0';
 }
 
@@ -286,25 +286,25 @@ void InputClick(char *s, unsigned l,unsigned *ref_x, unsigned *ref_y, BITSET *re
 		i++;
 	}
 	CharOut('_');
-	CharOut(10);
+	CharOut('\010');
 	do {
 		WaitInput(&x, &y, &b, &ch, -1);
 		if (ch >= 32 && i < l) {
 			CharOut(ch); s[i++] = ch;
 			CharOut('_');
-			CharOut(10);
-		} else if (ch == 10 && i > 0) { /* Backspace */
-			CharOut(' '); CharOut(10); CharOut(10);
-			CharOut('_'); CharOut(10);
+			CharOut('\010');
+		} else if (ch == '\010' && i > 0) { /* Backspace */
+			CharOut(' '); CharOut('\010'); CharOut('\010');
+			CharOut('_'); CharOut('\010');
 			i--;
-		} else if (ch == 33) /* Escape */
+		} else if (ch == '\033') /* Escape */
 			while (i > 0) {
-				CharOut(' '); CharOut(10); CharOut(10);
-				CharOut('_'); CharOut(10);
+				CharOut(' '); CharOut('\010'); CharOut('\010');
+				CharOut('_'); CharOut('\010');
 				i--;
 			}
-	} while (ch != 15 && b == 0); /* CR */
-	CharOut(' '); CharOut(10);
+	} while (ch != '\015' && b == 0); /* CR */
+	CharOut(' '); CharOut('\010');
 	s[i] = '\0';
 }
 #undef x

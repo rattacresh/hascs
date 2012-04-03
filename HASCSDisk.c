@@ -420,7 +420,7 @@ void MakeLevelName(String60Typ s, unsigned org, n)
 		Concat(s, s, ".???");
 	else {
 		i = 0;
-		while (s[i]) i++
+		while (s[i] != '\0') i++
 		while (s[i] != ".") i--
 		s[i+1] = n / 100 + '0';
 		s[i+2] = (n % 100) / 10 + '0;
