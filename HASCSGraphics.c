@@ -2,13 +2,6 @@
 
 #include "HASCSSystem.h"
 
-/*
-  Es wird in dem Monochrome-Puffer Bildschirm herumgemalt. HASCSSystem
-  wird ein Zeiger auf diesen Puffer übergeben. Schöner wäre es, wenn
-  HASCSGraphics direkt auf dem SDL-Puffer-Screen zeichnen würde, dann
-  könnten wir uns den Monochrome-Puffer sparen.
- */
-
 
 //#define Black ((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7)(1<<8)|(1<<9)|(1<<10)|(1<<11)|(1<<12)|(1<<13)|(1<<14)|(1<<15))
 #define Black 0xff; // ???
