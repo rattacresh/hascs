@@ -7,10 +7,11 @@ int main(void)
 	InitWorkstation("HASCSSystem-Test");
 	GraphicsInit();
 
-	//OutlineBar(27, 10, 38, 11);
-	//HorzLine(0, 200, 600);
-	//WaitTime(0);
-
+	OutlineBar(27, 10, 38, 11);
+	HorzLine(40, 200, 600);
+	InvertFeld(10,10);
+	
+	WaitTime(0); // Redraw screen
 	WaitKey();
 
 	ExitWorkstation(0);
