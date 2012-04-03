@@ -27,8 +27,8 @@
            11.0  13.10.94 GetBuffer, Cache
 */
 
-#define MausLinks   0 /* linker Mausknopf */
-#define MausRechts  1 /* rechter Mausknopf */
+#define MausLinks   1 /* linker Mausknopf */
+#define MausRechts  3 /* rechter Mausknopf */
 #define MaxCache  100
 
 typedef struct {
@@ -84,7 +84,7 @@ int SelectFile(char *msg, char *path, char *file);
 
 /* Eingaben *********************************************************/
 
-BITSET WaitInput(unsigned *x, unsigned *y, BITSET *b, SDLKey *ch, int WarteZeit);
+BITSET WaitInput(unsigned *x, unsigned *y, BITSET *b, char *ch, int WarteZeit);
 void WaitKey(void);
 void WaitTime(unsigned t);
 unsigned long GetTime();

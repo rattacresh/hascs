@@ -22,7 +22,7 @@ int main(void)
 	unsigned x;
 	unsigned y; 
 	BITSET s; 
-	SDLKey ch;
+	char ch;
 	WaitInput(&x, &y, &s, &ch, -1);
 
 
