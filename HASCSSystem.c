@@ -471,7 +471,11 @@ int SelectFile(char *msg, char *path, char *file)
 
 /* Eingaberoutinen **************************************************/
 
-BITSET WaitInput(unsigned x, unsigned y, BITSET *b, char *ch, int WarteZeit)
+BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, int WarteZeit)
+#define x (*ref_x)
+#define y (*ref_y)
+#define b (*ref_b)
+#define ch (*ref_ch)
 {
 	//EventSet flags, events;
 	unsigned mouse;
@@ -576,7 +580,8 @@ BITSET WaitInput(unsigned x, unsigned y, BITSET *b, char *ch, int WarteZeit)
 		int dummy;
 		Error("HASCS III wirklich beenden?", 0);
 	}
-    
+#undef x
+#undef y 
 	void Correct(int x, int y, int w, int h)
 	{
 		w = Min(w, 640);
@@ -584,6 +589,8 @@ BITSET WaitInput(unsigned x, unsigned y, BITSET *b, char *ch, int WarteZeit)
 		x = Min(x, 640-w); x = Max(0, x); /* XOff */
 		y = Min(y, 400-h); y = Max(0, y); /* YOff */
 	}
+#define x (*ref_x)
+#define y (*ref_y)
     
 	void Button(void);
 	{
@@ -776,6 +783,10 @@ BITSET WaitInput(unsigned x, unsigned y, BITSET *b, char *ch, int WarteZeit)
 	GrafMouse(bee, NIL);
 	*/
 }
+#undef x
+#undef y 
+#undef b
+#undef ch
 
 
 void WaitKey(void)
