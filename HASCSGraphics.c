@@ -35,7 +35,7 @@ void SetMonoSprite(unsigned x, unsigned y, SpritePtr Sprite)
 	if (NewYMax < y) NewYMax = y;
 }
 
-/* Setzt ein 16 x 16 Sprite auf Monochrombildschirm(Oder Modus)
+/* Setzt ein 16 x 16 Sprite auf Monochrombildschirm(Oder Modus) */
 void OrMonoSprite(unsigned x, unsigned y, SpritePtr Sprite)
 {
 	unsigned i, j;
@@ -49,7 +49,7 @@ void OrMonoSprite(unsigned x, unsigned y, SpritePtr Sprite)
 	if (NewXMax < x) NewXMax = x;
 	if (NewYMax < y) NewYMax = y;
 } 
-*/
+
 
 void SetMonoChar(unsigned x,unsigned y, char ch)
 {
@@ -96,9 +96,9 @@ void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, unsigned char *Sprite)
 }
 
 
+/* setzt Punkt x,y im Sprite auf Farbe c */
 void EditSprite(SpritePtr Sprite, unsigned x, unsigned y,unsigned c)
 {
-	/* setzt Punkt x,y im Sprite auf Farbe c */
 	if (c == 0)
 		Sprite[y] &= ~(1<<(15 - x));
 	else
@@ -106,9 +106,9 @@ void EditSprite(SpritePtr Sprite, unsigned x, unsigned y,unsigned c)
 }
 
 
+/* ermittelt Farbe des Punktes x, y im Sprite */
 unsigned GetSprite(SpritePtr Sprite, unsigned x, unsigned y)
 {
-	/* ermittelt Farbe des Punktes x, y im Sprite */
 	unsigned c;
 	if ((1<<(15 - x)) & Sprite[y])
 		c = 1;
@@ -219,7 +219,6 @@ void ScrollUp(unsigned x, unsigned y, unsigned w, unsigned h)
 
 void Fill(unsigned x, unsigned y, unsigned w, unsigned h, unsigned pattern)
 {
-	/*
 	unsigned a, i, j, k;
 	a = 640 * y + x;
 	for (k = 1; k <= h; k++)
@@ -227,8 +226,7 @@ void Fill(unsigned x, unsigned y, unsigned w, unsigned h, unsigned pattern)
 			for (i = 0; i <= w - 1; i++)
 				Bildschirm[a+i] = pattern;
 			a += 40;
-		}
-	*/
+		}	
 }
 
 
@@ -244,4 +242,3 @@ void GraphicsInit(void)
 	mask[2] = (1<< 7)|(1<< 6)|(1<< 5)|(1<< 4);
 	mask[3] = (1<< 3)|(1<< 2)|(1<< 1)|(1<< 0);
 }
-
