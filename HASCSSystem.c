@@ -507,10 +507,19 @@ BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, 
 	
 	switch (event.type) {
 	case SDL_MOUSEBUTTONDOWN:
-		printf("Mouse button %d pressed at (%d,%d)\n", event.button.button, event.button.x, event.button.y);
+		printf("Mouse button %d pressed at (%d,%d)\n", event.button.button, event.button.x, event.button.y);		
 		*ref_x = event.button.x;
 		*ref_y = event.button.y;
-		*ref_b = event.button.button;
+		switch (event.button.button) {
+		case 1: 
+			*ref_b = MausLinks;
+			break;
+		case 3: 
+			*ref_b = MausRechts;
+			break;
+		default:
+			*ref_b = MausRechts;
+		}
                 break;
         case SDL_KEYDOWN:
 		printf("The %s key was pressed (Code %i)!\n",
