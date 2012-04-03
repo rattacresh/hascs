@@ -1,5 +1,7 @@
 #include "HASCSOutput.h" /* HASCSOutput module */
 
+#include "compat.h"
+
 #include "HASCSGraphics.h"
 #include "HASCSSystem.h"
 #include "Sound.h"
@@ -19,7 +21,7 @@ void (*StringOut)(char *);
 
 unsigned cx, cy; /* Cursorposition */
 
-TextSTring TextFenster[TextZeilen+1]; /* letzte = "" */
+TextString TextFenster[TextZeilen+1]; /* letzte = "" */
 int TextFensterAusgabe;
 
 char out[256], hilf[256];
@@ -28,7 +30,7 @@ CharSet Cut;
 
 void BWOut(char c)
 {
-	unsigned pos, i, n;
+	unsigned /*pos, i,*/ n;
 	if (TextMode == 0) {
 		if (c != 10) {
 			if (cx < MaxX) {
@@ -39,32 +41,32 @@ void BWOut(char c)
 			cx--;
 	} else if (TextMode == 1) {
 		c = CAP(c);
-		if (c >= "A" && c <= "Z")
-			n = 80 + c - "A";
-		else if (c == " ")
+		if (c >= 'A' && c <= 'Z')
+			n = 80 + c - 'A';
+		else if (c == ' ')
 			n = 0;
-		else if (c == "Ä" || c == "ä")
+		else if (c == 'Ä' || c == 'ä')
 			n = 106;
-		else if (c == "Ö" || c == "ö")
+		else if (c == 'Ö' || c == 'ö')
 			n = 107;
-		else if (c == "Ü" || c == "ü")
+		else if (c == 'Ü' || c == 'ü')
 			n = 108;
-		else if (c == "_")
+		else if (c == '_')
 			n = 1;
 		else
 			n = 0;
 		if (c != 10) {
-			SetSprite(cx, cy, SystemSprite[n]);
+			SetSprite(cx, cy, &SystemSprite[n]);
 			cx++;
 		} else
 			cx--;
 	}
 }
 
-void BWStringOut(char *s, size_t n)
+void BWStringOut(char *s)
 {
 	unsigned i;
-	for (i = 0; i <= n; i++) {
+	for (i = 0; i <= HIGH(s); i++) {
 		if (s[i] == '\0') return;
 		CharOut(s[i]);
 	}
@@ -77,7 +79,7 @@ void Cls()
 	cx = 0; cy = 0;
 	for (x = 0; x <= 39; x++)
 		for (y = 0; y <= 24; y++)
-			SetSprite(x, y, SystemSprite[0]);
+			SetSprite(x, y, &SystemSprite[0]);
 }
 
 
@@ -104,14 +106,14 @@ void PrintColors(int Chars, int Background)
 void CursorAn(void)
 /* Cursor anschalten */
 {
-	CharOut("_"); CharOut(10);
+	CharOut('_'); CharOut(10);
 }
 
 
 void CursorAus(void)
 /* Cursor abschalten */
 {
-	CharOut(" "); CharOut(10);
+	CharOut(' '); CharOut(10);
 }
 
 
@@ -150,7 +152,7 @@ void Print(char *s)
 			zulang = l + Length(out) > TextSpalten;
 			if (zulang) {
 				i = TextSpalten - l;
-				while (i > 0 && NOT(out[i] IN Cut))
+				while (i > 0 && !INSet(out[i],Cut))
 					i--;
 				if (i == 0 && l == 0) i = TextSpalten - l;
 				Split(out, hilf, out, i);
@@ -195,7 +197,7 @@ void CardToString(unsigned c, unsigned l, char *s)
 }
 
 
-unsigned StringToCard(char *s);
+unsigned StringToCard(char *s)
 {
 	unsigned i, c;
 	i = 0;
@@ -246,31 +248,34 @@ void InputString(char *s, unsigned l)
 		CharOut(s[i]);
 		i++;
 	}
-	CharOut("_");
+	CharOut('_');
 	CharOut(10);
 	do {
-		WaitInput(x, y, b, ch, -1);
+		WaitInput(&x, &y, &b, &ch, -1);
 		if (ch >= 32 && i < l) {
 			CharOut(ch); s[i] = ch; i++;
-			CharOut("_");
+			CharOut('_');
 			CharOut(10);
 		} else if (ch == 10 && i > 0) { /* Backspace */
-			CharOut(" "); CharOut(10); CharOut(10);
-			CharOut("_"); CharOut(10);
+			CharOut(' '); CharOut(10); CharOut(10);
+			CharOut('_'); CharOut(10);
 			i--;
 		} else if ((ch == 33)) /* Escape */
 			while (i > 0) {
-				CharOut(" "); CharOut(10); CharOut(10);
-				CharOut("_"); CharOut(10);
+				CharOut(' '); CharOut(10); CharOut(10);
+				CharOut('_'); CharOut(10);
 				i--;
 			}
-	} while (ch != 15C && MausLinks & ~b); /* CR */
-	CharOut(" "); CharOut(10);
+	} while (ch != 15 && MausLinks & ~b); /* CR */
+	CharOut(' '); CharOut(10);
 	s[i] = '\0';
 }
 
 
-void InputClick(char *s, unsigned l,unsigned *x, unsigned *y, BITSET *b)
+void InputClick(char *s, unsigned l,unsigned *ref_x, unsigned *ref_y, BITSET *ref_b)
+#define x (*ref_x)
+#define y (*ref_y)
+#define b (*ref_b)
 {
 	/* String einlesen mit maximal l Zeichen */
 	unsigned i; char ch;
@@ -280,43 +285,48 @@ void InputClick(char *s, unsigned l,unsigned *x, unsigned *y, BITSET *b)
 		CharOut(s[i]);
 		i++;
 	}
-	CharOut("_");
+	CharOut('_');
 	CharOut(10);
 	do {
-		WaitInput(x, y, b, ch, -1);
+		WaitInput(&x, &y, &b, &ch, -1);
 		if (ch >= 32 && i < l) {
-			CharOut(ch); s[i] = ch; i++;
-			CharOut("_");
+			CharOut(ch); s[i++] = ch;
+			CharOut('_');
 			CharOut(10);
 		} else if (ch == 10 && i > 0) { /* Backspace */
-			CharOut(" "); CharOut(10); CharOut(10);
-			CharOut("_"); CharOut(10);
+			CharOut(' '); CharOut(10); CharOut(10);
+			CharOut('_'); CharOut(10);
 			i--;
-		} else if ((ch == 33)) /* Escape */
+		} else if (ch == 33) /* Escape */
 			while (i > 0) {
-				CharOut(" "); CharOut(10); CharOut(10);
-				CharOut("_"); CharOut(10);
+				CharOut(' '); CharOut(10); CharOut(10);
+				CharOut('_'); CharOut(10);
 				i--;
 			}
 	} while (ch != 15 && b == 0); /* CR */
-	CharOut(" "); CharOut(10);
+	CharOut(' '); CharOut(10);
 	s[i] = '\0';
 }
+#undef x
+#undef y
+#undef z
 
-void InputCard(unsigned *c, unsigned l)
+void InputCard(unsigned *ref_c, unsigned l)
+#define c (*ref_c)
 {
 	char s[21];
 	CardToString(c, 1, s);
 	InputString(s, l);
 	c = StringToCard(s);
 }
+#undef c
 
 /* Textfenster Routinen *********************************************/
 
 void BeginOutput(void)
 {
 	/* Bereitet Ausgabe im Textfenster vor */
-	unsigned i, j;
+	unsigned /*i,*/ j;
 	for (j = 0; j <= TextZeilen - 1; j++) /* Textbereich hochschieben */
 		Assign(TextFenster[j], TextFenster[j+1]);
 	ScrollUp(TextX / 2, TextY, TextSpalten / 2, TextZeilen);
@@ -330,11 +340,11 @@ void EndOutput(void)
 	TextFensterAusgabe = FALSE;
 }
 
-void OutputText(char *s);
+void OutputText(char *s)
 {
-	BeginOutput;
+	BeginOutput();
 	Print(s);
-	EndOutput;
+	EndOutput();
 }
 
 void PrintOutput()
@@ -342,7 +352,7 @@ void PrintOutput()
 	unsigned i, j;
 	for (j = 0; j <= TextZeilen - 1; j++) {/* Textbereich löschen */
 		for (i = 0; i <= TextSpalten / 2 - 1; i++)
-			SetSprite(TextX / 2 + i, TextY + j, SystemSprite[0]);
+			SetSprite(TextX / 2 + i, TextY + j, &SystemSprite[0]);
 		PrintAt(TextX, TextY + j, TextFenster[j]);
 	}
 }
@@ -350,36 +360,36 @@ void PrintOutput()
 
 /* Sonstiges und Stringfunktionen ***********************************/
 
-int Compare(char *s, char *p, size_t ns, size_t np)
+int Compare(char *s, char *p)
 {
 	unsigned i;
-	for (i = 0; i <= ns; i++) {
-		if (i > np) return s[i] == '\0';
+	for (i = 0; i <= HIGH(s); i++) {
+		if (i > HIGH(p)) return s[i] == '\0';
 		if (s[i] != p[i]) return FALSE;
 		if (s[i] == '\0') return TRUE;
 	}
-	if (ns == np) return TRUE;
-	return p[ns+1] == '\0';
+	if (HIGH(s) == HIGH(p)) return TRUE;
+	return p[HIGH(s)+1] == '\0';
 }
 
-int COMPARE(char *s, char *p, size_t ns, size_t np)
+int COMPARE(char *s, char *p)
 {
 	unsigned i;
-	for (i = 0; i <= ns; i++) {
-		if (i > np) return s[i] == '\0';
+	for (i = 0; i <= HIGH(s); i++) {
+		if (i > HIGH(p)) return s[i] == '\0';
 		if (CAP(s[i]) != CAP(p[i])) return FALSE;
 		if (s[i] == '\0') return TRUE;
 	}
-	if (ns == np) return TRUE;
-	return p[ns+1] == '\0';
+	if (HIGH(s) == HIGH(p)) return TRUE;
+	return p[HIGH(s)+1] == '\0';
 }
 
-int SMALLER(char *s, char *p, size_t ns, size_t np)
+int SMALLER(char *s, char *p)
 {
 	/* Liefert s < p */
 	unsigned i;
-	for (i = 0; i <= ns; i++) {
-		if (i > np)
+	for (i = 0; i <= HIGH(s); i++) {
+		if (i > HIGH(p))
 			return FALSE;
 		else if (cap(s[i]) != cap(p[i]))
 			return cap(s[i]) < cap(p[i]);
@@ -389,19 +399,19 @@ int SMALLER(char *s, char *p, size_t ns, size_t np)
 	return TRUE;
 }
 
-unsigned Length(char *s, size_t ns)
+unsigned Length(char *s)
 {
 	unsigned i;
-	for (i = 0; i <= ns; i++)
+	for (i = 0; i <= HIGH(s); i++)
 		if (s[i] == '\0') return i;
-	return ns+1;
+	return HIGH(s)+1;
 }
 
-void Assign(char *s, char *p, size_t ns, size_t np)
+void Assign(char *s, char *p)
 {
 	unsigned i;
-	for (i = 0; i <= ns; i++) {
-		if (i > np) {
+	for (i = 0; i <= HIGH(s); i++) {
+		if (i > HIGH(p)) {
 			s[i] = '\0';
 			return;
 		}
@@ -411,42 +421,42 @@ void Assign(char *s, char *p, size_t ns, size_t np)
 	}
 }
 
-void Concat(char *s, char *p, char *r, size_t ns, size_t nr)
+void Concat(char *s, char *p, char *r)
 {
 	unsigned i, j;
 	Assign(s, p);
 	i = Length(s);
-	for (j = 0; j <= nr; j++) {
-		if (i > ns)
+	for (j = 0; j <= HIGH(r); j++) {
+		if (i > HIGH(s))
 			return;
 		s[i] = r[j];
 		if (s[i] == '\0')
 			return;
 		i++;
 	}
-	if (i <= ns)
+	if (i <= HIGH(s))
 		s[i] = '\0';
 }
 
-void Split(char *p, char *r, char *s, size_t np, size_t nr, size_t ns, unsigned i)
+void Split(char *p, char *r, char *s, unsigned i)
 {
 	unsigned j;
-	for (j = 0; j <= np; j++)
-		if (j < i && j <= ns)
+	for (j = 0; j <= HIGH(p); j++)
+		if (j < i && j <= HIGH(s))
 			p[j] = s[j];
 		else
 			p[j] = '\0';
-	for (j = 0; j <= nr; j++)
-		if (j + i <= ns) 
+	for (j = 0; j <= HIGH(r); j++)
+		if (j + i <= HIGH(s)) 
 			r[j] = s[j+i];
 		else
 			r[j] = '\0';
 }
 
-unsigned FindC(char *s, size_t ns, char c)
+unsigned FindC(char *s, char c)
 {
 	unsigned i;
-	for (i = 0; i <= ns; i++) {
+	for (i = 0; i <= HIGH(s); i++) {
 		if (s[i] == c)
 			return i;
 		if (s[i] == '\0')
@@ -487,14 +497,14 @@ char cap(char ch)
 	else return ch;
 }
 
-int StringToInt(char *s, size_t ns)
+int StringToInt(char *s)
 {
 	unsigned i;
 	int f, z;
 	z = 0;
 	f = 1;
-	for (i = 0; i <= ns; i++)
-		if (s[i] == '-' && f == 1) { /* ein Minuszeichen */
+	for (i = 0; i <= HIGH(s); i++)
+		if (s[i] == '-' && f == 1) /* ein Minuszeichen */
 			f = -1;
 		else if (s[i] >= '0' && s[i] <= '9')
 			z = z * 10 + (s[i] - '0');
@@ -503,17 +513,17 @@ int StringToInt(char *s, size_t ns)
 	return z * f;
 }
 
-void AssignC(char *s, char c, size_t ns)
+void AssignC(char *s, char c)
 {
 	s[0] = c;
-	if (ns >= 1)
+	if (HIGH(s) >= 1)
 		s[1] = '\0';
 }
 
 void OutputInit(void)
 { /* Initialisierung */
 	TextFensterAusgabe = FALSE;
-	TextFenster[TextZeilen] = "";
+	*TextFenster[TextZeilen] = *"";
 	TextMode = 0;
 	AnzahlTexte = 0;
 	GotoXY(0, 0);

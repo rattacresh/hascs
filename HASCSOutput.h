@@ -21,7 +21,7 @@
 #define MaxText 200      /* maximale Anzahl Texte */
 
 typedef struct {  
-	char tring[61];
+	char String[61];
 	unsigned Nummer, Sample;
 } TextTyp;
 
@@ -64,17 +64,17 @@ void PrintOutput(); /* gesamtes Textfenster ausgeben */
 
 void CardToString(unsigned c, unsigned l, char *s);
 unsigned StringToCard(char *s);
-int StringToInt(char *s, size_t ns);
-int Compare(char *s, char *p, size_t ns, size_t np);
-int COMPARE(char *s, char *p, size_t ns, size_t np);
-int SMALLER(char *s, char *p, size_t ns, size_t np);
-void Assign(char *s, char *p, size_t ns, size_t np); /* s := p */
-void Concat(char *s, char *p, char *r, size_t ns, size_t nr); /* s := p + r */
-unsigned Length(char *s, size_t ns);
-void Split(char *p, char *r, char *s, size_t np, size_t nr, size_t ns, unsigned i);
-unsigned FindC(char *s, size_t ns, char c);
+int StringToInt(char *s);
+int Compare(char *s, char *p);
+int COMPARE(char *s, char *p);
+int SMALLER(char *s, char *p);
+void Assign(char *s, char *p); /* s := p */
+void Concat(char *s, char *p, char *r); /* s := p + r */
+unsigned Length(char *s);
+void Split(char *p, char *r, char *s, unsigned i);
+unsigned FindC(char *s, char c);
 int InString(char *s1, char *s2);
 char cap(char ch);
-void AssignC(char *s, char c, size_t ns);
+void AssignC(char *s, char c);
 
 #endif /* HASCSOUTPUT_H */
