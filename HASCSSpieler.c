@@ -98,14 +98,14 @@ int RingAnlegen(GegenstandTyp *ref_r)
 void RingAblegen(GegenstandTyp *ref_r)
 #define r (*ref_r)
 {
-	if (Ring == 1) { /* Statusänderung */
-		Spieler.Status = Spieler.Status & ~r->RingWirkung;
-		Spieler.Permanent = Spieler.Permanent & ~ r->RingWirkung;
-	} else if (Ring >= 10 && Ring <= 15) /* Basiswerterhöhung */
-		ChangeBasiswert(Ring - 10, -r->RingWirkung);
-	else if (Ring >= 20 && Ring <= 25) /* Basiswertsenkung */
-		ChangeBasiswert(Ring - 20, -r->RingWirkung);
-	KennNummer = 0;
+	if (r.Ring == 1) { /* Statusänderung */
+		Spieler.Status = Spieler.Status & ~r.RingWirkung;
+		Spieler.Permanent = Spieler.Permanent & ~ r.RingWirkung;
+	} else if (r.Ring >= 10 && r.Ring <= 15) /* Basiswerterhöhung */
+		ChangeBasiswert(r.Ring - 10, -r.RingWirkung);
+	else if (r.Ring >= 20 && r.Ring <= 25) /* Basiswertsenkung */
+		ChangeBasiswert(r.Ring - 20, -r.RingWirkung);
+	r.KennNummer = 0;
 }
 #undef r
 
@@ -129,44 +129,48 @@ int RuestungAnlegen(GegenstandTyp *ref_r)
 void RuestungAblegen(GegenstandTyp *ref_r)
 #define r (*ref_r)
 {
-	r->KennNummer = 0;
+	r.KennNummer = 0;
 }
 #undef r
 
-int GetButton(unsigned *x, unsigned *y)
+int GetButton(unsigned *ref_x, unsigned *ref_y)
+#define x (*ref_x)
+#define y (*ref_y)
 {
 	BITSET m;
 	char ch;
-	WaitInput(x, y, m, ch, -1); x = x / 16; y = y / 16;
+	WaitInput(&x, &y, &m, &ch, -1); x = x / 16; y = y / 16;
 	if (ch != '\0') {
 		x = MaxSichtweite; y = MaxSichtweite;
-		if (ch == "1") {x--; y++;}
-		else if (ch == "2") y++;
-		else if (ch == "3") {x++; y++;}
-		else if (ch == "4") x--;
-		else if (ch == "6") x++;
-		else if (ch == "7") {x--; y--;}
-		else if (ch == "8") y--;
-		else if (ch == "9") {x++; y--;}
-		else if (ch != "5")
+		if (ch == '1') {x--; y++;}
+		else if (ch == '2') y++;
+		else if (ch == '3') {x++; y++;}
+		else if (ch == '4') x--;
+		else if (ch == '6') x++;
+		else if (ch == '7') {x--; y--;}
+		else if (ch == '8') y--;
+		else if (ch == '9') {x++; y--;}
+		else if (ch != '5')
 			return FALSE;
-		SichtLevelUmrechnung(x, y, x, y);
+		SichtLevelUmrechnung(x, y, &x, &y);
 		return TRUE;
 	} else {
 		if ((x - 1) <= MaxSichtmal2 && (y - 1) <= MaxSichtmal2) {
-			SichtLevelUmrechnung((x - 1), (y - 1), x, y);
+			SichtLevelUmrechnung((x - 1), (y - 1), &x, &y);
 			return TRUE;
 		} else
 			return FALSE;
 	}
 }
+#undef x
+#undef y
 
 int Near(unsigned x, unsigned y)
 {
 	unsigned xs, ys;
-	if (LevelSichtUmrechnung(x, y, xs, ys)) {
+	if (LevelSichtUmrechnung(x, y, &xs, &ys))
 		return xs >= MaxSichtweite-1 && xs <= MaxSichtweite+1 
-		    && ys >= MaxSichtweite-1 && ys <= MaxSichtweite+1
+		    && ys >= MaxSichtweite-1 && ys <= MaxSichtweite+1;
 	else return FALSE;
 }
  
@@ -176,7 +180,9 @@ int NearSicht(unsigned xs, unsigned ys)
 	    && ys >= MaxSichtweite-1 && ys <= MaxSichtweite+1;
 }
 
-void *DisplayRucksack(unsigned *n, BITSET *mb)
+void *DisplayRucksack(unsigned *ref_n, BITSET *ref_mb)
+#define n (*ref_n)
+#define mb (*ref_mb)
 {
 	unsigned i, mx, my;
 	char ch;
@@ -187,12 +193,12 @@ void *DisplayRucksack(unsigned *n, BITSET *mb)
 	for (i = 1; i <= MaxRuck; i++) {
 		if (Spieler.Rucksack[i].KennNummer != 0) {
 			SetSprite(2 + 12 * ((i-1) / 10), 7 + i - 10 * ((i-1) / 10),
-				  SystemSprite[Spieler.Rucksack[i].Sprite]);
+				  &SystemSprite[Spieler.Rucksack[i].Sprite]);
 			GotoXY(7 + 24 * ((i-1) / 10), 7 + i - 10 * ((i-1) / 10));
-			PrintGegenstand(Spieler.Rucksack[i]);
+			PrintGegenstand(&Spieler.Rucksack[i]);
 		}
 	}
-	WaitInput(mx, my, mb, ch, -1); mx = mx / 16; my = my / 16;
+	WaitInput(&mx, &my, &mb, &ch, -1); mx = mx / 16; my = my / 16;
 	RestoreScreen();
 	n = 0;
 	if ((mx >= 2 && mx < 26 && my >= 8 && my < 18)) {
@@ -208,10 +214,13 @@ void *DisplayRucksack(unsigned *n, BITSET *mb)
 		return &Spieler.Ring;
 	return NULL;
 }
+#undef n
+#undef mb
 
-void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *Waffe)
+void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *ref_Waffe)
+#define Waffe (*ref_Waffe)
 {
-	unsigned Schaden, i,t , Trefferwurf, Punkte;
+	unsigned Schaden, i,/*t ,*/ Trefferwurf, Punkte;
 	Trefferwurf = Zufall(20);
 	if (Trefferwurf + Spieler.Ge >= 20 + WM) {
 		if (Waffe.KennNummer == GWaffe)
@@ -230,7 +239,7 @@ void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *Waffe)
 		if (Trefferwurf == 20) /* natürliche 20 */
 			Schaden = Schaden * 2;
 		i = FindMonster(zx, zy);
-		if (MonsterParade(Monster[i], Waffe, Spieler.Ge + Trefferwurf)) {
+		if (MonsterParade(&Monster[i], &Waffe, Spieler.Ge + Trefferwurf)) {
 			BeginOutput(); /* Du triffst! ??? pariert! */
 			Print("#511#"); Print(Monster[i].Name); Print("#515#");
 			EndOutput();
@@ -240,11 +249,11 @@ void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *Waffe)
 				Schaden = 0; /* keine magische Waffe */
 			Punkte = (Monster[i].Trefferwurf + Monster[i].Schaden * 2 +
 				Monster[i].Bonus * 3) / 10;
-			BeginOutput;
+			/* BeginOutput; FIXME --rtc */
 			Print("#511#"); PrintCard(Schaden, 1); Print("#512#");
-			if (HitMonster(Monster[i], Schaden))
+			if (HitMonster(&Monster[i], Schaden))
 				Print("#510#");
-			EndOutput;
+			/* EndOutput; FIXME --rtc */
 			Erfahrung(Punkte * Schaden);
 		}
 	} else { /* nicht getroffen */
@@ -264,6 +273,7 @@ void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *Waffe)
 		PrintCharakter(5);
 	}
 }
+#undef Waffe
 
 void NahAngriff(unsigned zx, unsigned zy)
 {
@@ -278,31 +288,31 @@ void NahAngriff(unsigned zx, unsigned zy)
 	if (SSchutz & Spieler.Status) /* Schutz */
 		return;
 	Bonus = 0;
-	if (SAbenteurer & Typ) { Bonus = 1; }
+	if (SAbenteurer & Spieler.Typ) Bonus = 1;
 	rWaffe = NahkampfWaffe(Spieler.rechteHand);
 	lWaffe = NahkampfWaffe(Spieler.linkeHand);
 	if (rWaffe && lWaffe) { /* Beidhändiger Kampf */
-		Angriff(zx, zy, 4 - Bonus, Spieler.rechteHand);
+		Angriff(zx, zy, 4 - Bonus, &Spieler.rechteHand);
 		if (LevelMonster & Level[zx][zy].Spezial)
-			Angriff(zx, zy, 4 - Bonus, Spieler.linkeHand)
+			Angriff(zx, zy, 4 - Bonus, &Spieler.linkeHand);
 	} else if (rWaffe)
-		Angriff(zx, zy, 1 - Bonus, Spieler.rechteHand);
+		Angriff(zx, zy, 1 - Bonus, &Spieler.rechteHand);
 	else if (lWaffe)
-		Angriff(zx, zy, 1 - Bonus, Spieler.linkeHand);
+		Angriff(zx, zy, 1 - Bonus, &Spieler.linkeHand);
 	else if (Spieler.rechteHand.KennNummer == 0) /* Handangriff */
-		Angriff(zx, zy, 1 - Bonus, Spieler.rechteHand);
+		Angriff(zx, zy, 1 - Bonus, &Spieler.rechteHand);
 	else if (Spieler.linkeHand.KennNummer == 0)
-		Angriff(zx, zy, 1 - Bonus, Spieler.linkeHand);
+		Angriff(zx, zy, 1 - Bonus, &Spieler.linkeHand);
 }
 
 void LeiterBenutz(int Hoch)
 {
-	int Leiter; ParameterTyp r; unsigned i, j;
+	int Leiter; ParameterTyp r; unsigned i/*, j*/;
 	Leiter = FALSE;
 	if (LevelParameter & Level[Spieler.x][Spieler.y].Spezial
 	 && SReitet & ~Spieler.Status) {
 		i = FindParameter(Spieler.x, Spieler.y);
-		if (Art == FLeiterBeide) {
+		if (Parameter[i].Art == FLeiterBeide) {
 			if (Hoch) {
 				r.ZielX = Parameter[i].xhoch;
 				r.ZielY = Parameter[i].yhoch;
@@ -347,29 +357,28 @@ void TuerOeffnen(unsigned px, unsigned py)
 {
 	unsigned i = FindParameter(px, py);
 	if (Parameter[i].Art == FTuerZu) {
-		Level[px, py].Feld = Parameter[i].SpriteOffen;
+		Level[px][py].Feld = Parameter[i].SpriteOffen;
 		Parameter[i].Art = FTuerOffen;
 		OutputText("#550#"); /* geoeffnet */
 		Rueckgabe = 3;
-	} else if (Parameter[i].Art == FTuerVerschlossen) {
+	} else if (Parameter[i].Art == FTuerVerschlossen)
 		OutputText("#561#"); /* geht nicht */
-	}
 }
 
 void Besteigen(void)
 {
-	unsigned tx, ty, l, i, j; int ok;
+	unsigned tx, ty/*, l*/, i/*, j*/; int ok;
 	BeginOutput(); Print("#530#"); /* Wohin auf-/absteigen? */
-	if (GetButton(tx, ty)) {
+	if (GetButton(&tx, &ty)) {
 		if (SReitet & Spieler.Status) { /* absteigen */
 			if (Near(tx, ty)) {
 				Spieler.Status &= ~SReitet;
 				if (SpielerFrei(tx, ty)
-				  && LevelMonster & ~Level[tx, ty].Spezial)
+				  && LevelMonster & ~Level[tx][ty].Spezial)
 				{
 					Spieler.ReitTier.x = Spieler.x;
 					Spieler.ReitTier.y = Spieler.y;
-					Level[Spieler.x, Spieler.y].Spezial |= LevelMonster;
+					Level[Spieler.x][Spieler.y].Spezial |= LevelMonster;
 					Spieler.x = tx; Spieler.y = ty;
 					if (AnzahlMonster < MaxMonster)
 						AnzahlMonster++;
@@ -382,7 +391,7 @@ void Besteigen(void)
 					Spieler.Status |= SReitet;
 			}
 		} else { /* aufsteigen */
-			if (Near(tx,ty) && LevelMonster & Level[tx, ty].Spezial) {
+			if (Near(tx,ty) && LevelMonster & Level[tx][ty].Spezial) {
 				i = FindMonster(tx, ty);
 				if (MonsterReitbar & Monster[i].Spezial) {
 					ok = TRUE;
@@ -396,7 +405,7 @@ void Besteigen(void)
 						Spieler.x = tx; Spieler.y = ty;
 						Spieler.Status |= SReitet;
 						Spieler.ReitTier = Monster[i];
-						Level[tx, ty].Spezial &= ~LevelMonster;
+						Level[tx][ty].Spezial &= ~LevelMonster;
 						while (i < AnzahlMonster) {
 							Monster[i] = Monster[i+1];
 							i++;
@@ -452,34 +461,35 @@ void Ausruhen(void)
 		OutputText("#591#");
 }
 
-void Benutze(GegenstandTyp *r)
+void Benutze(GegenstandTyp *ref_r)
 {
-	void Fernkampf(GegenstandTyp *r)
+	void Fernkampf(GegenstandTyp *ref_r)
+#define r (*ref_r)
 	{
 		unsigned x, y, x2, y2, mx, my; int hit;
 		if ((1 << 1) & ~r.Spezial) {
 			OutputText("#667#"); return;
 		}
 		OutputText("#600#");
-		if (!(GetButton(x2, y2))) { return; }
-		if (LevelSichtUmrechnung(x2, y2, x2, y2)) {
+		if (!GetButton(&x2, &y2)) return;
+		if (LevelSichtUmrechnung(x2, y2, &x2, &y2)) {
 			x = MaxSichtweite; y = MaxSichtweite;
-			hit = MakeShoot(x, y, x2, y2, 100, TRUE);
-			SichtLevelUmrechnung(x, y, mx, my);
+			hit = MakeShoot(&x, &y, x2, y2, 100, TRUE);
+			SichtLevelUmrechnung(x, y, &mx, &my);
 			if (hit) {
 				if (SAmazone & Spieler.Typ) /* Amazone */
-					Angriff(mx, my, 0, r);
+					Angriff(mx, my, 0, &r);
 				else
-					Angriff(mx, my, 2, r); /* Fernkampf mit WM -2 */
+					Angriff(mx, my, 2, &r); /* Fernkampf mit WM -2 */
 			} else {
 				if (r.WaffenAnwendungen > 1)
 					r.WaffenAnwendungen--;
 				else if (r.WaffenAnwendungen == 1)
 					r.KennNummer = 0;
 			}
-			if ((1 << 3) & r.Spezial && r.KennNummer != 0)) {
+			if ((1 << 3) & r.Spezial && r.KennNummer != 0) {
 				if (SchutzWurf(Spieler.Ge) || SchutzWurf(Spieler.Ge)) {
-					if (!LegeGegenstand(mx, my, r))
+					if (!LegeGegenstand(mx, my, &r))
 						OutputText("#601#");
 				} else
 					OutputText("#601#");
@@ -487,53 +497,62 @@ void Benutze(GegenstandTyp *r)
 			}
 		}
 	}
+#undef r
 
-	void NimmZauberstab(GegenstandTyp *r)
+	void NimmZauberstab(GegenstandTyp *ref_r)
+#define r (*ref_r)
 	{
-		unsigned x, y, mx, my, i; int b;
+		unsigned x, y, mx, my, i; /*int b;*/
 
-		void Verzaubert(MonsterTyp *m, unsigned *Stab, unsigned *Wirkung)
+		void Verzaubert(MonsterTyp *ref_m, unsigned *ref_Stab, unsigned *ref_Wirkung)
+#define m (*ref_m)
+#define Stab (*ref_Stab)
+#define Wirkung (*ref_Wirkung)
 		{
-			unsigned i, j; int b; MonsterTyp nm;
+			unsigned i, j; /*int b;*/ MonsterTyp nm;
 			switch (Stab) {
 			case 1 : j = W6(Wirkung);
 				BeginOutput(); /* erst Ausgabe, da Monster tot sein könnte! */
 				Print(Name); Print("#620#"); PrintCard(j, 1); Print("#626#");
 				EndOutput();
-				b = HitMonster(m, j);
+				/*b =*/ HitMonster(&m, j);
 				return;
-			case 2 : m->Status = Wirkung; break;
-			case 3 : m->Spezial |= Wirkung; break;
-			case 4 : m->Spezial &=  ~Wirkung; break;
-			case 5 : Minus(m->Trefferwurf, Wirkung); break;
-			case 6 : Minus(m->Schaden, Wirkung); break;
-			case 7 : Minus(m->Bonus, Wirkung); break;
+			case 2 : m.Status = Wirkung; break;
+			case 3 : m.Spezial |= Wirkung; break;
+			case 4 : m.Spezial &=  ~Wirkung; break;
+			case 5 : Minus(&m.Trefferwurf, Wirkung); break;
+			case 6 : Minus(&m.Schaden, Wirkung); break;
+			case 7 : Minus(&m.Bonus, Wirkung); break;
 			case 8 : BeginOutput(); Print(Name); Print("#628#"); EndOutput();
 				do {
 					NormalKoords(
-						Zufall(2 * Wirkung + 1) + m->x - Wirkung - 1,
-						Zufall(2 * Wirkung + 1) + m->y - Wirkung - 1, i, j);
-				} while (!MonsterFrei(m, i, j));
-				nm = *m; DeleteMonster(x, y); NewMonster(i, j, nm);
+						Zufall(2 * Wirkung + 1) + m.x - Wirkung - 1,
+						Zufall(2 * Wirkung + 1) + m.y - Wirkung - 1, &i, &j);
+				} while (!MonsterFrei(&m, i, j));
+				nm = m; DeleteMonster(x, y); NewMonster(i, j, &nm);
 				return;
-			case 10 : DoMonsterDialog(Wirkung, m);
+			case 10 : DoMonsterDialog(Wirkung, &m);
 				return;
+			}
+			BeginOutput(); Print(Name); Print("#628#"); EndOutput();
 		}
-		BeginOutput(); Print(Name); Print("#628#"); EndOutput();
+#undef m
+#undef Stab
+#undef Wirkung
 
 		if (ZaubernGelungen()) {
 			OutputText("#624#"); /* Wohin... */
-			if (GetButton(mx, my)) {
-				b = LevelSichtUmrechnung(mx, my, mx, my);
+			if (GetButton(&mx, &my)) {
+				/*b =*/ LevelSichtUmrechnung(mx, my, &mx, &my);
 				if (mx <= MaxSichtmal2 && my <= MaxSichtmal2) {
 					x = MaxSichtweite; y = MaxSichtweite;
-					if (MakeShoot(x, y, mx, my, 30, r.Spezial == 0)) {
-						SichtLevelUmrechnung(x, y, mx, my);
+					if (MakeShoot(&x, &y, mx, my, 30, r.Spezial == 0)) {
+						SichtLevelUmrechnung(x, y, &mx, &my);
 						i = FindMonster(mx, my);
-						if (MonsterSchutzwurf(Monster[i]))
+						if (MonsterSchutzwurf(&Monster[i]))
 							OutputText("#625#"); /* keine Wirkung */
 						else
-							Verzaubert(Monster[i], r.Zauberstab, r.ZStabWirkung);
+							Verzaubert(&Monster[i], &r.Zauberstab, &r.ZStabWirkung);
 					}
 				}
 			}
@@ -544,10 +563,12 @@ void Benutze(GegenstandTyp *r)
 			}
 		}
 	}
+#undef r
 
-	void NimmPhiole(GegenstandTyp *r);
-		unsigned i, j; GegenstandTyp *g; BITSET b;
+	void NimmPhiole(GegenstandTyp *ref_r);
+#define r (*ref_r)
 	{
+		unsigned i, j; GegenstandTyp *g; BITSET b;
 		switch (r.Phiole) {
 		case 1: TrefferPunkte(W6(r.PhioleWirkung), TRUE); /* Heilung */
 			OutputText("#650#"); break;
@@ -559,17 +580,16 @@ void Benutze(GegenstandTyp *r)
 			OutputText("#651#"); break;
 		case 5: Todeshauch(1, r.PhioleWirkung); /* Todeshauch */
 			OutputText("#654#"); break;
-		case 6... 7: OutputText("#630#");
-			g = DisplayRucksack(i, b);
-			if (g) {
+		case 6 ... 7: OutputText("#630#");
+			g = DisplayRucksack(&i, &b);
+			if (g)
 				if (g->KennNummer ) {
 					if (r.Pergament == 6)
 						g->Flags |= r.PhioleWirkung;
 					else
 						g->Flags &= ~r.PhioleWirkung;
-					BeginOutput(); Print("#631#"); PrintGegenstand(g^); EndOutput();
+					BeginOutput(); Print("#631#"); PrintGegenstand(g); EndOutput();
 				}
-			}
 			break;
 		case 8: OutputText("#632#");
 			Erweckung(r.PhioleWirkung);
@@ -580,7 +600,7 @@ void Benutze(GegenstandTyp *r)
 					           - r.PhioleWirkung - 1,
 					           (int)Zufall(2 * r.PhioleWirkung + 1) + Spieler.y
 					           - r.PhioleWirkung - 1,
-					           i, j);
+					           &i, &j);
 			} while (!SpielerFrei(i, j));
 			Spieler.x = i; Spieler.y = j;
 			break;
@@ -588,7 +608,7 @@ void Benutze(GegenstandTyp *r)
 			Spieler.Sichtweite = r.PhioleWirkung;
 			OutputText("#651#");
 			break;
-		case 11: if (Vision(r.PhioleWirkung, 2, i, j));
+		case 11: if (Vision(r.PhioleWirkung, 2, &i, &j));
 			RestoreScreen();
 			break;
 		}
@@ -598,12 +618,14 @@ void Benutze(GegenstandTyp *r)
 				r.KennNummer = 0;
 		}
 	}
+#undef r
 
-	void NimmPergament(GegenstandTyp *r)
+	void NimmPergament(GegenstandTyp *ref_r)
+#define r (*ref_r)
 	{
 		if (ZaubernGelungen()) { 
 			Erfahrung(50 + Zufall(50));
-			NimmPhiole(r);
+			NimmPhiole(&r);
 		} else {
 			if (r.PergamentAnwendungen > 0) {
 				r.PergamentAnwendungen--;
@@ -612,8 +634,10 @@ void Benutze(GegenstandTyp *r)
 			}
 		}
 	}
+#undef r
 
-	void BenutzeSchluessel(GegenstandTyp *r)
+	void BenutzeSchluessel(GegenstandTyp *ref_r)
+#define r (*ref_r)
 	{
 		unsigned x, y, i;
 
@@ -630,9 +654,9 @@ void Benutze(GegenstandTyp *r)
 		}
 
 		BeginOutput(); Print("#540#"); /* Welche Tür... */
-		if (!GetButton(x, y)) { EndOutput(); return; }
+		if (!GetButton(&x, &y)) { EndOutput(); return; }
 		if (Near(x, y) && LevelParameter & Level[x][y].Spezial) {
-			i = FindParameter(x, y)
+			i = FindParameter(x, y);
 			if (Parameter[i].Art == FTuerZu) { /* Abschließen */
 				if (KeyFits()) {
 					Parameter[i].Art = FTuerVerschlossen;
@@ -643,7 +667,7 @@ void Benutze(GegenstandTyp *r)
 			} else if (Parameter[i].Art == FTuerVerschlossen) { /* Aufschließen */
 				if (KeyFits()) {
 					Parameter[i].Art = FTuerZu;
-					Level[x,y].Feld = Parameter[i].SpriteZu;
+					Level[x][y].Feld = Parameter[i].SpriteZu;
 					Print("#560#"); /* aufgeschlossen */
 				} else
 					Print("#542#"); /* Schlüssel paßt nicht */
@@ -651,8 +675,10 @@ void Benutze(GegenstandTyp *r)
 		}
 		EndOutput();
 	}
+#undef r
 
-	void NimmNahrung(GegenstandTyp *r)
+	void NimmNahrung(GegenstandTyp *ref_r)
+#define r (*ref_r)
 	{
 		Spieler.Nahrung += r.Nahrung;
 		if (Spieler.Nahrung > MaxNahrung)
@@ -660,18 +686,20 @@ void Benutze(GegenstandTyp *r)
 		PrintCharakter(3);
 		r.KennNummer = 0;
 	}
+#undef r
 	
+#define r (*ref_r)
 	switch (r.KennNummer) {
-	case GZauberstab: NimmZauberstab(r); break;
-	case GPergament:  NimmPergament(r); break;
-	case GPhiole:     NimmPhiole(r); break;
-	case GWaffe:      Fernkampf(r); break;
-	case GSchluessel: BenutzeSchluessel(r); break;
-	case GNahrung:    NimmNahrung(r); break;
+	case GZauberstab: NimmZauberstab(&r); break;
+	case GPergament:  NimmPergament(&r); break;
+	case GPhiole:     NimmPhiole(&r); break;
+	case GWaffe:      Fernkampf(&r); break;
+	case GSchluessel: BenutzeSchluessel(&r); break;
+	case GNahrung:    NimmNahrung(&r); break;
 	default:
 		if (r.KennNummer > 10) /* Sondergegenstand */
 			if (r.DialogNr != 0) {
-				DoGegenstandDialog(r.DialogNr, r);
+				DoGegenstandDialog(r.DialogNr, &r);
 				if (r.DialogAnzahl > 0) {
 					r.DialogAnzahl--;
 					if (r.DialogAnzahl == 0)
@@ -680,9 +708,11 @@ void Benutze(GegenstandTyp *r)
 			}
 	}
 }
+#undef r
 
 
-void LegeAb(GegenstandTyp *r)
+void LegeAb(GegenstandTyp *ref_r)
+#define r (*ref_r)
 {
 	unsigned x, y; int abgelegt;
 
@@ -694,9 +724,9 @@ void LegeAb(GegenstandTyp *r)
 		return;
 	}
 	BeginOutput(); Print("#720#"); /* Wohin ablegen... */
-	if (GetButton(x, y)) { /* ins Level */
+	if (GetButton(&x, &y)) { /* ins Level */
 		if (Near(x, y)) {
-			if (LegeGegenstand(x, y, r)) {
+			if (LegeGegenstand(x, y, &r)) {
 				abgelegt = TRUE;
 				Print("#721#"); /* OK */
 			} else
@@ -715,9 +745,9 @@ void LegeAb(GegenstandTyp *r)
 	EndOutput();
 	if (abgelegt) {
 		if (r.KennNummer == GRing)
-			RingAblegen(r);
+			RingAblegen(&r);
 		else if (r.KennNummer == GRuestung)
-			RuestungAblegen(r);
+			RuestungAblegen(&r);
 		else if (r.KennNummer == GLicht) {
 			r.KennNummer = 0;
 			Spieler.Sichtweite = SetLightRange();
@@ -726,6 +756,7 @@ void LegeAb(GegenstandTyp *r)
 		PrintCharakter(5);
 	}
 }
+#undef r
 
 /**********************************************************************/
 
@@ -733,18 +764,20 @@ void InfoGegenstand(unsigned gx, unsigned gy)
 {
 	unsigned i;
 
-	BeginOutput;
+	/*BeginOutput; XXX --rtc */
 	i = FindGegenstand(gx,gy);
 	Print("#695#");
-	PrintGegenstand(Gegenstand[i]);
-	EndOutput;
+	PrintGegenstand(&Gegenstand[i]);
+	/*EndOutput; XXX --rtc */
 }
 
 void  InfoFeld(unsigned x, unsigned y)
 {
 	unsigned i;
 
-	int SucheFalle(ParameterTyp *p)
+	int SucheFalle(ParameterTyp *ref_p)
+#define p (*ref_p)
+	{
 		unsigned EP;
 		EP = 0;
 		if (SchutzWurf(Spieler.In)
@@ -768,18 +801,18 @@ void  InfoFeld(unsigned x, unsigned y)
 		}
 		return FALSE;
 	}
+#undef p
 
-	if (Near(x, y && LevelParameter & Level[x,y].Spezial)) {
+	if (Near(x, y) && LevelParameter & Level[x][y].Spezial) {
 		i = FindParameter(x, y);
 		if (Parameter[i].Art == FFalle) {
-			if (SucheFalle(Parameter[i])) {
-				return
-			}
+			if (SucheFalle(&Parameter[i]))
+				return;
 		} else if ((Parameter[i].Art == FDialog || Parameter[i].Art == FBild || Parameter[i].Art == FSound)) {
 			if ((Parameter[i].automatisch == 0)) {
-				if (Parameter[i].Art == FDialog) DoParameterDialog(Nummer, Parameter[i])
-				else if (Parameter[i].Art == FSound) PlaySoundN(Nummer);
-				else if (Parameter[i].Art == FBild) ShowPicture(Nummer, TRUE);
+				if (Parameter[i].Art == FDialog) DoParameterDialog(Parameter[i].Nummer, &Parameter[i]);
+				else if (Parameter[i].Art == FSound) PlaySoundN(Parameter[i].Nummer);
+				else if (Parameter[i].Art == FBild) ShowPicture(Parameter[i].Nummer, TRUE);
 				if (Parameter[i].Zaehler > 0) {
 					Parameter[i].Zaehler--;
 					if (Parameter[i].Zaehler == 0)
@@ -788,16 +821,16 @@ void  InfoFeld(unsigned x, unsigned y)
 				return;
 			}
 		} else if (Parameter[i].Art == FTuerOffen) {
-			Level[x, y].Feld = Parameter[i].SpriteZu;
+			Level[x][y].Feld = Parameter[i].SpriteZu;
 			Parameter[i].Art = FTuerZu;
 			OutputText("#543#"); /* Du schließt die Tür! */
 			Rueckgabe = 3;
 			return;
 		}
 	}
-	BeginOutput;
+	/*BeginOutput; XXX --rtc */
 	Print("#700#"); Print(Felder[Level[x][y].Feld].Name);
-	EndOutput;
+	/*EndOutput; XXX --rtc */
 }
 
 void InfoMonster(unsigned mx, unsigned my)
@@ -805,16 +838,16 @@ void InfoMonster(unsigned mx, unsigned my)
 	unsigned i;
 	i = FindMonster(mx, my);
 	if (Monster[i].Status == 0) {
-		if (LevelGegenstand & Level[mx,my].Spezial)
+		if (LevelGegenstand & Level[mx][my].Spezial)
 			InfoGegenstand(mx, my);
 		else
 			InfoFeld(mx, my);
 	} else {
-		BeginOutput;
+		/*BeginOutput; XXX --rtc */
 		Print("#680#"); Print(Name); /* Du siehst: ... */
 		EndOutput();
 		if (Monster[i].Sprich > 0 && Monster[i].Sprich < 1000 && Monster[i].Status > 1)
-			DoMonsterDialog(Sprich, Monster[i]);
+			DoMonsterDialog(Monster[i].Sprich, &Monster[i]);
 	}
 }
 
@@ -824,28 +857,30 @@ void Nimm(unsigned number)
 {
 	int rfrei, lfrei; GegenstandTyp r;
 
-	int Beidhaendig(GegenstandTyp *r)
+	int Beidhaendig(GegenstandTyp *ref_r)
+#define r (*ref_r)
 	{
 		return r.KennNummer == GWaffe && (1 << 2) & r.Spezial;
 	}
+#undef r
 		
 	rfrei = Spieler.rechteHand.KennNummer == 0;
 	lfrei = Spieler.linkeHand.KennNummer == 0;
-	if (Beidhaendig(Spieler.rechteHand)) lfrei = FALSE;
-	r = Rucksack[number];
+	if (Beidhaendig(&Spieler.rechteHand)) lfrei = FALSE;
+	r = Spieler.Rucksack[number];
 	switch (r.KennNummer) {
 	case GRuestung:
-		if (RuestungAnlegen(r))
+		if (RuestungAnlegen(&r))
 			Wegwerfen(number);
 		break;
 	case GRing:
-		if (RingAnlegen(r))
+		if (RingAnlegen(&r))
 			Wegwerfen(number);
 		break;
 	default:
 		if (!rfrei && !lfrei)
 			OutputText("#712#");
-		else if (Beidhaendig(r && (!rfrei || !lfrei)))
+		else if (Beidhaendig(&r) && !(rfrei && lfrei))
 			OutputText("#713#");
 		else {
 			if (rfrei) Spieler.rechteHand = r;
@@ -859,8 +894,8 @@ void Nimm(unsigned number)
 
 void DoRucksack(void)
 {
-	unsigned  x,y,i; BITSET b; void *g;
-	g = DisplayRucksack(i, b);
+	unsigned  x,y,i; BITSET b; /*void *g;*/
+	/*g =*/ DisplayRucksack(&i, &b);
 	if (i >= 1 && i <= MaxRuck && (1 << 0) & b) { /* in die Hand nehmen */
 		if ((Spieler.Rucksack[i].KennNummer != 0)) {
 			Nimm(i);
@@ -869,9 +904,9 @@ void DoRucksack(void)
 	} else if (i >= 1 && i <= MaxRuck && (1 << 1) & b) /* ablegen */
 		if (Spieler.Rucksack[i].KennNummer) {
 			BeginOutput(); Print("#720#"); /* Wohin ablegen... */
-			if (GetButton(x, y)) /* dahin ablegen */
+			if (GetButton(&x, &y)) /* dahin ablegen */
 				if (Near(x, y))
-					if (LegeGegenstand(x, y, Spieler.Rucksack[i])) {
+					if (LegeGegenstand(x, y, &Spieler.Rucksack[i])) {
 						Wegwerfen(i);
 						Print("#721#"); /* OK */
 						EndOutput();
@@ -884,14 +919,14 @@ void DoRucksack(void)
 
 void DoGegenstand(unsigned x, unsigned y)
 {
-	GegenstandTyp *g;
+	GegenstandTyp g;
 	int aufgenommen;
 
-	aufgenommen = NimmGegenstand(x, y, TRUE, g);
-	BeginOutput;
+	aufgenommen = NimmGegenstand(x, y, TRUE, &g);
+	/*BeginOutput; XXX --rtc */
 		Print("#322#");      /* Du findest: */
-		PrintGegenstand(g);
-	EndOutput;
+		PrintGegenstand(&g);
+	/* EndOutput; XXX --rtc */
 	if (aufgenommen) {
 		PrintCharakter(3);
 		PrintCharakter(4);
@@ -901,11 +936,11 @@ void DoGegenstand(unsigned x, unsigned y)
 		OutputText("#335#"); /* Rucksack voll! */
 }
 
-void Karte();
+void Karte()
 {
 	unsigned d;
 	if (LevelNoMap & ~LevelFlags) {
-		if (Vision(44, 1, d, d)) { }
+		if (Vision(44, 1, &d, &d)) { }
 		RestoreScreen();
 	}
 }
@@ -914,11 +949,11 @@ void Karte();
 
 int SpielerFrei(unsigned x, unsigned y)
 {
-	BITSET Spezial; unsigned i;
+	BITSET Spezial; /*unsigned i;*/
 	Spezial = Felder[Level[x][y].Feld].Spezial;
 	if (SReitet & Spieler.Status) /* reitet */
-		return MonsterFrei(Spieler.ReitTier, x, y);
-	else if (LevelMonster & Level[x,y].Spezial)
+		return MonsterFrei(&Spieler.ReitTier, x, y);
+	else if (LevelMonster & Level[x][y].Spezial)
 		return FALSE;
 	else if (FeldBegehbar & Spezial && FeldSumpf & Spezial)
 		return Zufall(10) <= 5;
@@ -932,7 +967,7 @@ int SpielerFrei(unsigned x, unsigned y)
 int IsMonster(unsigned x, unsigned y)
 {
 	unsigned i;
-	if (LevelMonster & Level[x,y].Spezial) {
+	if (LevelMonster & Level[x][y].Spezial) {
 		i = FindMonster(x, y);
 		return MonsterImmun & ~Monster[i].Spezial;
 	}
@@ -958,15 +993,15 @@ int IsTuer(unsigned x, unsigned y)
 
 unsigned SpielerBewegung(unsigned x, unsigned y, BITSET t)
 {
-	unsigned i, ix, iy, fx, fy;
-	BITSET b;
-	char ch;
-	int NichtFrei;
+	unsigned /*i,*/ ix, iy, fx, fy;
+	/*BITSET b;*/
+	/*char ch;*/
+	/*int NichtFrei;*/
 
 	Rueckgabe = 0;
 
 	if (SBetrunken & Spieler.Status && Zufall(10) <= 5) { /* betrunken */
-		x = Zufall(23); y = Zufall(23); t = {0};
+		x = Zufall(23); y = Zufall(23); t = (1<<0);
 	}
 
 	if (x > 0 && y > 0
@@ -974,9 +1009,9 @@ unsigned SpielerBewegung(unsigned x, unsigned y, BITSET t)
 	{
 
 		ix = MaxSichtweite; iy = MaxSichtweite;
-		if (x > SichtMitteX) ix++ else if (x < SichtMitteX) ix--
-		if (y > SichtMitteY) iy++ else if (y < SichtMitteY) iy--
-		SichtLevelUmrechnung(ix, iy, fx, fy);
+		if (x > SichtMitteX) ix++; else if (x < SichtMitteX) ix--;
+		if (y > SichtMitteY) iy++; else if (y < SichtMitteY) iy--;
+		SichtLevelUmrechnung(ix, iy, &fx, &fy);
 
 		if (NearSicht(x - 1, y - 1) && IsMonster(fx, fy))
 			NahAngriff(fx, fy); /* Nahkampf */
@@ -998,12 +1033,12 @@ unsigned SpielerBewegung(unsigned x, unsigned y, BITSET t)
 		&& x < 24 && y < 24 && (1 << 1) & t) /* Info */
 	{
 		ix = x - 1; iy = y  - 1;
-		SichtLevelUmrechnung(ix, iy, fx, fy);
+		SichtLevelUmrechnung(ix, iy, &fx, &fy);
 
-		if (LevelBekannt & SichtBereich[ix,iy].Spezial) {
-			if (LevelMonster & Level[fx, fy].Spezial)
+		if (LevelBekannt & SichtBereich[ix][iy].Spezial) {
+			if (LevelMonster & Level[fx][fy].Spezial)
 				InfoMonster(fx, fy);
-			else if (LevelGegenstand & Level[fx, fy].Spezial)
+			else if (LevelGegenstand & Level[fx][ fy].Spezial)
 				InfoGegenstand(fx, fy);
 			else
 				InfoFeld(fx, fy);
@@ -1013,35 +1048,34 @@ unsigned SpielerBewegung(unsigned x, unsigned y, BITSET t)
 	     && y >= 13 && y <= 14 && (1 << 0) & t) /* Menü */
 	{
 		switch (x) {
-		case 25...26: LeiterBenutz(TRUE); break;   /* hoch */
-		case 27...28: LeiterBenutz(FALSE); break; /* runter */
-		case 29...30: Besteigen(); break;
-		case 31...32: DoRucksack(); break;
-		case 33...34: Karte(); break;
-		case 35...36: Ausruhen(); break;
-		case 37...38: if (DiskScreen()) Rueckgabe = 2; /* Quit */
+		case 25 ... 26: LeiterBenutz(TRUE); break;   /* hoch */
+		case 27 ... 28: LeiterBenutz(FALSE); break; /* runter */
+		case 29 ... 30: Besteigen(); break;
+		case 31 ... 32: DoRucksack(); break;
+		case 33 ... 34: Karte(); break;
+		case 35 ... 36: Ausruhen(); break;
+		case 37 ... 38: if (DiskScreen()) Rueckgabe = 2; /* Quit */
 		}
 	} else if (x >= 25 && y == 8) {
 		if ((1 << 0) & t) {
-			Benutze(Spieler.rechteHand); PrintCharakter(5);
+			Benutze(&Spieler.rechteHand); PrintCharakter(5);
 		} else if ((1 << 1) & t)
-			LegeAb(Spieler.rechteHand);
+			LegeAb(&Spieler.rechteHand);
 	} else if (x >= 25 && y == 9) {
 		if ((1 << 0) & t) {
-			Benutze(Spieler.linkeHand); PrintCharakter(5);
+			Benutze(&Spieler.linkeHand); PrintCharakter(5);
 		} else if ((1 << 1) & t)
-			LegeAb(Spieler.linkeHand);
+			LegeAb(&Spieler.linkeHand);
 	} else if (x >= 25 && y == 10) {
 		if ((1 << 1) & t)
-			LegeAb(Spieler.Ruestung);
+			LegeAb(&Spieler.Ruestung);
 	} else if (x >= 25 && y == 11) {
 		if ((1 << 0) & t) {
-			Benutze(Spieler.Ring); PrintCharakter(5);
+			Benutze(&Spieler.Ring); PrintCharakter(5);
 		} else if ((1 << 1) & t)
-			LegeAb(Spieler.Ring);
+			LegeAb(&Spieler.Ring);
 	}
 
 	return Rueckgabe;
 
 }
-
