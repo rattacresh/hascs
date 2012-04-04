@@ -24,7 +24,9 @@ void TestAllocate() {
 	printf("String im allozierten RAM: <%s>\n", meinRAM);
 	printf("(Es sollten %i Buchstaben G zu sehen sein.)\n", GAmount);
 
-	Deallocate(meinRAM);
+	printf("meinRAM-adr vor dealloc: %p\n", meinRAM);
+	Deallocate((void**)&meinRAM);
+	printf("meinRAM-adr nach dealloc (soll nil sein): %p\n", meinRAM);
 	if (meinRAM)
 		printf("FEHLER: meinRAM wurde nicht dealloziert!\n");
 }

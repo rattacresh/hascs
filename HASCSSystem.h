@@ -45,6 +45,7 @@ unsigned NewXMin, NewXMax, NewYMin, NewYMax;
 CacheType Cache[MaxCache+1];
 unsigned AnzCache, CacheCounter, ErrorResult;
 
+
 /* Programmverwaltung ***********************************************/
 
 void InitWorkstation(char *WinName);
@@ -54,7 +55,7 @@ void Error(char *s, int Mode);
 int LoadAndRun(char *Prg, char *Arg);
 
 void *Allocate(unsigned long Bytes);
-void Deallocate(void *Ptr);
+void Deallocate(void **Ptr);
 void *GetBuffer(unsigned long Bytes);
 
 unsigned GetCache(unsigned id);

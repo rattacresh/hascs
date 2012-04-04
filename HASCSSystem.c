@@ -135,11 +135,9 @@ void ExitWorkstation(int result)
 
 void *Allocate(unsigned long Bytes)
 {
-	void *Ptr;
-	if (Bytes == 0) 
+	if (!Bytes) 
 		return NULL;
-	Ptr = malloc(Bytes);
-	return Ptr;
+	return malloc(Bytes);
 }
 
 void *GetBuffer(unsigned long Bytes)
