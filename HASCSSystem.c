@@ -252,6 +252,8 @@ void Deallocate(void **Ptr)
 	if (*Ptr) {
 		free(*Ptr);
 		*Ptr = NULL;
+	} else {
+		Error("NULL-Pointer an Deallocate übergeben", 0);
 	}
 }
 
@@ -554,7 +556,24 @@ void SetzeZufall(unsigned long n)
 	srand(n);
 }
 
-
+/**
+ * Behandelt fatale und nichtfatale Fehler. Gibt eine Meldung aus und
+ * lässt, je nach Mode, den User eine Entscheidung über Fortführung,
+ * Abbruch oder Programmabbruch treffen. So ist es zumindest
+ * gedacht. Momentan sind keine Userentscheidungen möglich, bei
+ * schwerwiegenden Fehlern wird immer das Programm beendet. HASCS
+ * denkt, dass der User immer auf den ersten Button geklickt hat.
+ *
+ * Mode == -1 bedeutet einen fatalen Fehler (alles Ende)
+ * Mode == 0 bedeutet schwerwiegender Fehler, aber die Frage nach dem 
+ *           Programmabbruch ist dem User überlassen. Momentan wird aber
+ *           immer abgebrochen.
+ * Mode == 1 gibt nur eine Meldung aus und das Programm geht weiter
+ * Mode == 2 fragt den User nach Abbruch oder Weiter. Momentan "klickt"
+ *           er immer auf Abbruch.
+ * Mode == 3 gibt nur eine Meldung aus und das Programm geht weiter
+ * 
+ */
 void Error(char *s, int Mode)
 {
 	if (Mode >= 0 && !ShowError)
@@ -564,22 +583,15 @@ void Error(char *s, int Mode)
 
 	// User-Abfrage im Alert-Fenster:
 	/*
-	char q[256];
-	unsigned default;
-	int ok;    
-
-	Assign(s, q, ok);
-	WrapAlert(q, 0);
-	Concat("[3][", q, q, ok);
- default = 1;
- switch (Mode) {
- case -1 : Concat(q, "][ ENDE ]", q, ok); break;
- case 0 : Concat(q, "][ ENDE | WEITER ]", q, ok); default = 2; break;
- case 1 : Concat(q, "][ WEITER ]", q, ok); break;
- case 2 : Concat(q, "][ ABBRUCH | WEITER ]", q, ok); default = 2; break;
- case 3 : Concat(q, "][ ABBRUCH ]", q, ok); break;
- }
- FormAlert(default, q, ErrorResult);
+	  default = 1;
+	  switch (Mode) {
+	  case -1 : Concat(q, "][ ENDE ]", q, ok); break;
+	  case 0 : Concat(q, "][ ENDE | WEITER ]", q, ok); default = 2; break;
+	  case 1 : Concat(q, "][ WEITER ]", q, ok); break;
+	  case 2 : Concat(q, "][ ABBRUCH | WEITER ]", q, ok); default = 2; break;
+	  case 3 : Concat(q, "][ ABBRUCH ]", q, ok); break;
+	  }
+	  FormAlert(default, q, ErrorResult);
 	*/
 
 	ErrorResult = 1; // Der User "hat den ersten Knopf im Alert-Fenster gedrückt"
