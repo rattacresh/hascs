@@ -73,7 +73,7 @@ void SetBuffer(unsigned width, unsigned height, void *Buffer);
 
 FILE *OpenFile(char *Name);
 void CloseFile(FILE *Handle);
-int CreateFile(char *Name);
+FILE *CreateFile(char *Name);
 void DeleteFile(char *Name);
 void ReadFile(FILE *Handle, unsigned long Bytes, void *Ptr);
 void WriteFile(FILE *Handle, unsigned long Bytes, void *Ptr);

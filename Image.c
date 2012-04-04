@@ -175,7 +175,7 @@ int SaveImage(char *Name)
 	HeaderType ImgHeader;
 
 	unsigned z, counter, LineLength, NewLineLength;
-	int fh;
+	FILE* fh;
 			 
 	unsigned FillLine(unsigned z; BildZeile *x)
 	{

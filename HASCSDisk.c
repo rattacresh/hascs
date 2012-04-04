@@ -488,7 +488,8 @@ void DeleteLevels(void)
 
 void LoadOrSavePlayer(int Load);
 {
-	int h; String60Typ s;
+	FILE* h; 
+	String60Typ s;
 	Buffer = GetBuffer(BufferSize);
 	Assign(s, Spieler.Name);
 	Korrektur(s);
@@ -594,7 +595,7 @@ void WriteLevel(char *Name)
 {
 	CharPtr p;
 	unsigned i;
-	int h;
+	FILE* h;
 		
 	void WriteMonster(MonsterTyp *m)
 	{

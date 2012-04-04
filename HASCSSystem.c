@@ -415,11 +415,15 @@ void CloseFile(FILE *Handle)
 
 void DeleteFile(char *Name)
 {
-	//FileError = Delete(Name);
+	FileError = remove(Name);
 }
 
-int CreateFile(char *Name)
+FILE* CreateFile(char *Name)
 {
+	FILE *fp = fopen(Name, "wb");
+	if (!fp)
+		return 0;
+	return fp;
 	/*
 	int Handle;
 	char path[128], file[128];
@@ -433,7 +437,6 @@ int CreateFile(char *Name)
 	FileError = Handle < 0;
 	return Handle;
 	*/
-	return 0;
 }
 
 void ReadFile(FILE *Handle, unsigned long Bytes, void *Ptr)
