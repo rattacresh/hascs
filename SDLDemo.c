@@ -49,6 +49,18 @@ void TestError() {
 	Error("***Dummy-Fehlermeldung*** (die zu keinem Programmabbruch führt, da mode 1)", 1);
 }
 
+void TestBuffer() {
+	char *myBuf = GetBuffer(100);
+	int i;
+	for (i=0; i<7; ++i) 
+		myBuf[i] = 'G';
+	myBuf[7] = '\0';
+	char *otherBufPtr = GetBuffer(10);
+	printf("Die BufferAdr sollten gleich sein.\n");
+	printf("Hier sollten 7 Gs zu sehen sein: %s\n", otherBufPtr);
+	printf("(Wenn ein kleinerer Puffer geholt wird, dann wird der alte nicht gelöscht.)\n");
+}
+
 
 int main(void)
 {
@@ -74,6 +86,10 @@ int main(void)
 
 	printf("Test: Error...\n");
 	TestError();
+	printf("OK\n\n");
+
+	printf("Test: GetBuffer...\n");
+	TestBuffer();
 	printf("OK\n\n");
 
 

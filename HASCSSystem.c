@@ -567,7 +567,7 @@ void SetzeZufall(unsigned long n)
  * Mode == -1 bedeutet einen fatalen Fehler (alles Ende)
  * Mode == 0 bedeutet schwerwiegender Fehler, aber die Frage nach dem 
  *           Programmabbruch ist dem User überlassen. Momentan wird aber
- *           immer abgebrochen.
+ *           immer abgebrochen (außer ShowError ist FALSE).
  * Mode == 1 gibt nur eine Meldung aus und das Programm geht weiter
  * Mode == 2 fragt den User nach Abbruch oder Weiter. Momentan "klickt"
  *           er immer auf Abbruch.
@@ -577,9 +577,17 @@ void SetzeZufall(unsigned long n)
 void Error(char *s, int Mode)
 {
 	if (Mode >= 0 && !ShowError)
-		return; // keine Fehlermeldung 
+		return; // keine Fehlermeldung, da ShowError == FALSE
 	
-	printf("Fehler: %s\n", s);
+	printf("HASCS-Fehlermeldung: %s\n", s);
+	printf("Buttons: ");
+	switch (Mode) {
+	case -1 : printf("[ ENDE ]\n"); break;
+	case  0 : printf("[ ENDE | WEITER ]\n"); break;
+	case  1 : printf("[ WEITER ]\n"); break;
+	case  2 : printf("[ ABBRUCH | WEITER ]\n"); break;
+	case -3 : printf("[ ABBRUCH ]\n"); break;
+	}
 
 	// User-Abfrage im Alert-Fenster:
 	/*
@@ -603,16 +611,11 @@ void Error(char *s, int Mode)
 
 void PrinterOut(char ch)
 {
-	/*
-	do { } while (!PrnOS());
-	PrnOut(ch);
-	*/
 	printf("Ich drucke aus: %c\n", ch);
 }
 
 int PrinterStatus()
 {
-	//return PrnOS();
 	return 0;
 }
 
