@@ -64,7 +64,7 @@ unsigned GetFreq(unsigned f)
 
 int LoadSoundFile(char *f, unsigned id, SoundType s)
 {
-	FILE* h;
+	int h;
 	char header[128];
 	int ok, free;
 

@@ -3,7 +3,7 @@
 #include <SDL/SDL.h>
 #include <limits.h>
 #include <time.h>
-#include <stdio.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include "HASCSSystem.h"
 #include "HASCSGraphics.h"
@@ -387,28 +387,23 @@ int FileName(char *Pattern, char *FileName)
  */
 unsigned long FileLength(char *Filename)
 {
-	FILE *fp = fopen(Filename, "rb");
-	if (!fp)
+	int fhandle = open(Filename, O_RDONLY);
+	if (fhandle == -1)
 		return 0;
-	if (fseek(fp, 0, SEEK_END))
-		Error("FileLength: fseek funktioniert nicht!?", -1);
-	unsigned long result = ftell(fp);
-	if (fclose(fp))
+	int endpos = lseek(fhandle, 0, SEEK_END);
+	if (close(fhandle))
 		Error("FileLength: Fehler beim Schlieﬂen einer Datei!", 1);
-	return result;		
+	return endpos;		
 }
 
-FILE *OpenFile(char *Name)
+int OpenFile(char *Name)
 {
-	FILE *fp = fopen(Name, "r+b");
-	if (!fp)
-		return 0;
-	return fp;
+	return open(Name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 }
 
-void CloseFile(FILE *Handle)
+void CloseFile(int Handle)
 {
-	FileError = fclose(Handle);
+	FileError = close(Handle);
 	//	if (FileError)
 	//	Error("FileLength: Fehler beim Schlieﬂen einer Datei!", 1);	
 }
@@ -423,35 +418,35 @@ void DeleteFile(char *Name)
  * existierende. TODO: soll auch Pfade erzeugen, wenn die noch nicht
  * da sind.
  */
-FILE* CreateFile(char *Name)
+int CreateFile(char *Name)
 {
-	FILE *fp = fopen(Name, "wb");
-	if (!fp) {
+	int fhandle = open(Name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+	if (fhandle<0) {
 		FileError = 1;
-		return NULL;
+		return fhandle;
 	}
-	if (fclose(fp)) {
+	if (close(fhandle)<0) {
 		FileError = 1;
 		Error("FileLength: Fehler beim Schlieﬂen einer Datei!", 1);
 	}
-	return fp;
+	return fhandle;
 }
 
-void ReadFile(FILE *Handle, unsigned long Bytes, void *Ptr)
+void ReadFile(int Handle, unsigned long Bytes, void *Ptr)
 {
-	size_t ReadBytes = fread(Ptr, 1, Bytes, Handle);
+	size_t ReadBytes = read(Handle, Ptr, Bytes);
 	FileError = Bytes != ReadBytes;
 }
 
-void WriteFile(FILE *Handle, unsigned long Bytes, void *Ptr)
+void WriteFile(int Handle, unsigned long Bytes, void *Ptr)
 {
-	size_t WroteBytes = fwrite(Ptr, 1, Bytes, Handle);
+	size_t WroteBytes = write(Handle, Ptr, Bytes);
 	FileError = Bytes != WroteBytes;
 }
 
-void FileSeek(FILE *Handle, unsigned long pos)
+void FileSeek(int Handle, unsigned long pos)
 {
-	FileError = fseek(Handle, pos, 0);
+	FileError = lseek(Handle, pos, 0);
 }
 
 void RenameFile(char *s, char *d)

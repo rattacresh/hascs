@@ -115,7 +115,7 @@ int Decompress(BytePtr source, BytePtr dest)
 
 int LoadImageN(unsigned n, unsigned w, h)
 {
-	FILE* handle;
+	int handle;
 	unsigned long length;
 	void *ImgBuffer, Start;
 	char Name[128]
@@ -175,7 +175,7 @@ int SaveImage(char *Name)
 	HeaderType ImgHeader;
 
 	unsigned z, counter, LineLength, NewLineLength;
-	FILE* fh;
+	int fh;
 			 
 	unsigned FillLine(unsigned z; BildZeile *x)
 	{

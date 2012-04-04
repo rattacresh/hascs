@@ -91,7 +91,7 @@ void ReadBlock(int handle, unsigned anzahl, CharPtr a)
 
 void LoadOrSaveDat(int Load, char *FileName)
 {
-	FILE* h;
+	int h;
 	String60Typ s;
 	Buffer = GetBuffer(BufferSize);
 	Concat(s, PrgPath, FileName);
@@ -117,7 +117,7 @@ void LoadOrSaveDat(int Load, char *FileName)
 
 void LoadOrSaveSprites(int Load; char *FileName)
 {
-	FILE* h;
+	int h;
 	unsigned long Count;
 	String60Typ s;
 	Assign(LastSprites, FileName);
@@ -488,7 +488,7 @@ void DeleteLevels(void)
 
 void LoadOrSavePlayer(int Load);
 {
-	FILE* h; 
+	int h; 
 	String60Typ s;
 	Buffer = GetBuffer(BufferSize);
 	Assign(s, Spieler.Name);
@@ -595,7 +595,7 @@ void WriteLevel(char *Name)
 {
 	CharPtr p;
 	unsigned i;
-	FILE* h;
+	int h;
 		
 	void WriteMonster(MonsterTyp *m)
 	{

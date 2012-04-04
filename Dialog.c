@@ -1566,7 +1566,7 @@ void CodeDialog(unsigned long n, unsigned long l, void *b)
 int LoadDialog(unsigned n, int coded)
 {
 	char s[128];
-	FILE* f; /* Filehandle */
+	int f; /* Filehandle */
 	unsigned id, i;
 
 	DialogNummer = n;
@@ -1602,7 +1602,7 @@ int LoadDialog(unsigned n, int coded)
 int SaveDialog(unsigned n, int coded)
 {
 	String80Type s;
-	FILE* f;
+	int f;
 	unsigned long l;
 	BITSET *p;
 

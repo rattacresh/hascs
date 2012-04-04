@@ -75,9 +75,9 @@ void TestFileFunc() {
 	printf("Größe HASCSMonster.c: %lu\n", FileLength("HASCSMonster.c"));
 	printf("Größe NOTAFILE:       %lu\n", FileLength("NOTAFILE"));
 	
-	FILE *dummyfile = CreateFile("einDummyFile");
+	int dummyfile = CreateFile("einDummyFile");
 	if (!dummyfile)
-		printf("FEHLER: Habe keinen Filepointer bekommen!\n");
+		printf("FEHLER: Habe keinen Filehandler bekommen!\n");
 	else
 		printf("Habe die Datei einDummyFile angelegt:\n");
 	LoadAndRun("ls -l einDummyFile", "");
