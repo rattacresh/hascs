@@ -287,13 +287,13 @@ void SetNewSprite(unsigned x, unsigned y);
 void SetOldSprite(unsigned x, unsigned y);
 int MakeShoot(unsigned *qx, unsigned *qy, unsigned zx, unsigned zy, unsigned time,
 	int mode);
-void FillRectangle (int x0, int y0, int x1, int y1, SpriteType *Sprite);
+void FillRectangle(int x0, int y0, int x1, int y1, SpriteType *Sprite);
 void RestoreScreen();
 void ReserveScreen(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
 
 void PrintCharakter(unsigned Was);
 void PrintMenue(void);
-void PrintGegenstand (GegenstandTyp *g);
+void PrintGegenstand(GegenstandTyp *g);
 void PrintLevelName(char *s);
 
 void DisplayCharakter(SpielerTyp *s);
