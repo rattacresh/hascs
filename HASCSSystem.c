@@ -451,16 +451,20 @@ void WriteFile(FILE *Handle, unsigned long Bytes, void *Ptr)
 
 void FileSeek(FILE *Handle, unsigned long pos)
 {
-	//long ret;
-	//Seek(pos, Handle, beginning, ret);
-	//FileError = ret != pos;
+	FileError = fseek(Handle, pos, 0);
 }
 
 void RenameFile(char *s, char *d)
 {
-	//Rename(s, d);
+	FileError = rename(s, d);
 }
 
+/**
+ * Soll eine File-Select-Box öffnen. Die gibt es im SDL nicht -- wir
+ * müssen sie selbst schreiben (TODO). Wird hauptsächlich im
+ * HASCSEditor verwendet, so dass wir auch erst die Engine fertig
+ * machen können.
+ */
 int SelectFile(char *msg, char *path, char *file)
 {
 	/*
