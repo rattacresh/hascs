@@ -61,6 +61,17 @@ void TestBuffer() {
 	printf("(Wenn ein kleinerer Puffer geholt wird, dann wird der alte nicht gelöscht.)\n");
 }
 
+void TestCaches() {
+	printf("Rückgabe NewCache(7, 1024): %u\n\n", NewCache(7, 1024));
+	printf("Rückgabe NewCache(0, 2666): %u\n\n", NewCache(0, 2666));
+	printf("Rückgabe GetCache(7): %u\n\n", GetCache(7));
+	printf("Rückgabe GetCache(0): %u\n\n", GetCache(0));
+	printf("Rückgabe GetCache(3): %u\n\n", GetCache(3));
+	printf("Lösche Cache mit Index 1 (Cache mit id 7):\nFreeCache(1)\n\n"); FreeCache(1);
+	printf("Rückgabe GetCache(7): %u\n", GetCache(7));
+}
+
+
 
 int main(void)
 {
@@ -90,6 +101,10 @@ int main(void)
 
 	printf("Test: GetBuffer...\n");
 	TestBuffer();
+	printf("OK\n\n");
+
+	printf("Test: Caches...\n");
+	TestCaches();
 	printf("OK\n\n");
 
 

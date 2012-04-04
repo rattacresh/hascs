@@ -126,14 +126,19 @@ void InitWorkstation(char *WinName)
 #endif
 }
 
-
+/**
+ * Beendet das gesamte Programm.
+ */
 void ExitWorkstation(int result)
 {
 	atexit(SDL_Quit);
 	exit(result);
 }
 
-
+/**
+ * Alloziert einen Speicherbereich von Bytes Größe im RAM und liefert
+ * einen Pointer darauf zurück.
+ */
 void *Allocate(unsigned long Bytes)
 {
 	if (!Bytes) 
@@ -141,6 +146,12 @@ void *Allocate(unsigned long Bytes)
 	return malloc(Bytes);
 }
 
+/**
+ * Liefert einen Pointer auf den HASCS-Systempuffer. Übergeben wird
+ * die erwünschte Puffergröße in Bytes. Sollte der Systempuffer zu
+ * klein sein, so wird er vergrößert. Dabei werden jedoch die
+ * bisherigen Inhalte gelöscht.
+ */
 void *GetBuffer(unsigned long Bytes)
 {    
 	printf("GetBuffer: Bytes = %lu\n", Bytes);
@@ -164,6 +175,10 @@ void *GetBuffer(unsigned long Bytes)
 	return BufferAdr;
 }
 
+/**
+ * Liefert den index des Caches mit der übergebenen id. Gibt es keinen
+ * Cache mit dieser id, so wird 0 zurückgegeben.
+ */
 unsigned GetCache(unsigned id)
 {
 	unsigned i;
@@ -184,6 +199,10 @@ unsigned GetCache(unsigned id)
 	return 0;
 }
 
+/**
+ * Ein Cache wird gelöscht. Der übergebene Parameter ist der index,
+ * nicht die id des Caches.
+ */
 void FreeCache(unsigned n)
 {
 	unsigned i;
@@ -199,6 +218,10 @@ void FreeCache(unsigned n)
 	}
 }
 
+/**
+ * Legt einen neuen Cache mit der ID id und der Größe Bytes an.
+ * Liefert den index des neues Caches zurück.
+ */
 unsigned NewCache(unsigned id, unsigned long Bytes)
 {
 	unsigned i;
@@ -277,7 +300,13 @@ int LoadAndRun(char *Prg, char *Arg)
 
 /* Bildschirmverwaltung *********************************************/
 
-
+/**
+ * Kopiert einen rechteckigen Bereich auf dem Bildschirmpuffer oder
+ * zwischen Pic-Buffer und Bildschirmpuffer.
+ *
+ * TODO: Scheint noch nicht richtig zu funktionieren. Es wird zwar ein
+ * Bildbereich kopiert, aber nicht der, der angegeben wurde.
+ */
 void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 {
 	  SDL_Rect sourceRect, destRect;
