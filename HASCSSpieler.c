@@ -14,32 +14,33 @@
 unsigned Rueckgabe;
 
 
-int SpielerFrei(unsigned x, unsigned y)
-	FORWARD;
+int SpielerFrei(unsigned x, unsigned y);
 
-void Minus(unsigned *x, unsigned y)
+void Minus(unsigned *ref_x, unsigned y)
+#define x (*ref_x)
 {
-	if (y > *x) {
-		*x = 0;
-	} else {
-		*x = *x - y;
+	if (y > x)
+		x = 0;
+	else {
+		x = x - y;
 	}
 }
+#undef x
 
 int DiskScreen()
 {
-	unsigned sound, load, save, quit, print, cancel, x;
+	unsigned sound, load, save, quit, print, /*cancel,*/ x;
 	NewScreen(8, 4, 24, 16, " HASCS III ");
 	print = AddObject(2, 2, 20, 1, "#133#", BigText|Outlined|Selectable);
-	if (DruckerAusgabe) { SetFlagSelected(print, 1) }
+	if (DruckerAusgabe) SetFlagSelected(print, 1);
 	sound = AddObject(2, 4, 20, 1, "#135#", BigText|Outlined|Selectable);
-	if (SoundAusgabe) { SetFlagSelected(sound, 1) }
+	if (SoundAusgabe) SetFlagSelected(sound, 1);
 	load = AddObject(2, 7, 20, 1, "#130#", BigText|Outlined|Exit);
 	save = 0;
 	if (LevelNoSave & ~LevelFlags)
 		save = AddObject(2, 9, 20, 1, "#131#", BigText|Outlined|Exit);
 	quit = AddObject(2, 11, 20, 1, "#132#", BigText|Outlined|Exit);
-	cancel = AddObject(2, 13, 20, 1, "#134#", BigText|Outlined|Exit);
+	/*cancel =*/ AddObject(2, 13, 20, 1, "#134#", BigText|Outlined|Exit);
 	DrawScreen();
 	x = HandleScreen();
 	DruckerAusgabe = GetFlagSelected(print) != 0;
@@ -71,42 +72,45 @@ int ZaubernGelungen(void)
 	}
 }
  
-int RingAnlegen(GegenstandTyp *r)
+int RingAnlegen(GegenstandTyp *ref_r)
+#define r (*ref_r)
 {
-	if ((Spieler.Ring.KennNummer != 0)) {
+	if (Spieler.Ring.KennNummer != 0) {
 		OutputText("#711#"); /* Zwei Ringe? */
 		return FALSE;
 	} else if (ZaubernGelungen()) { 
 		Spieler.Ring = r;
 		Erfahrung(15 + Zufall(15));
-		if (Ring == 1) {
-			Spieler.Status = Spieler.Status | r->RingWirkung;
-			Spieler.Permanent = Spieler.Permanent | r->RingWirkung;
-		} else if (Ring >= 10 && Ring <= 15) { /* Basiswerterhöhung */
-			ChangeBasiswert(Ring - 10, r->RingWirkung);
-		} else if (Ring >= 20 && Ring <= 25) { /* Basiswertsenkung */
-			ChangeBasiswert(Ring - 20, -r->RingWirkung);
-		}
+		if (r.Ring == 1) {
+			Spieler.Status = Spieler.Status | r.RingWirkung;
+			Spieler.Permanent = Spieler.Permanent | r.RingWirkung;
+		} else if (r.Ring >= 10 && r.Ring <= 15) /* Basiswerterhöhung */
+			ChangeBasiswert(r.Ring - 10, r.RingWirkung);
+		else if (r.Ring >= 20 && r.Ring <= 25) /* Basiswertsenkung */
+			ChangeBasiswert(r.Ring - 20, -r.RingWirkung);
 		OutputText("#669#");
 		return TRUE;
 	} else
 		return FALSE;
 }
+#undef r
 
-void RingAblegen(GegenstandTyp *r)
+void RingAblegen(GegenstandTyp *ref_r)
+#define r (*ref_r)
 {
 	if (Ring == 1) { /* Statusänderung */
 		Spieler.Status = Spieler.Status & ~r->RingWirkung;
 		Spieler.Permanent = Spieler.Permanent & ~ r->RingWirkung;
-	} else if (Ring >= 10 && Ring <= 15) { /* Basiswerterhöhung */
+	} else if (Ring >= 10 && Ring <= 15) /* Basiswerterhöhung */
 		ChangeBasiswert(Ring - 10, -r->RingWirkung);
-	} else if (Ring >= 20 && Ring <= 25) { /* Basiswertsenkung */
+	else if (Ring >= 20 && Ring <= 25) /* Basiswertsenkung */
 		ChangeBasiswert(Ring - 20, -r->RingWirkung);
-	}
 	KennNummer = 0;
 }
+#undef r
 
-int RuestungAnlegen(GegenstandTyp *r)
+int RuestungAnlegen(GegenstandTyp *ref_r)
+#define r (*ref_r)
 {
 	if (Spieler.Ruestung.KennNummer == 0) {
 		if (GMagisch & Spieler.Ruestung.Flags) {
@@ -120,11 +124,14 @@ int RuestungAnlegen(GegenstandTyp *r)
 		return FALSE;
 	}
 }
+#undef r
 
-void RuestungAblegen(GegenstandTyp *r)
+void RuestungAblegen(GegenstandTyp *ref_r)
+#define r (*ref_r)
 {
 	r->KennNummer = 0;
 }
+#undef r
 
 int GetButton(unsigned *x, unsigned *y)
 {
@@ -146,7 +153,7 @@ int GetButton(unsigned *x, unsigned *y)
 		SichtLevelUmrechnung(x, y, x, y);
 		return TRUE;
 	} else {
-		if (((x - 1) <= MaxSichtmal2 && (y - 1) <= MaxSichtmal2)) {
+		if ((x - 1) <= MaxSichtmal2 && (y - 1) <= MaxSichtmal2) {
 			SichtLevelUmrechnung((x - 1), (y - 1), x, y);
 			return TRUE;
 		} else
@@ -332,9 +339,8 @@ void LeiterBenutz(int Hoch)
 				Rueckgabe = 3;
 			}
 		}
-	} else {
+	} else
 		OutputText("#523#");
-	}
 }
 
 void TuerOeffnen(unsigned px, unsigned py)
@@ -663,7 +669,7 @@ void Benutze(GegenstandTyp *r)
 	case GSchluessel: BenutzeSchluessel(r); break;
 	case GNahrung:    NimmNahrung(r); break;
 	default:
-		if (r.KennNummer > 10) { /* Sondergegenstand */
+		if (r.KennNummer > 10) /* Sondergegenstand */
 			if (r.DialogNr != 0) {
 				DoGegenstandDialog(r.DialogNr, r);
 				if (r.DialogAnzahl > 0) {
@@ -672,7 +678,6 @@ void Benutze(GegenstandTyp *r)
 						r.KennNummer = 0;
 				}
 			}
-		}
 	}
 }
 
@@ -861,23 +866,20 @@ void DoRucksack(void)
 			Nimm(i);
 			PrintCharakter(5);
 		}
-	} else if (i >= 1 && i <= MaxRuck && (1 << 1) & b) { /* ablegen */
+	} else if (i >= 1 && i <= MaxRuck && (1 << 1) & b) /* ablegen */
 		if (Spieler.Rucksack[i].KennNummer) {
 			BeginOutput(); Print("#720#"); /* Wohin ablegen... */
-			if (GetButton(x, y)) { /* dahin ablegen */
-				if (Near(x, y)) {
+			if (GetButton(x, y)) /* dahin ablegen */
+				if (Near(x, y))
 					if (LegeGegenstand(x, y, Spieler.Rucksack[i])) {
 						Wegwerfen(i);
 						Print("#721#"); /* OK */
 						EndOutput();
 						return;
 					}
-				}
-			}
 			Print("#722#");
 			EndOutput();
 		}
-	}
 }
 
 void DoGegenstand(unsigned x, unsigned y)
@@ -918,7 +920,7 @@ int SpielerFrei(unsigned x, unsigned y)
 		return MonsterFrei(Spieler.ReitTier, x, y);
 	else if (LevelMonster & Level[x,y].Spezial)
 		return FALSE;
-	else if ((FeldBegehbar & Spezial && FeldSumpf & Spezial))
+	else if (FeldBegehbar & Spezial && FeldSumpf & Spezial)
 		return Zufall(10) <= 5;
 	else if (FeldBegehbar & Spezial)
 		return TRUE;
@@ -999,13 +1001,12 @@ unsigned SpielerBewegung(unsigned x, unsigned y, BITSET t)
 		SichtLevelUmrechnung(ix, iy, fx, fy);
 
 		if (LevelBekannt & SichtBereich[ix,iy].Spezial) {
-			if (LevelMonster & Level[fx, fy].Spezial) {
+			if (LevelMonster & Level[fx, fy].Spezial)
 				InfoMonster(fx, fy);
-			} else if (LevelGegenstand & Level[fx, fy].Spezial) {
+			else if (LevelGegenstand & Level[fx, fy].Spezial)
 				InfoGegenstand(fx, fy);
-			} else {
+			else
 				InfoFeld(fx, fy);
-			}
 		}
 
 	} else if (x >= 25 && x <= 38
