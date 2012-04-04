@@ -418,25 +418,23 @@ void DeleteFile(char *Name)
 	FileError = remove(Name);
 }
 
+/**
+ * Erzeugt eine neue Datei -- oder überschreibt eine
+ * existierende. TODO: soll auch Pfade erzeugen, wenn die noch nicht
+ * da sind.
+ */
 FILE* CreateFile(char *Name)
 {
 	FILE *fp = fopen(Name, "wb");
-	if (!fp)
-		return 0;
-	return fp;
-	/*
-	int Handle;
-	char path[128], file[128];
-	Create(Name, 0, Handle);
-	if (Handle == -34) { // Path not found 
-		SplitPath(Name, path, file);
-		path[(sizeof path)-1] = '\0';
-		if (!DirCreate(path));
-		Create(Name, 0, Handle);
+	if (!fp) {
+		FileError = 1;
+		return NULL;
 	}
-	FileError = Handle < 0;
-	return Handle;
-	*/
+	if (fclose(fp)) {
+		FileError = 1;
+		Error("FileLength: Fehler beim Schließen einer Datei!", 1);
+	}
+	return fp;
 }
 
 void ReadFile(FILE *Handle, unsigned long Bytes, void *Ptr)
