@@ -380,6 +380,10 @@ int FileName(char *Pattern, char *FileName)
 	return 0;
 }
 
+/**
+ * Liefert die Größe einer Datei in Bytes zurück. Falls die Datei
+ * nicht existiert, so wird 0 zurückgegeben.
+ */
 unsigned long FileLength(char *Filename)
 {
 	FILE *fp = fopen(Filename, "r");
