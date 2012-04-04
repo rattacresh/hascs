@@ -245,11 +245,10 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 
 void Deallocate(void *Ptr)
 {
-	/*
-	if (Ptr)
-		if (Free(Ptr))
-			Ptr = NULL;
-	*/
+	if (Ptr) {
+		free(Ptr);
+		Ptr = NULL;
+	}
 }
 
 
