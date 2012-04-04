@@ -245,4 +245,3 @@ void GraphicsInit(void)
 	SetSpritePart = SetMonoSpritePart;
 	SetBuffer(640, 400, &Bildschirm);
 }
-

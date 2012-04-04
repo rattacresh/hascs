@@ -5,6 +5,7 @@
 #include <time.h>
 #include <unistd.h>
 #include "HASCSSystem.h"
+#include "HASCSGraphics.h"
 
 int ScreenWidth, ScreenHeight; //, ScreenPlanes;
 
@@ -85,7 +86,7 @@ void InitWorkstation(char *WinName)
 	
 	SDL_WM_SetCaption(WinName, WinName);    
 
-
+	GraphicsInit();
 #if 0
 
 	SDL_Color colors[256];
@@ -96,8 +97,6 @@ void InitWorkstation(char *WinName)
 	
 	SDL_Rect  dst = {0,0,640,400};
 #endif
-
-
 }
 
 
@@ -118,8 +117,7 @@ void *Allocate(unsigned long Bytes)
 }
 
 void *GetBuffer(unsigned long Bytes)
-{
-    
+{    
 	printf("GetBuffer: Bytes = %lu\n", Bytes);
 
 	if (Bytes >= BufferLen) {
@@ -145,16 +143,15 @@ unsigned GetCache(unsigned id)
 {
 	unsigned i;
     
-	/*
-	  InOut.WriteLn();
-	  InOut.WriteString("GetCache: id = "); InOut.WriteCard(id, 1);
-	*/
+	printf("GetCache: id = %u\n", id);
     
 	for (i = 1; i <= AnzCache; i++)
 		if (id == Cache[i].CacheId) {
 			CacheCounter++;
 			Cache[i].CacheUsed = CacheCounter;
-	    
+
+
+			
 			/*
 			  InOut.WriteString("  index = "); InOut.WriteCard(i, 1);
 			  InOut.WriteString("  buffer = "); InOut.WriteLNum(CacheBuffer, 10, 1, ' ');
@@ -578,6 +575,8 @@ void Error(char *s, int Mode)
 		return; // keine Fehlermeldung 
 	
 	printf("Fehler: %s\n", s);
+
+	// User-Abfrage im Alert-Fenster:
 	/*
 	char q[256];
 	unsigned default;
@@ -595,9 +594,12 @@ void Error(char *s, int Mode)
  case 3 : Concat(q, "][ ABBRUCH ]", q, ok); break;
  }
  FormAlert(default, q, ErrorResult);
- if (ErrorResult == 1 && Mode <= 0)
-	 ExitWorkstation(1);
 	*/
+
+	ErrorResult = 1; // Der User "hat den ersten Knopf im Alert-Fenster gedrückt"
+
+	if (ErrorResult == 1 && Mode <= 0)
+		ExitWorkstation(1);
 }
 
 

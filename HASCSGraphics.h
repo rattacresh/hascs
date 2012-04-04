@@ -51,5 +51,8 @@ void ScrollUp(unsigned x, unsigned y, unsigned w, unsigned h);
 /* Füllt Bildschirmausschnitt */
 void Fill(unsigned x, unsigned y, unsigned w, unsigned h, unsigned pattern);
 
+/* Muss vor der Benutzung von HASCSGraphics-Funktionen einmal
+   aufgerufen werden. */
+void GraphicsInit(void);
 
 #endif /* HASCSGRAPHICS_H */
