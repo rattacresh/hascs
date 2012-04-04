@@ -386,18 +386,14 @@ int FileName(char *Pattern, char *FileName)
  */
 unsigned long FileLength(char *Filename)
 {
-	FILE *fp = fopen(Filename, "r");
+	FILE *fp = fopen(Filename, "rb");
 	if (!fp)
 		return 0;
-	
 	if (fseek(fp, 0, SEEK_END))
 		Error("FileLength: fseek funktioniert nicht!?", -1);
-
 	unsigned long result = ftell(fp);
-
 	if (fclose(fp))
-		Error("Fehler beim Schlieﬂen einer Datei!", 1);
-
+		Error("FileLength: Fehler beim Schlieﬂen einer Datei!", 1);
 	return result;		
 }
 

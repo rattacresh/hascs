@@ -71,6 +71,10 @@ void TestCaches() {
 	printf("Rückgabe GetCache(7): %u\n", GetCache(7));
 }
 
+void TestFileFunc() {
+	printf("Größe HASCSMonster.c: %lu\n", FileLength("HASCSMonster.c"));
+	printf("Größe NOTAFILE:       %lu\n", FileLength("NOTAFILE"));
+}
 
 
 int main(void)
@@ -105,6 +109,10 @@ int main(void)
 
 	printf("Test: Caches...\n");
 	TestCaches();
+	printf("OK\n\n");
+
+	printf("Test: File-Funktionen...\n");
+	TestFileFunc();
 	printf("OK\n\n");
 
 
