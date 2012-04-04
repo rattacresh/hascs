@@ -439,12 +439,8 @@ FILE* CreateFile(char *Name)
 
 void ReadFile(FILE *Handle, unsigned long Bytes, void *Ptr)
 {
-	/*
-	unsigned long Count;
-	Count = Bytes;
-	Read(Handle, Bytes, Ptr);
-	FileError = Bytes != Count;
-	*/
+	size_t ReadBytes = fread(Ptr, 1, Bytes, Handle);
+	FileError = Bytes != ReadBytes;
 }
 
 void WriteFile(FILE *Handle, unsigned long Bytes, void *Ptr)
