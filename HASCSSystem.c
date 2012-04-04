@@ -79,7 +79,7 @@ void InitWorkstation(char *WinName)
 	
 	ScreenMFDB = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_HWSURFACE);
 	if (ScreenMFDB == NULL) {
-		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung 640*400 öffnen: %s\n", SDL_GetError());
+		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung %ix%i öffnen: %s\n", ScreenWidth, ScreenHeight, SDL_GetError());
 		exit(1);
 	}
 	
@@ -104,6 +104,7 @@ void InitWorkstation(char *WinName)
 void ExitWorkstation(int result)
 {
 	atexit(SDL_Quit);
+	exit(result);
 }
 
 
@@ -119,11 +120,7 @@ void *Allocate(unsigned long Bytes)
 void *GetBuffer(unsigned long Bytes)
 {
     
-	/*
-	  InOut.WriteLn();
-	  InOut.WriteString("GetBuffer: Bytes = ");
-	  InOut.WriteLNum(Bytes, 10, 1, ' ');
-	*/
+	printf("GetBuffer: Bytes = %lu\n", Bytes);
 
 	if (Bytes >= BufferLen) {
 		BufferLen = Bytes + 1;
@@ -139,10 +136,7 @@ void *GetBuffer(unsigned long Bytes)
 	}
 	BufferAdr[Bytes] = 0; // Endmarkierung 
 
-	/*
-	  InOut.WriteString("  BufferAdr = ");
-	  InOut.WriteLNum(BufferAdr, 10, 1, ' ');
-	*/
+	printf("  BufferAdr = %p\n", BufferAdr);
     
 	return BufferAdr;
 }
@@ -506,10 +500,10 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		*ref_x = event.button.x;
 		*ref_y = event.button.y;
 		switch (event.button.button) {
-		case 1: 
+		case SDL_BUTTON_LEFT: 
 			*ref_b = MausLinks;
 			break;
-		case 3: 
+		case SDL_BUTTON_RIGHT: 
 			*ref_b = MausRechts;
 			break;
 		default:
@@ -517,7 +511,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		}
                 break;
         case SDL_KEYDOWN:
-		printf("The %s key was pressed (Code %i)!\n",
+		printf("The %s key was pressed (code %i)!\n",
 		       SDL_GetKeyName(event.key.keysym.sym), event.key.keysym.sym);		
 		*ref_ch = event.key.keysym.sym;
 		break;
@@ -580,13 +574,15 @@ void SetzeZufall(unsigned long n)
 
 void Error(char *s, int Mode)
 {
+	if (Mode >= 0 && !ShowError)
+		return; // keine Fehlermeldung 
+	
+	printf("Fehler: %s\n", s);
 	/*
 	char q[256];
 	unsigned default;
-	int ok;
-    
-	if (Mode >= 0 && !ShowError)
-		return; // keine Fehlermeldung 
+	int ok;    
+
 	Assign(s, q, ok);
 	WrapAlert(q, 0);
 	Concat("[3][", q, q, ok);
@@ -611,6 +607,7 @@ void PrinterOut(char ch)
 	do { } while (!PrnOS());
 	PrnOut(ch);
 	*/
+	printf("Ich drucke aus: %c\n", ch);
 }
 
 int PrinterStatus()
