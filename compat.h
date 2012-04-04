@@ -2,11 +2,14 @@
 #define COMPAT_H
 #include <ctype.h>
 #include <string.h>
+#include <stdint.h>
 #define CAP(c) toupper(c)
 #define HIGH(s) 1024 /* greater than any string */
 #define TRUE 1
 #define FALSE 0
 #define INSet(a,b) strchr(b,a)
+#define BITSET unsigned
+#define LENGTH(s) strlen(s)
 #if 0
 /* compat stubs begin */
 #define bee 0

@@ -384,10 +384,10 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 }
 
 
-void Korrektur(char *s, size_t n;)
+void Korrektur(char *s)
 {
 	unsigned i;
-	for (i = 0; i <= n; i++) {
+	for (i = 0; i <= HIGH(s); i++) {
 		if (s[i] == '\0') return;
 		if (s[i] != '.' && s[i] != '\' && s[i] != ':') {
 			s[i] = CAP(s[i]);
@@ -563,10 +563,10 @@ int NextLine(CharPtr p)
 	return *p != '\0';
 }
 
-void SetString(CharPtr p, char *s, size_t n)
+void SetString(CharPtr p, char *s)
 {
 	unsigned i;
-	for (i = 0; i <= n; i++) {
+	for (i = 0; i <= HIGH(s); i++) {
 		if (s[i] == '\0') return;
 		*p++ = s[i];
 	}

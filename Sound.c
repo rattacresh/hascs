@@ -32,10 +32,10 @@ int DMASound()
 }
 
 
-int InBuffer(unsigned l, char *p, char *s, size_t n)
+int InBuffer(unsigned l, char *p, char *s)
 {
 	unsigned i;
-	for (i = 0; i <= n; i++) {
+	for (i = 0; i <= HIGH(s); i++) {
 		if (s[i] == '\0') return TRUE;
 		if (p[l] != s[i]) return FALSE;
 		l++;

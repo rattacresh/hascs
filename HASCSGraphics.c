@@ -1,14 +1,14 @@
 #include "HASCSGraphics.h" /* HASCSGraphics module */
 
 #include "HASCSSystem.h"
-
+#include <arpa/inet.h> /* byte order htons() ntohs()*/
 
 
 #define Black ((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7) \
 	|(1<<8)|(1<<9)|(1<<10)|(1<<11)|(1<<12)|(1<<13)|(1<<14)|(1<<15))
 
-BITSET Bildschirm[16000]; /* virtueller Bildschirm */
-BITSET mask[4] = {
+uint16_t Bildschirm[16000]; /* virtueller Bildschirm */
+uint16_t mask[4] = {
 	(1<<15)|(1<<14)|(1<<13)|(1<<12),
 	(1<<11)|(1<<10)|(1<< 9)|(1<< 8),
 	(1<< 7)|(1<< 6)|(1<< 5)|(1<< 4),
@@ -51,7 +51,8 @@ void OrMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
 
 void SetMonoChar(unsigned x,unsigned y, char ch)
 {
-	register unsigned i,h,m;
+	register unsigned i,h;
+	uint16_t m;
 
 	i = y * 640 + x/2;
 	m = x % 2 ? 0x00ff : 0xff00;
@@ -74,7 +75,7 @@ void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, SpriteType *ref_Sprite)
 #define Sprite (*ref_Sprite)
 {
 	register unsigned i,j;
-	register BITSET m;
+	register uint16_t m;
 	unsigned z[4];
 	j = f / 4 * 4;
 	for (i = 0; i <= 3; i++) {

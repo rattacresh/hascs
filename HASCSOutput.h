@@ -1,6 +1,7 @@
 #ifndef HASCSOUTPUT_H
 #define HASCSOUTPUT_H
 
+#include "compat.h"
 
 /*
 

@@ -1,7 +1,7 @@
 #ifndef HASCSGRAPHICS_H
 #define HASCSGRAPHICS_H
 
-#include <inttypes.h>
+#include "compat.h"
 /*
    Grafik- und Textausgaben auf den HASCS II Bildschirm.
 
@@ -11,7 +11,7 @@
 
 #define MaxSprites 160
 
-typedef BITSET SpriteType[16];
+typedef uint16_t SpriteType[16];
 
 typedef SpriteType SpriteArrayType[MaxSprites];
 

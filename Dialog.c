@@ -67,10 +67,11 @@
 typedef char String80Type[80];
 typedef unsigned *CardPtr;
 typedef String80Type *StringPtr;
-typedef unsigned CharSet[(1 << CHAR_BIT) / sizeof (unsigned)];
+/*typedef unsigned CharSet[(1 << CHAR_BIT) / sizeof (unsigned)];*/
+typedef char *CharSet;
 typedef char *CharPtr;
 
-typedef void (*ActionProc)(CharPtr);
+typedef void (*ActionProc)(CharPtr *);
 typedef struct {
 	char name[21];
 	ActionProc action;
@@ -90,7 +91,44 @@ typedef struct {
 	void *LabelAddress;
 } LabelType;
 
-static CommandType Command[] = {
+static unsigned fx, fy, fw, fh/*, i*/; /* Fensterausmaße in Sprites */
+static unsigned ZeilenAus, ZeilenPos = 1, Redraw,
+    DialogBreite, DialogHoehe, DialogNummer = 9999,
+    x, y, w, h;
+static unsigned long DialogLaenge;
+static CharPtr DialogBuffer; /* Dialogpuffer */
+static int Continue, OpenWindow; /* Dialogausführung */
+static String80Type ein;
+static unsigned long DebugLevel;
+static CharSet VarSet = "abcdefghijklmnopqrstuvwxyz"
+		 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		 ".0123456789",
+	OpSet = ":=+-|&<>*/~#",
+	NumberSet = "0123456789";
+
+static MonsterTyp *SelectedMonster = NULL;
+static GegenstandTyp *SelectedGegenstand = NULL;
+static ParameterTyp *SelectedParameter = NULL;
+
+static LabelType ReturnAddress[MaxGosub+1]; /* GOSUB Stack */
+static unsigned ReturnLevel;
+
+static LabelType Labels[MaxLabel+1]; /* Label Adressen */
+static unsigned LabelAnzahl;
+    
+static String80Type DialogText[MaxZeilen + 1]; /* Texte für Hyperclick */
+
+static unsigned LocalVar[26];
+    
+void Nothing(CharPtr *p), Goto(CharPtr *p), Input(CharPtr *p),
+	End(CharPtr *p), Label(CharPtr *p), Window(CharPtr *p),
+	If(CharPtr *p), Picture(CharPtr *p), Wait(CharPtr *p),
+	Select(CharPtr *p), XCopy(CharPtr *p), Aim(CharPtr *p),
+	XTeleport(CharPtr *p), Delete(CharPtr *p), Sound(CharPtr *p),
+	Invert(CharPtr *p), Output(CharPtr *p), Gosub(CharPtr *p),
+	Return(CharPtr *p), Call(CharPtr *p);
+
+static CommandType XCommand[] = {
 	/* Kommandos */
 	{"", Nothing},
 	{"GOTO", Goto},
@@ -104,9 +142,9 @@ static CommandType Command[] = {
 	{"WAIT", Wait},
 	{"SELECT", Select},
 	{"THEN", Nothing},
-	{"COPY", Copy},
+	{"COPY", XCopy},
 	{"AIM", Aim},
-	{"TELEPORT", Teleport},
+	{"TELEPORT", XTeleport},
 	{"DELETE", Delete},
 	{"SOUND", Sound},
 	{"INVERT", Invert},
@@ -258,47 +296,18 @@ static VariableType Variable[] = {
 	{"Z", &LocalVar[25], 0, NumberToken},
 };
 
-static unsigned fx, fy, fw, fh, i; /* Fensterausmaße in Sprites */
-static unsigned ZeilenAus, ZeilenPos = 1, Redraw,
-    DialogBreite, DialogHoehe, DialogNummer = 9999,
-    x, y, w, h;
-static unsigned long DialogLaenge;
-static CharPtr DialogBuffer; /* Dialogpuffer */
-static int Continue, OpenWindow; /* Dialogausführung */
-static String80Type ein;
-static unsigned long DebugLevel;
-static CharSet VarSet = "abcdefghijklmnopqrstuvwxyz"
-		 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		 ".0123456789";
-	OpSet = ":=+-|&<>*/~#";
-	NumberSet = "0123456789";
-
-static static MonsterType *SelectedMonster = NULL;
-static GegenstandTyp *SelectedGegenstand = NULL;
-static ParameterTyp *SelectedParameter = NULL;
-
-static LabelType ReturnAddress[MaxGosub+1]; /* GOSUB Stack */
-static unsigned ReturnLevel;
-
-static LabelType Labels[MaxLabel+1]; /* Label Adressen */
-static unsigned LabelAnzahl;
-    
-static String80Type DialogText[MaxZeilen + 1]; /* Texte für Hyperclick */
-
-static unsigned LocalVar[26];
-    
 /* Forward Deklarationen ************************************************/
 
 unsigned GetNumber(CharPtr *p);
 
-void *GetItem(unsigned n, void **p, unsigned *r; char **s);
+void *GetItem(unsigned n, CharPtr *p, unsigned *r, char *s);
 unsigned EvalTerm(CharPtr *p, unsigned n);
-void EvalString(CharPtr *p, char **s);
+void EvalString(CharPtr *p, char *s);
 void NewLabel(unsigned l, CharPtr p);
 
 /* Hilfprozeduren *******************************************************/
 
-void DialogFehler(char *s, *q, unsigned c)
+void DialogFehler(char *s, char *q, unsigned c)
 {
 	char err[256], num[256];
 	err[0] = '\0';
@@ -317,19 +326,18 @@ void DialogFehler(char *s, *q, unsigned c)
 
 unsigned Max(unsigned x, unsigned y)
 {
-	if (x > y) return x else return y;
+	if (x > y) return x; else return y;
 }
 
 unsigned Min(unsigned x, unsigned y)
 {
-	if (x < y) return x else return y;
+	if (x < y) return x; else return y;
 }
 
 unsigned GetToken(CharPtr *ref_p, unsigned *ref_n, char *s)
+#define p (*ref_p)
+#define n (*ref_n)
 {
-	CharPtr p = *ref_p;
-	unsigned n = *ref_n
-
 	unsigned i, t;
 
 	t = *p;
@@ -337,16 +345,16 @@ unsigned GetToken(CharPtr *ref_p, unsigned *ref_n, char *s)
 	case OperatorToken:
 	case VariableToken:
 	case CommandToken:
-		*p++;
+		p++;
 		n = *p++;
 		break;
 	case ByteToken:
-		*p++;
+		p++;
 		n = *p++;
 		t = NumberToken;
 		break;
 	case NumberToken:
-		*p++;
+		p++;
 		n = *p++;
 		n = n * 256 + *p++;
 		break;
@@ -370,74 +378,75 @@ unsigned GetToken(CharPtr *ref_p, unsigned *ref_n, char *s)
 		s[i] = '\0';
 		break;
 	}
-	*ref_p = p, *ref_n = n;
 	return t;
 }
+#undef p
+#undef n
 
 int NextLine(CharPtr *ref_p)
+#define p (*ref_p)
 {
-	CharPtr *p = *ref_p;
 	unsigned t, i;
 	String80Type s;
 
 	do {
-		t = GetToken(&p, i, s);
+		t = GetToken(&p, &i, s);
 		if (t == TextEndeToken) return FALSE;
-	while (t != ZeilenEndeToken);
+	} while (t != ZeilenEndeToken);
 	p++;
-	*ref_p = p;
 	return *p != TextEndeToken;
 }
+#undef p
 
 
 int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 {
-	unsigned long l = *ref_l;
+#define l (*ref_l)
 	unsigned t, n, i, Line;
 	char s[80];
 	int ok = TRUE, label = FALSE, ende;
 	CharPtr start;
 
-	static int LastLine(CharPtr *ref_p)
+	int LastLine(CharPtr *ref_p)
+#define p (*ref_p)
 	{
-		CharPtr p = *ref_p;
 		while (*p >= ' ') p++;
 		while (*p != '\0' && *p != 10) p++;
 		if (*p == 10) p++;
 		Line++;
-		*ref_p = p;
 		return *p == '\0';
 	}
+#undef p
 
-	static void GetLine(CharPtr *ref_p, char *s, size_t n)
+	void GetLine(CharPtr *ref_p, char *s)
+#define p (*ref_p)
 	{
-		CharPtr p = *ref_p;
 		unsigned i;
-		for (i = 0; i <= n; i++) {
+		for (i = 0; i <= HIGH(s); i++) {
 			if (*p < ' ') { s[i] = '\0'; break; }
 			s[i] = *p++;
 		}
-		*ref_p = p;
 	}
+#undef p
 
 	unsigned GetToken(CharPtr *ref_p, char *s)
+#define p (*ref_p)
 	{
-		CharPtr p = ref_p;
 		unsigned i = 0, t = 0;
-		while (*p == ' ' || *p = 8) p++;
-		if (*p IN OpSet) { /* Operator */
+		while (*p == ' ' || *p == 8) p++;
+		if (INSet(*p,OpSet)) { /* Operator */
 			t = OperatorToken;
-			while (*p IN OpSet)
+			while (INSet(*p,OpSet))
 				s[i++] = *p++;
 		} else if (*p == '"') { /* String */
 			t = StringToken;
 			p++;
-			while (*p >= " " && *p != '"')
+			while (*p >= ' ' && *p != '"')
 				s[i++] = *p++;
 			if (*p == '"') p++;
-		} else if (*p IN NumberSet) {
+		} else if (INSet(*p,NumberSet)) {
 			t = NumberToken;
-			while (*p IN NumberSet)
+			while (INSet(*p,NumberSet))
 				s[i++] = *p++;
 		} else if (*p == ',') {
 			t = KommaToken;
@@ -448,15 +457,15 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 		} else if (*p == ')') {
 			t = KlammerZuToken;
 			s[i++] = *p++;
-		} else if (*p IN VarSet) {
-			t:= VariableToken;
-			while (*p IN VarSet)
+		} else if (INSet(*p,VarSet)) {
+			t = VariableToken;
+			while (INSet(*p,VarSet))
 				s[i++] = *p++;
 		}
 		s[i] = '\0';
-		*ref_p = p;
 		return t;
 	}
+#undef p
 
 	unsigned FindOperator(char *s)
 	{
@@ -474,7 +483,7 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 	{
 		unsigned i;
 		for (i = 1; i <= MaxCommand; i++)
-			if (COMPARE(Command[i].name, s)) {
+			if (COMPARE(XCommand[i].name, s)) {
 				*t = CommandToken;
 				return i;
 			}
@@ -531,7 +540,7 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 					}
 					if (label) {
 						label = FALSE;
-						NewLabel(n);
+						NewLabel(n, q);
 					}
 				case StringToken:
 					n = LENGTH(s);
@@ -540,12 +549,11 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 						for (i = 0; i <= n - 1; i++)
 							OutC(s[i]);
 				}
-				t = GetToken(p, s);
-			}
-			ende = LastLine(p);
+				t = GetToken(&p, s);
+			ende = LastLine(&p);
 			if (!ende) Out(ZeilenEndeToken); /* LF */
-		} else if (*p !=  '*') /* Ausgabezeile */
-			GetLine(p, s);
+		} else if (*p !=  '*') { /* Ausgabezeile */
+			GetLine(&p, s);
 			n = LENGTH(s);
 			Out(AusgabeToken);
 			if (n > 0)
@@ -554,16 +562,16 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 			
 			if (n > DialogBreite) DialogBreite = n;
 			DialogHoehe++;
-			ende = LastLine(p);
+			ende = LastLine(&p);
 			if (!ende) Out(ZeilenEndeToken); /* LF */
 		} else /* Kommentar */
-			ende = LastLine(p);
+			ende = LastLine(&p);
 	} while (!ende && ok);
 	Out(0); /* Endekennzeichnung */
 	l = q - start;
 	return ok;
 }
-
+#undef l
 
 /************************************************************************/
 
@@ -587,34 +595,36 @@ void NewLabel(unsigned l, CharPtr p)
 	}
 }
 
-int FindLabel(CharPtr *p; unsigned l)
+int FindLabel(CharPtr *ref_p, unsigned l)
+#define p (*ref_p)
 {
 	unsigned cmd, t; String80Type s;
 
-	*p = GetLabel(l); /* Schon in Liste? */
-	if (*p) return TRUE;
-	*p = DialogBuffer;
+	p = GetLabel(l); /* Schon in Liste? */
+	if (p != NULL) return TRUE;
+	p = DialogBuffer;
 	do {
-		t = GetToken(p, cmd, s);
+		t = GetToken(&p, &cmd, s);
 		if (t == CommandToken && cmd == 4) /* Label */
-			if (GetNumber(p) == l) {/* Label gefunden */
+			if (GetNumber(&p) == l) {/* Label gefunden */
 				NewLabel(l, p);
 				return TRUE;
 			}
-	} while (NextLine(p));
+	} while (NextLine(&p));
 	DialogFehler("Label nicht gefunden ", "", l);
 	return FALSE;
 }
+#undef p
 
 /************************************************************************/
 
-void PrinterLine(char *s, size_t n)
+void PrinterLine(char *s)
 {
 	unsigned i;
 	if (!PrinterStatus())
 		WaitTime(1000);
 
-	for (i = 0; i <= n ; i++) {
+	for (i = 0; i <= HIGH(s) ; i++) {
 		if (s[i] == '\0') {
 			PrinterOut(13); PrinterOut(10);
 			return;
@@ -627,35 +637,39 @@ void PrinterLine(char *s, size_t n)
 
 /* Variablenbearbeitung *************************************************/
 
-void GetVariable(CharPtr *p, unsigned *c, char *s)
+unsigned GetVariable(CharPtr *ref_p, unsigned *ref_c, char *s)
+#define p (*ref_p)
+#define c (*ref_c)
 {
 	unsigned type, i, r;
 	char q[80];
-	CharPtr v;
+	/*CharPtr v;*/
 
-	*c = 0;
+	c = 0;
 	
-	switch ((type = GetToken(p, i, q)))
+	type = GetToken(&p, &i, q);
+	switch (type) {
 	case VariableToken:
-		v = GetItem(i, p, r, q);
-		*c = r;
+		/*v =*/ GetItem(i, &p, &r, q);
+		c = r;
 		Assign(s, q);
 		return Variable[i].type;
 	case KlammerAufToken: /* ( */
-		switch ((type = GetVariable(p, i, q))) {
+		type = GetVariable(&p, &i, q);
+		switch (type) {
 		case StringToken:
-			EvalString(p, q);
+			EvalString(&p, q);
 			Assign(s, q);
 			break;
 		case NumberToken:
-			*c = EvalTerm(p, i);
+			c = EvalTerm(&p, i);
 		}
 		break;
 	case StringToken:
 		Assign(s, q);
 		break;
 	case NumberToken:
-		*c = i;
+		c = i;
 		/* FALLTHROUGH */
 	case ZeilenEndeToken:
 		break;
@@ -664,57 +678,75 @@ void GetVariable(CharPtr *p, unsigned *c, char *s)
 	}
 	return type;
 }
+#undef c
+#undef p
 
-unsigned GetNumber(CharPtr *p)
+unsigned GetNumber(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned c, t;
-	Strin80Type s;
+	String80Type s;
 
-	t = GetVariable(p, c, s);
+	t = GetVariable(&p, &c, s);
 	if (t == StringToken) {
 		c = StringToCard(s);
 		t = NumberToken;
 	}
-	return t == NumberToken ? EvalTerm(p, c) : 0;
+	if (t == NumberToken)
+	       return EvalTerm(&p, c);
+	else
+	       return 0;
 }
+#undef p
 
-unsigned GetArgument(CharPtr *p)
+unsigned GetArgument(CharPtr *ref_p)
+#define p (*ref_p)
 {
-	Strin80Type s;
+	String80Type s;
 	unsigned n;
-	if (GetToken(p, n, s) == KlammerAufToken)
-		return GetNumber(p);
+	if (GetToken(&p, &n, s) == KlammerAufToken)
+		return GetNumber(&p);
 	DialogFehler("Klammer auf '(' erwartet", "", 65535);
 	Continue = FALSE;
 	return 0;
 }
+#undef p
 
-void GetString(CharPtr *p, char *s)
+void GetString(CharPtr *ref_p, char *s)
+#define p (*ref_p)
 {
 	unsigned c;
-	if (GetVariable(p, c, s) == NumberToken)
+	if (GetVariable(&p, &c, s) == NumberToken)
 		CardToString(c, 1, s);
-	EvalString(p, s);
+	EvalString(&p, s);
 }
+#undef p
 
-void *GetAddress(CharPtr *p; unsigned *t, unsigned *c, char *s)
+void *GetAddress(CharPtr *ref_p, unsigned *ref_t, unsigned *ref_c, char *s)
+#define p (*ref_p)
+#define t (*ref_t)
+#define c (*ref_c)
 {
 	void *v;
 	unsigned i, k;
 	char q[80];
 	
-	t = GetToken(p, i, s);
-	if (t = VariableToken)
-		v = GetItem(i, p, c, s);
-	if (v != NULL) {
-		t = GetToken(p, k, q); /* Komma überlesen */
-		t = Variable[i].type;
-		return v;
+	t = GetToken(&p, &i, s);
+	if (t == VariableToken) {
+		v = GetItem(i, &p, &c, s);
+		if (v != NULL) {
+			t = GetToken(&p, &k, q); /* Komma überlesen */
+			t = Variable[i].type;
+			return v;
+		}
 	}
 	DialogFehler("Variable erwartet ", s, 65535);
 	Continue = FALSE;
 	return NULL;
 }
+#undef p
+#undef t
+#undef c
 
 unsigned FindText(unsigned n)
 {
@@ -723,12 +755,14 @@ unsigned FindText(unsigned n)
 	for (i = 1; i <= AnzahlTexte; i++)
 		if (Text[i].Nummer == n)
 			return i;
-	AnzahlTexte++
+	AnzahlTexte++;
 	Text[AnzahlTexte].Nummer = n;
 	return AnzahlTexte;
 }
 
-void *GetItem(unsigned n, void **p, unsigned *r, char **s);
+void *GetItem(unsigned n, CharPtr *ref_p, unsigned *ref_r, char *s)
+#define p (*ref_p)
+#define r (*ref_r)
 {
 	unsigned x, y; String80Type *str; CardPtr v;
 	v = NULL;
@@ -745,7 +779,7 @@ void *GetItem(unsigned n, void **p, unsigned *r, char **s);
 			case 5: v = &SelectedMonster->y; break;
 			case 6: v = &SelectedMonster->Spezial; break;
 			case 7: v = &SelectedMonster->Typ; break;
-			case 8: v = &SelectedMonster->Name; break;
+			case 8: v = (CardPtr)&SelectedMonster->Name; break;
 			}
 	} else if (Variable[n].number < 20) {
 		if (SelectedGegenstand)
@@ -758,7 +792,7 @@ void *GetItem(unsigned n, void **p, unsigned *r, char **s);
 			case 16 : v = &SelectedGegenstand->RingDauer; break;
 			case 17 : v = &SelectedGegenstand->Flags; break;
 			case 18 : v = &SelectedGegenstand->Dialog; break;
-			case 19 : v = S&electedGegenstand->Name; break;
+			case 19 : v = (CardPtr)&SelectedGegenstand->Name; break;
 			}
 	} else if (Variable[n].number < 30) {
 		if (SelectedParameter)
@@ -777,35 +811,35 @@ void *GetItem(unsigned n, void **p, unsigned *r, char **s);
 	} else {
 		switch (Variable[n].number) {
 		case 31:
-			x = GetArgument(p);
+			x = GetArgument(&p);
 			if (x < MaxSprites)
-				v = &Felder[x].Name;
+				v = (CardPtr)&Felder[x].Name;
 			break;
 		case 32:
-			x = GetArgument(p);
+			x = GetArgument(&p);
 			if (x < MaxSprites)
 				v = &Felder[x].Spezial;
 			break;
 		case 33:
-			x = GetArgument(p);
-			v = &Text[FindText(x)].String;
+			x = GetArgument(&p);
+			v = (CardPtr)&Text[FindText(x)].String;
 			break;
 		case 34:
-			x = GetArgument(p);
+			x = GetArgument(&p);
 			v = &Text[FindText(x)].Sample;
 			break;
 		case 50:
-			x = GetArgument(p);
+			x = GetArgument(&p);
 			if (x >= 1 && x <= MaxFlags)
 				v = &Spieler.Flags[x];
 			break;
 		case 51:
-			r = Zufall(GetArgument(p));
+			r = Zufall(GetArgument(&p));
 			break;
 		case 52:
-			x = GetArgument(p);
-			y = GetNumber(p);
-			v = &Level[x,y].Feld;
+			x = GetArgument(&p);
+			y = GetNumber(&p);
+			v = &Level[x][y].Feld;
 			break;
 		case 60:
 			r = GetTime() % 65536;
@@ -816,21 +850,24 @@ void *GetItem(unsigned n, void **p, unsigned *r, char **s);
 		if (Variable[n].type == NumberToken)
 			r = *v;
 		else if (Variable[n].type == StringToken) {
-			str = ADDRESS(v);
+			str = (String80Type *)v;
 			Assign(s, *str);
 		}
 	}
 	return v;
 }
+#undef r
+#undef p
 
 /* Zahlausdruck auswerten ***********************************************/
 
-unsigned EvalTerm(CharPtr *p, unsigned n)
+unsigned EvalTerm(CharPtr *ref_p, unsigned n)
+#define p (*ref_p)
 {
 	unsigned v, op; String80Type h;
 
-	while (GetToken(p, op, h) == OperatorToken) {
-		if (GetVariable(p, v, h) == StringToken)
+	while (GetToken(&p, &op, h) == OperatorToken) {
+		if (GetVariable(&p, &v, h) == StringToken)
 			v = StringToCard(h);
 
 		switch (op) {
@@ -845,22 +882,24 @@ unsigned EvalTerm(CharPtr *p, unsigned n)
 		case  9 : n = n != v; break;
 		case 10 : n = n * v; break; /* Multiplikation */
 		case 11 : n = n / v; break; /* Division */
-		case 12 : n = n <= v break;
+		case 12 : n = n <= v; break;
 		case 13 : n = n >= v; break;
 		case 14 : n = n & ~v; break;/* Mengendifferenz */
 		}
 	}
 	return n;
 }
+#undef p
 
 /* Zeichenkettenausdruck auswerten **************************************/
 
-void EvalString(CharPtr *p, char *s)
+void EvalString(CharPtr *ref_p, char *s)
+#define p (*ref_p)
 {
-	unsigned t, op, c; String80Type h;
+	unsigned /*t,*/ op, c; String80Type h;
 
-	while (GetToken(p, op, h) == OperatorToken) {
-		if (GetVariable(p, c, h) == NumberToken)
+	while (GetToken(&p, &op, h) == OperatorToken) {
+		if (GetVariable(&p, &c, h) == NumberToken)
 			CardToString(c, 1, h);
 
 		switch (op) {
@@ -874,12 +913,13 @@ void EvalString(CharPtr *p, char *s)
 		case  9: Assign(s, !COMPARE(s, h) ? "1" : "0"); break;
 		case 12: Assign(s, InString(s, h) ? "1" : "0"); break;
 		case 13: Assign(s, InString(h, s) ? "1" : "0"); break;
-		default
+		default:
 			DialogFehler("Falscher Operator in Stringausdruck!", "", 65535);
 			break;
 		}
 	}
 }
+#undef p
 
 /* Textzeile aus-/eingeben **********************************************/
 
@@ -891,21 +931,21 @@ void OpenScreen(int MinW, int MinH)
 		h = Max(Min(DialogHoehe, 23), Min(25, MinH));
 	}
 	w = Min(80, w); h = Min(25, h);
-	if (x == 0 || y = 0
+	if (x == 0 || y == 0
 		|| x + w > 79 ||  y + h > 24) /* zentrieren */
 	{
 		x = (40 - w / 2) / 2 * 2;
 		y = (12 - h / 2);
 	}
 	fw = (w + 1) / 2; fh = h; fx = x / 2; fy = y;
-	if (fx >= 1 && fy >= 1 && fx+fw < 40 & fy+fh < 25)
+	if (fx >= 1 && fy >= 1 && fx+fw < 40 && fy+fh < 25)
 		ReserveScreen(fx - 1, fy - 1, fx + fw, fy + fh);
 	else
-		FillRectangle(0, 0, 39, 24, SystemSprite[0]);
+		FillRectangle(0, 0, 39, 24, &SystemSprite[0]);
 	
 	ZeilenAus = 0;
 	ZeilenPos = 0;
-	for (i = 1; i <= MaxZeilen; i++) DialogText[i] = "";
+	for (i = 1; i <= MaxZeilen; i++) *DialogText[i] = *"";
 	OpenWindow = FALSE;
 }
 
@@ -935,38 +975,45 @@ void Ausgabe(char *s)
 
 /* Kommandos  ***********************************************************/
 
-void Label(CharPtr *p)
+void Label(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned label;
 
-	label = GetNumber(p);
+	label = GetNumber(&p);
 	NewLabel(label, p);
 }
+#undef p
 
-void Goto(CharPtr *p)
+void Goto(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned label;
 
-	label = GetNumber(p);
-	Continue = FindLabel(p, label);
+	label = GetNumber(&p);
+	Continue = FindLabel(&p, label);
 }
+#undef p
 
-void Gosub(CharPtr *p)
+void Gosub(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned label;
 	
-	label = GetNumber(p);
+	label = GetNumber(&p);
 	if (ReturnLevel < MaxGosub) {
-		ReturnLevel++
+		ReturnLevel++;
 		ReturnAddress[ReturnLevel].LabelAddress = p;
-		Continue = FindLabel(p, label);
+		Continue = FindLabel(&p, label);
 	} else {
 		DialogFehler("Zuviele verschachtelte GOSUB", "", 65535);
 		Continue = FALSE;
 	}
 }
+#undef p
 
-void Return(CharPtr *p)
+void Return(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	if (ReturnLevel > 0)
 		p = ReturnAddress[--ReturnLevel].LabelAddress;
@@ -975,13 +1022,17 @@ void Return(CharPtr *p)
 		Continue = FALSE;
 	}
 }
+#undef p
 
-void End(CharPtr *p)
+void End(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	Continue = FALSE;
 }
+#undef p
 
-void Input(CharPtr *p)
+void Input(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned i, mx, my;
 	BITSET mb;
@@ -993,7 +1044,7 @@ void Input(CharPtr *p)
 
 		my = my / 16; mx = mx / 8;
 		if (my < y || my >= y + h
-			|| mx < x OR mx >= x + w)
+			|| mx < x || mx >= x + w)
 			return;
 		my = my - y + 1; mx = mx - x;
 		if (mx >= LENGTH(DialogText[my])) return;
@@ -1009,7 +1060,7 @@ void Input(CharPtr *p)
 	if  (OpenWindow)
 		OpenScreen(20, 1);
 
-	ein = "";
+	*ein = *"";
 	if (ZeilenPos < h)
 		ZeilenPos++;
 	else {
@@ -1017,10 +1068,10 @@ void Input(CharPtr *p)
 		for (i = 2; i <= ZeilenPos; i++)
 			Assign(DialogText[i-1], DialogText[i]);
 		
-		DialogText[ZeilenPos] = "";
+		*DialogText[ZeilenPos] = *"";
 	}
 	GotoXY(x, y + ZeilenPos - 1);
-	InputClick(ein, w - 1, mx, my, mb);
+	InputClick(ein, w - 1, &mx, &my, &mb);
 	if (mb) {
 		GetWord(mx, my, ein);
 		PrintAt(x, y + ZeilenPos - 1, ein);
@@ -1030,18 +1081,20 @@ void Input(CharPtr *p)
 	if (DruckerAusgabe)
 		PrinterLine(ein);
 }
+#undef p
 
-void Aim(CharPtr *p)
+void Aim(CharPtr *ref_p)
+#define p (*ref_p)
 {
-	unsigned i, x, y, qx, qy, mode, type;
-	BITSET b : BITSET;
+	unsigned /*i,*/ x, y, qx, qy, mode, type;
+	BITSET b;
 	char ch;
 	CardPtr varx, vary;
 	char s[80];
 	
-	varx = GetAddress(p, type, x, s);
-	vary = GetAddress(p, type, y, s);
-	mode = GetNumber(p);
+	varx = GetAddress(&p, &type, &x, s);
+	vary = GetAddress(&p, &type, &y, s);
+	mode = GetNumber(&p);
 	if (ZeilenAus > 0) {
 		WaitKey(); ZeilenAus = 0;
 	}
@@ -1049,42 +1102,48 @@ void Aim(CharPtr *p)
 		RestoreScreen();
 		OpenWindow = TRUE;
 	}
-	WaitInput(x, y, b, ch, -1);
+	WaitInput(&x, &y, &b, &ch, -1);
 	x = x / 16 - 1; y = y / 16 - 1;
 	if  (x >= 0 && y >= 0
-	  && x <= 22 && y <= 22 && MausLinks IN b)
+	  && x <= 22 && y <= 22 && MausLinks & b)
 	{
-		if (mode = 1) {
+		if (mode == 1) {
 			qx = MaxSichtweite; qy = MaxSichtweite;
-			if (MakeShoot(qx, qy, x, y, 30, TRUE)) {/* getroffen */
+			if (MakeShoot(&qx, &qy, x, y, 30, TRUE)) {/* getroffen */
 				x = qx; y = qy;
 			}
 		}
-		SichtLevelUmrechnung(x, y, x, y);
+		SichtLevelUmrechnung(x, y, &x, &y);
 	} else {
 		x = Spieler.x; y = Spieler.y;
 	}
 	*varx = x; *vary = y;
 }
+#undef p
 
 
-void Nothing(CharPtr *p)
+void Nothing(CharPtr *ref_p)
+#define p (*ref_p)
 {
 }
+#undef p
 
-void Window(CharPtr *p)
+void Window(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	if (!OpenWindow) {
 		RestoreScreen();
 		OpenWindow = TRUE;
 	}
-	x = GetNumber(p);
-	y = GetNumber(p);
-	w = GetNumber(p);
-	h = GetNumber(p);
+	x = GetNumber(&p);
+	y = GetNumber(&p);
+	w = GetNumber(&p);
+	h = GetNumber(&p);
 }
+#undef p
 
-void Output(CharPtr *p)
+void Output(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	String80Type s;
 
@@ -1095,31 +1154,36 @@ void Output(CharPtr *p)
 		RestoreScreen();
 		OpenWindow = TRUE;
 	}
-	GetString(p, s);
+	GetString(&p, s);
 	OutputText(s);
 }
+#undef p
 
-void Invert(CharPtr *p)
+void Invert(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned x, y;
 
-	x = GetNumber(p);
-	y = GetNumber(p);
-	if (LevelSichtUmrechnung(x, y, x, y))
+	x = GetNumber(&p);
+	y = GetNumber(&p);
+	if (LevelSichtUmrechnung(x, y, &x, &y))
 		InvertFeld(x+1, y+1);
 }
+#undef p
 
-void Picture(CharPtr *p)
+void Picture(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned n;
-	n = GetNumber(p); /* Bildnummer */
+	n = GetNumber(&p); /* Bildnummer */
 	ShowPicture(n, FALSE);
 }
+#undef p
 
 void ShowPicture(unsigned n, int New)
 {
 	unsigned ys, ws, hs, i, PicW, PicH;
-	if (!LoadImageN(n, PicW, PicH))
+	if (!LoadImageN(n, &PicW, &PicH))
 		return;
 	if (New) {
 		OpenWindow = TRUE;
@@ -1141,13 +1205,13 @@ void ShowPicture(unsigned n, int New)
 			for (i = 2; i <= ZeilenPos; i++)
 				Assign(DialogText[i-1], DialogText[i]);
 		}
-		DialogText[ZeilenPos] = "";
+		*DialogText[ZeilenPos] = *"";
 		hs = Min(PicH - ys, 16);
-		HASCSSystem.Copy(4, 0, ys, ws, hs,
+		/*HASCSSystem.*/Copy(4, 0, ys, ws, hs,
 			8 * x, 16 * (ZeilenPos + y - 1));
 		ZeilenAus++;
 		ys += 16;
-	while (ys < PicH);
+	} while (ys < PicH);
 	if (New) {
 		if (ZeilenAus > 0)
 			WaitKey();
@@ -1156,54 +1220,56 @@ void ShowPicture(unsigned n, int New)
 }
 
 
-void Let(CharPtr *p, unsigned i)
+void Let(CharPtr *ref_p, unsigned i)
+#define p (*ref_p)
 {
 	CardPtr var;
-	unsgiend type, value;
+	unsigned /*type,*/ value;
 	String80Type s;
 	StringPtr str;
 
-	var = GetItem(i, p, value, s);
+	var = GetItem(i, &p, &value, s);
 	if (var)
 		switch (Variable[i].type) {
 		case NumberToken:
-			*var = EvalTerm(p, value);
+			*var = EvalTerm(&p, value);
 			break;
 		case StringToken:
-			str = ADDRESS(var); EvalString(p, s); Assign(*str, s);
+			str = (StringPtr)var; EvalString(&p, s); Assign(*str, s);
 			break;
 		}
 }
 
 
-void If(CharPtr *p)
+void If(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned cmd, c, type;
 	String80Type h;
 
-	type = GetVariable(p, c, h);
+	type = GetVariable(&p, &c, h);
 	if (type == NumberToken) {
-		if (EvalTerm(p, c) = 0) return;
+		if (EvalTerm(&p, c) == 0) return;
 	} else if (type == StringToken) {
-		EvalString(p, h);
+		EvalString(&p, h);
 		if (!COMPARE(h, "1")) return;
 	}
-	type = GetToken(p, cmd, h);
+	type = GetToken(&p, &cmd, h);
 	if (type == VariableToken)
-		Let(p, cmd);
+		Let(&p, cmd);
 	else if (type == CommandToken)
-		Command[cmd].action(p);
+		XCommand[cmd].action(&p);
 }
+#undef p
 
 
-void Sound(CharPtr *p)
+void Sound(CharPtr *ref_p)
+#define p (*ref_p)
 {
-	unsigned n, mode;
-	SoundType snd;
-	String80Type s;
+	unsigned n, mode; SoundType snd; /*String80Type s;*/
 
-	n = GetNumber(p);
-	mode = GetNumber(p);
+	n = GetNumber(&p);
+	mode = GetNumber(&p);
 	switch (mode) {
 	case 1: if (LoadSound(n, snd)); break;
 	case 2: LoopSoundN(n); break;
@@ -1211,86 +1277,102 @@ void Sound(CharPtr *p)
 		PlaySoundN(n); break;
 	}
 }
+#undef p
 
-void Wait(CharPtr *p)
+void Wait(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned t;
 
-	t = GetNumber(p);
-	if (t = 0) {
+	t = GetNumber(&p);
+	if (t == 0) {
 		WaitKey();
 		ZeilenAus = 0;
 	} else {
 		WaitTime(t * 100);
 	}
 }
+#undef p
 
-void Select(CharPtr *p)
+void Select(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned x, y, i;
 
-	x = GetNumber(p);
+	x = GetNumber(&p);
 	if (x <= MaxBreite) { /* Level */
-		y = GetNumber(p);
-		i = GetNumber(p);
+		y = GetNumber(&p);
+		i = GetNumber(&p);
 		if (i == 60006) {
-			SelectedMonster =
-				LevelMonster IN Level[x,y].Spezial
-				? &Monster[FindMonster(x,y)]
-				: NULL;
+			SelectedMonster = NULL;
+			if (LevelMonster & Level[x][y].Spezial)
+				SelectedMonster = &Monster[FindMonster(x,y)];
 		} else if (i == 60007) {
-			SelectedGegenstand = 
-				LevelGegenstand IN Level[x,y].Spezial
-				? &Gegenstand[FindGegenstand(x,y)]/* im Level */
-				: NULL;
+			SelectedGegenstand = NULL;
+			if (LevelGegenstand & Level[x][y].Spezial)/* im Level */
+				SelectedGegenstand = &Gegenstand[FindGegenstand(x,y)];
 		} else if (i == 60008) {
-			SelectedParameter =
-				LevelParameter IN Level[x,y].Spezial
-				? &Parameter[FindParameter(x,y)]
-				: NULL;
+			SelectedParameter = NULL;
+			if (LevelParameter & Level[x][y].Spezial)
+				SelectedParameter = &Parameter[FindParameter(x,y)];
 		} else 
 			x = i;
 	}
-	if (x < 60000) return
+	if (x < 60000) return;
 	switch (x - 60000) {
-	case 0: SelectedGegenstand = (i = GetNumber(p)) >= 1 && i <= MaxRuck
-		? &Spieler.Rucksack[i] : NULL; break;
+	case 0: i = GetNumber(&p);
+		SelectedGegenstand = NULL;
+		if (i >= 1 && i <= MaxRuck)
+			SelectedGegenstand = &Spieler.Rucksack[i];
+		break;
 	case 1: SelectedGegenstand = &Spieler.rechteHand; break;
 	case 2: SelectedGegenstand = &Spieler.linkeHand; break;
 	case 3: SelectedGegenstand = &Spieler.Ruestung; break;
 	case 4: SelectedGegenstand = &Spieler.Ring; break;
-	case 5:	SelectedMonster = SReitet IN Spieler.Status
-		? &Spieler.ReitTier : NULL; break;
-	case 6:	SelectedMonster = (i = GetNumber(p)) >= 1 
-		/* ( schon durch letztes GetNumber */
-		&& i <= AnzahlMonster ? &Monster[i] : NULL; break;
-	case 7: SelectedGegenstand = (i = GetNumber(p)) >= 1 
-		&& i <= AnzahlGegen ? &Gegenstand[i] : NULL; break;
-	case 8: SelectedParameter = (i = GetNumber(p)) >= 1
-		&& i <= AnzahlParameter ? &Parameter[i] : NULL; break;
+	case 5:	SelectedMonster = NULL;
+		if (SReitet & Spieler.Status)
+			SelectedMonster = &Spieler.ReitTier;
+		break;
+	case 6:	i = GetNumber(&p); /* ( schon durch letztes GetNumber */
+		SelectedMonster = NULL;
+		if (i >= 1 && i <= AnzahlMonster)
+			SelectedMonster = &Monster[i];
+		break;
+	case 7: i = GetNumber(&p);
+		SelectedGegenstand = NULL;
+		if (i >= 1 && i <= AnzahlGegen)
+			SelectedGegenstand = &Gegenstand[i];
+		break;
+	case 8: i = GetNumber(&p);
+		SelectedParameter = NULL;
+		if (i >= 1 && i <= AnzahlParameter)
+			SelectedParameter =&Parameter[i];
+		break;
 	}
 }
+#undef p
 
-void Copy(CharPtr *p)
+void XCopy(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned i, x, y;
 
-	x = GetNumber(p);
+	x = GetNumber(&p);
 	if (x <= MaxBreite) {/* Level */
-		y = GetNumber(p);
-		i = GetNumber(p);
+		y = GetNumber(&p);
+		i = GetNumber(&p);
 		if (i == 60006 && SelectedMonster)
-			NewMonster(x, y, *SelectedMonster);
+			NewMonster(x, y, SelectedMonster);
 		else if (i == 60007 && SelectedGegenstand)
-			NewGegenstand(x, y, *SelectedGegenstand);
+			NewGegenstand(x, y, SelectedGegenstand);
 		else if (i == 60008 && SelectedParameter)
-			NewParameter(x, y, *SelectedParameter);
+			NewParameter(x, y, SelectedParameter);
 		else
 			x = i; /* vielleicht doch für den Spieler? */
 
 	}
 	if (x == 60000) { /* Rucksack */
-		i = GetNumber(p);
+		i = GetNumber(&p);
 		if (i >= 1 && i <= MaxRuck && SelectedGegenstand)
 			Spieler.Rucksack[i] = *SelectedGegenstand;
 	} else {
@@ -1306,16 +1388,18 @@ void Copy(CharPtr *p)
 			Spieler.ReitTier = *SelectedMonster;
 	}
 }
+#undef p
 
-void Delete(CharPtr *p)
+void Delete(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned x, y, i;
 
-	x = GetNumber(p);
+	x = GetNumber(&p);
 
 	if (x <= MaxBreite) { /* Level */
-		y = GetNumber(p);
-		i = GetNumber(p);
+		y = GetNumber(&p);
+		i = GetNumber(&p);
 		if (i == 60006) DeleteMonster(x, y);
 		else if (i == 60007) DeleteGegenstand(x, y);
 		else if (i == 60008) DeleteParameter(x, y);
@@ -1323,7 +1407,7 @@ void Delete(CharPtr *p)
 			x = i;
 	}
 	if (x == 60000) {/* Rucksack */
-		i = GetNumber(p);
+		i = GetNumber(&p);
 		if (i >= 1 && i <= MaxRuck)
 			Spieler.Rucksack[i].KennNummer = 0;
 	} else {
@@ -1335,19 +1419,22 @@ void Delete(CharPtr *p)
 			Spieler.Ruestung.KennNummer = 0;
 		else if (x == 60004)
 			Spieler.Ring.KennNummer = 0;
-		else if (x == 60005)
-			Spieler.ReitTier.Typ = 0; EXCL(Spieler.Status, SReitet);
+		else if (x == 60005) {
+			Spieler.ReitTier.Typ = 0; Spieler.Status &= ~SReitet;
+		}
 	}
 }
+#undef p
 
 
-void Teleport(CharPtr *p)
+void XTeleport(CharPtr *ref_p)
+#define p (*ref_p)
 {
 	unsigned x, y, l;
 
-	x = GetNumber(p);
-	y = GetNumber(p);
-	l = GetNumber(p);
+	x = GetNumber(&p);
+	y = GetNumber(&p);
+	l = GetNumber(&p);
 	if (l) {
 		Spieler.x = x; Spieler.y = y;
 		if (l != Spieler.LevelNumber) { /* neues Level laden */
@@ -1361,17 +1448,20 @@ void Teleport(CharPtr *p)
 	}
 	Redraw = 1; /* Levelausschnitt neu zeichnen */
 }
+#undef p
 
-void Call(CharPtr *p)
+void Call(CharPtr *ref_p)
+#define p (*ref_p)
 {
 }
+#undef p
 
 
 /* Dialog ausführen *****************************************************/
 
 void ExecuteDialog(void)
 {
-	unsigned cmd, type, token;
+	unsigned cmd, /*type, */token;
 	String80Type s;
 	CharPtr p;
 
@@ -1381,30 +1471,32 @@ void ExecuteDialog(void)
 	Redraw = 0;
 	ReturnLevel = 0; /* noch kein GOSUB */
 	ZeilenAus = 0;
-	DebugLevel = {};
+	DebugLevel = 0;
 	LabelAnzahl = 0;
 	p = DialogBuffer; /* Start am Pufferanfang */
 
 	while (Continue) {
-		token = GetToken(p, cmd, s);
+		token = GetToken(&p, &cmd, s);
 		if (DebugLevel != 0) {
 			switch (token) {
 			case VariableToken: Assign(s, Variable[cmd].name); break;
-			case CommandToken: Assign(s, Command[cmd].name); break;
+			case CommandToken: Assign(s, XCommand[cmd].name); break;
 			}
 			WaitTime(0);
 			Error(s, 2);
 			Continue = ErrorResult = 2;
 		}
 		switch (token) {
-		case VariableToken: Let(p, cmd); break;
-		case CommandToken: Command[cmd].action(p); break;
+		case VariableToken: Let(&p, cmd); break;
+		case CommandToken: XCommand[cmd].action(&p); break;
 		case AusgabeToken: Ausgabe(s); break;/* Zeichenkette ausgeben */
 		default:
 			DialogFehler("Befehl erwartet", "", 65535);
 			Continue = FALSE;
 		}
-		Continue = Continue && NextLine(p);
+		Continue = Continue && NextLine(&p);
+		/* XXX should NextLine always be invoked? even if Continue
+		 * is FALSE? --rtc */
 	} /* while (Continue) */
 
 	if (!OpenWindow) {
@@ -1436,7 +1528,7 @@ void MakeFileName(int c, unsigned n, char *s)
 		Concat(s, s, ".DAT");
 		Concat(s, PrgPath, s);
 	} else if (n == ConfigDialog)
-		Assign(s, HASCSSystem.Command);
+		Assign(s, /*HASCSSystem.*/Command);
 	else if (n < 1000) {
 		Assign(s, DiaPath);
 		Concat(s, s, c ? "XDIALOG.000" : "DIALOG.000");
@@ -1452,7 +1544,7 @@ void CodeDialog(unsigned long n, unsigned long l, void *b)
 	unsigned long i;
 	BITSET *p = b;
 
-	for (i = 1; i <= l DIV 2; i++) {
+	for (i = 1; i <= l / 2; i++) {
 		n = (n * 153 + 97) % 16777216;
 		*p = *p ^ (n % 65536); /* EXOR */
 		p += 2;
@@ -1461,7 +1553,7 @@ void CodeDialog(unsigned long n, unsigned long l, void *b)
 
 int LoadDialog(unsigned n, int coded)
 {
-	char s[128]
+	char s[128];
 	int f; /* Filehandle */
 	unsigned id, i;
 
@@ -1485,13 +1577,13 @@ int LoadDialog(unsigned n, int coded)
 		CodeDialog(BenutzerNummer, DialogLaenge, DialogBuffer);
 
 	i = NewCache(id, DialogLaenge + 16);
-	if (!Tokenize(DialogBuffer, Cache[i].CacheBuffer, DialogLaenge)) {
+	if (!Tokenize(DialogBuffer, Cache[i].CacheBuffer, &DialogLaenge)) {
 		FreeCache(i);
-		return FALSE
+		return FALSE;
 	} /* Syntaxfehler */
 	Cache[i].CacheInfo1 = DialogBreite;
 	Cache[i].CacheInfo2 = DialogHoehe;
-	Cache[i].DialogBuffer = CacheBuffer;
+	DialogBuffer = Cache[i].CacheBuffer;
 	return TRUE;
 }
 
@@ -1503,10 +1595,10 @@ int SaveDialog(unsigned n, int coded)
 	BITSET *p;
 
 	MakeFileName(!coded, n, s);
-	l = FileLength(s); if (l = 0) return FALSE;;
+	l = FileLength(s); if (l == 0) return FALSE;;
 	p = GetBuffer(l);
 	f = OpenFile(s); ReadFile(f, l, p); CloseFile(f);
-	CodeDialog(LONG(BenutzerNummer), l, p);
+	CodeDialog(BenutzerNummer, l, p);
 	MakeFileName(coded, n, s);
 	f = CreateFile(s); WriteFile(f, l, p); CloseFile(f);
 	return !FileError;
@@ -1515,9 +1607,9 @@ int SaveDialog(unsigned n, int coded)
 
 /* Dialog ausführen *****************************************************/
 
-void DoDialog(unsinged n)
+void DoDialog(unsigned n)
 {
-	unsigned i;
+	/*unsigned i;*/
 	if (!LoadDialog(n, FALSE)) /* unkodierter Dialog */
 		if (!LoadDialog(n, TRUE)) { /* kodierter Dialog */
 			DialogFehler("Dialog nicht geladen", "", 65535);
@@ -1526,7 +1618,7 @@ void DoDialog(unsinged n)
 	ExecuteDialog();
 }
 
-void DoMonsterDialog(unsinged n, MonsterTyp *m)
+void DoMonsterDialog(unsigned n, MonsterTyp *m)
 {
 	SelectedMonster = m;
 	DoDialog(n);

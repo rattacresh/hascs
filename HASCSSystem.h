@@ -1,7 +1,7 @@
 #ifndef HASCSSYSTEM_H
 #define HASCSSYSTEM_H
 
-#include <stdint.h>
+#include "compat.h"
 
 /*
 

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g3 -O2 -DBITSET=uint16_t -funsigned-char
+CFLAGS = -g3 -O2 -Wall -funsigned-char
 LIBS = 
 HASCSEDITOR_SOURCE = \
 	Dialog.c HASCSGame.c HASCSMagic.c HASCSSprite.c Sound.c \
