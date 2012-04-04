@@ -124,23 +124,21 @@ void *GetBuffer(unsigned long Bytes)
 	  InOut.WriteString("GetBuffer: Bytes = ");
 	  InOut.WriteLNum(Bytes, 10, 1, ' ');
 	*/
-	/*
 
 	if (Bytes >= BufferLen) {
 		BufferLen = Bytes + 1;
 		if (BufferAdr != NULL) {
-			if (!Free(BufferAdr))
-				Error("Fehler in der Speicherverwaltung(3)", -1);
+			free(BufferAdr);
 			BufferAdr = NULL;
 		}
-		Alloc(BufferLen, BufferAdr);
+		BufferAdr = malloc(BufferLen);
 		if (BufferAdr == NULL)
 			Error("Kein Speicher mehr frei!", -1);
 		else if (((unsigned long)BufferAdr % 2) != 0)
 			Error("Ungerade Pufferadresse!", -1);
 	}
 	BufferAdr[Bytes] = 0; // Endmarkierung 
-	*/
+
 	/*
 	  InOut.WriteString("  BufferAdr = ");
 	  InOut.WriteLNum(BufferAdr, 10, 1, ' ');
@@ -191,13 +189,12 @@ void FreeCache(unsigned n)
 
 unsigned NewCache(unsigned id, unsigned long Bytes)
 {
-	//unsigned i;
-	//void *adr;
+	unsigned i;
+	void *adr;
     
 	unsigned LRUCache(void)
 	{
 		unsigned i, j, Min; 
-		//int ok;
 		Min = UINT_MAX; 
 		j = 0;
 		for (i = 1; i <= AnzCache; i++)
@@ -209,6 +206,8 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 			return j;
 		else
 			Error("Kein Speicher mehr frei!", -1);
+
+		return 0; // Der Rückgabewert wird vom Aufrufer (unten) gar nicht verwendet.
 	}
     
     
@@ -218,24 +217,25 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 	  InOut.WriteString("  Bytes = "); InOut.WriteLNum(Bytes, 10, 1, ' ');
 	*/
 
-	/*
 	i = GetCache(id);
-	if (i != 0) FreeCache(i);
+	if (i != 0) 
+		FreeCache(i);
 	adr = NULL;
 	do {
-		if (AnzCache < MaxCache) Alloc(Bytes, adr);
+		if (AnzCache < MaxCache) 
+			adr = malloc(Bytes);
 		if (adr == NULL) {
 			i = LRUCache();
 			FreeCache(i);
 		}
 	} while (adr == NULL);
-	CacheCounter++;
-	AnzCache++;
+	++CacheCounter;
+	++AnzCache;
 	Cache[AnzCache].CacheId = id;
 	Cache[AnzCache].CacheBuffer = adr;
 	Cache[AnzCache].CacheLength = Bytes;
 	Cache[AnzCache].CacheUsed = CacheCounter;
-	*/
+
 	return AnzCache;
 }
 
