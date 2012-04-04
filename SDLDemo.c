@@ -15,7 +15,7 @@ void TestPaint() {
 void TestAllocate() {
 	int GAmount = 10;
 	char *meinRAM = Allocate(GAmount + 1);
-	if (meinRAM == NULL)
+	if (!meinRAM)
 		printf("Fehler: allozieren hat nicht geklappt!\n");
 	int i;
 	for (i=0; i<GAmount; ++i) 
@@ -23,6 +23,10 @@ void TestAllocate() {
 	meinRAM[GAmount] = '\0';
 	printf("String im allozierten RAM: <%s>\n", meinRAM);
 	printf("(Es sollten %i Buchstaben G zu sehen sein.)\n", GAmount);
+
+	Deallocate(meinRAM);
+	if (meinRAM)
+		printf("FEHLER: meinRAM wurde nicht dealloziert!\n");
 }
 
 void TestWaitInput() {
@@ -58,7 +62,7 @@ int main(void)
 	LoadAndRun("df -h /", "");
 	printf("OK\n\n");
 
-	printf("Test: Allocate...\n");
+	printf("Test: Allocate und Deallocate...\n");
 	TestAllocate();
 	printf("OK\n\n");
 

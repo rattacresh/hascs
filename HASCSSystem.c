@@ -231,6 +231,7 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 void Deallocate(void *Ptr)
 {
 	if (Ptr) {
+		printf("ICH DEALLOZIERE\n");
 		free(Ptr);
 		Ptr = NULL;
 	}
