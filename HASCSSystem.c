@@ -93,6 +93,8 @@ void SystemInit(void)
 
 void InitWorkstation(char *WinName)
 {
+	SystemInit();
+
 	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "SDL konnte nicht initialisiert werden: %s\n", SDL_GetError());
 		exit(1);
@@ -110,7 +112,6 @@ void InitWorkstation(char *WinName)
 	
 	SDL_WM_SetCaption(WinName, WinName);    
 
-	SystemInit();
 	GraphicsInit();
 
 #if 0
@@ -174,14 +175,10 @@ unsigned GetCache(unsigned id)
 			CacheCounter++;
 			Cache[i].CacheUsed = CacheCounter;
 
-
+			printf("  index = %u\n", i);
+			printf("  buffer = %p\n", Cache[i].CacheBuffer);
+			printf("  bytes = %i\n", Cache[i].CacheLength);
 			
-			/*
-			  InOut.WriteString("  index = "); InOut.WriteCard(i, 1);
-			  InOut.WriteString("  buffer = "); InOut.WriteLNum(CacheBuffer, 10, 1, ' ');
-			  InOut.WriteString("  bytes = "); InOut.WriteLNum(CacheLength, 10, 1, ' ');
-			*/
-	    
 			return i;
 		}
 	return 0;
