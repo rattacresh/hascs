@@ -1,6 +1,7 @@
 #ifndef HASCSSYSTEM_H
 #define HASCSSYSTEM_H
 
+#include <stdio.h>
 #include "compat.h"
 
 /*
@@ -70,15 +71,15 @@ void SetBuffer(unsigned width, unsigned height, void *Buffer);
 
 /* Dateiverwaltung **************************************************/
 
-int OpenFile(char *Name);
-void CloseFile(int Handle);
+FILE *OpenFile(char *Name);
+void CloseFile(FILE *Handle);
 int CreateFile(char *Name);
 void DeleteFile(char *Name);
-void ReadFile(int Handle, unsigned long Bytes, void *Ptr);
-void WriteFile(int Handle, unsigned long Bytes, void *Ptr);
+void ReadFile(FILE *Handle, unsigned long Bytes, void *Ptr);
+void WriteFile(FILE *Handle, unsigned long Bytes, void *Ptr);
 unsigned long FileLength(char *Filename);
 int FileName(char *Pattern, char *FileName);
-void FileSeek(int Handle, unsigned long pos);
+void FileSeek(FILE *Handle, unsigned long pos);
 void RenameFile(char *s, char *d);
 int SelectFile(char *msg, char *path, char *file);
 

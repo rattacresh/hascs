@@ -1,5 +1,6 @@
 #include "HASCSDisk.h" /* HASCSDisk module */
 
+#include <stdio.h>
 /* HASCS Importe */
 #include "HASCSGlobal.h"
 #include "HASCSGraphics.h"
@@ -90,7 +91,8 @@ void ReadBlock(int handle, unsigned anzahl, CharPtr a)
 
 void LoadOrSaveDat(int Load, char *FileName)
 {
-	int h; String60Typ s;
+	FILE* h;
+	String60Typ s;
 	Buffer = GetBuffer(BufferSize);
 	Concat(s, PrgPath, FileName);
 	if (Load) {
@@ -115,7 +117,9 @@ void LoadOrSaveDat(int Load, char *FileName)
 
 void LoadOrSaveSprites(int Load; char *FileName)
 {
-	int h; unsigned long Count; String60Typ s;
+	FILE* h;
+	unsigned long Count;
+	String60Typ s;
 	Assign(LastSprites, FileName);
 	Concat(s, PrgPath, FileName);
 	if (Load) {

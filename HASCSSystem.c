@@ -3,6 +3,7 @@
 #include <SDL/SDL.h>
 #include <limits.h>
 #include <time.h>
+#include <stdio.h>
 #include <unistd.h>
 #include "HASCSSystem.h"
 #include "HASCSGraphics.h"
@@ -397,20 +398,19 @@ unsigned long FileLength(char *Filename)
 	return result;		
 }
 
-int OpenFile(char *Name)
+FILE *OpenFile(char *Name)
 {
-	/*
-	int Handle;
-	Open(Name, 0, Handle);
-	FileError = Handle < 0;
-	return Handle;
-	*/
-	return 0;
+	FILE *fp = fopen(Name, "r+b");
+	if (!fp)
+		return 0;
+	return fp;
 }
 
-void CloseFile(int Handle)
+void CloseFile(FILE *Handle)
 {
-	//FileError = !Close(Handle);
+	FileError = fclose(Handle);
+	//	if (FileError)
+	//	Error("FileLength: Fehler beim Schließen einer Datei!", 1);	
 }
 
 void DeleteFile(char *Name)
@@ -436,7 +436,7 @@ int CreateFile(char *Name)
 	return 0;
 }
 
-void ReadFile(int Handle, unsigned long Bytes, void *Ptr)
+void ReadFile(FILE *Handle, unsigned long Bytes, void *Ptr)
 {
 	/*
 	unsigned long Count;
@@ -446,7 +446,7 @@ void ReadFile(int Handle, unsigned long Bytes, void *Ptr)
 	*/
 }
 
-void WriteFile(int Handle, unsigned long Bytes, void *Ptr)
+void WriteFile(FILE *Handle, unsigned long Bytes, void *Ptr)
 {
 	/*
 	unsigned long Count;
@@ -456,7 +456,7 @@ void WriteFile(int Handle, unsigned long Bytes, void *Ptr)
 	*/
 }
 
-void FileSeek(int Handle, unsigned long pos)
+void FileSeek(FILE *Handle, unsigned long pos)
 {
 	//long ret;
 	//Seek(pos, Handle, beginning, ret);

@@ -27,6 +27,7 @@
            4.00  20.09.94 Megamax Umstellung, Tokenisierung
 */
 
+#include <stdio.h>
 #include "HASCSGlobal.h"
 #include "HASCSGraphics.h"
 #include "HASCSOutput.h"
@@ -1565,7 +1566,7 @@ void CodeDialog(unsigned long n, unsigned long l, void *b)
 int LoadDialog(unsigned n, int coded)
 {
 	char s[128];
-	int f; /* Filehandle */
+	FILE* f; /* Filehandle */
 	unsigned id, i;
 
 	DialogNummer = n;
@@ -1601,7 +1602,7 @@ int LoadDialog(unsigned n, int coded)
 int SaveDialog(unsigned n, int coded)
 {
 	String80Type s;
-	int f;
+	FILE* f;
 	unsigned long l;
 	BITSET *p;
 

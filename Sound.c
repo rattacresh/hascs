@@ -1,5 +1,6 @@
 #include "Sound.h" /* Sound module */
 
+#include <stdio.h>
 #include "HASCSSystem.h"
 
 /* Hardware Register für DMA Sound */
@@ -63,7 +64,7 @@ unsigned GetFreq(unsigned f)
 
 int LoadSoundFile(char *f, unsigned id, SoundType s)
 {
-	int h;
+	FILE* h;
 	char header[128];
 	int ok, free;
 

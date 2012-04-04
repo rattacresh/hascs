@@ -1,5 +1,6 @@
 #include "Image.h" /* Image module */
 
+#include <stdio.h>
 #include "HASCSSystem.h"
 #include "HASCSDisk.h"
 #include "HASCSOutput.h"
@@ -114,7 +115,7 @@ int Decompress(BytePtr source, BytePtr dest)
 
 int LoadImageN(unsigned n, unsigned w, h)
 {
-	int handle;
+	FILE* handle;
 	unsigned long length;
 	void *ImgBuffer, Start;
 	char Name[128]
