@@ -1,7 +1,6 @@
 /* HASCSSystem module */
 
 #include <SDL/SDL.h>
-//#include <SDL/SDL_image.h>
 #include <limits.h>
 #include <time.h>
 #include <unistd.h>
@@ -116,6 +115,7 @@ void *Allocate(unsigned long Bytes)
 	Alloc(Bytes, Ptr);
 	return Ptr;
 	*/
+	return 0;
 }
 
 void *GetBuffer(unsigned long Bytes)
@@ -197,13 +197,13 @@ void FreeCache(unsigned n)
 
 unsigned NewCache(unsigned id, unsigned long Bytes)
 {
-	unsigned i;
-	void *adr;
+	//unsigned i;
+	//void *adr;
     
 	unsigned LRUCache(void)
 	{
 		unsigned i, j, Min; 
-		int ok;
+		//int ok;
 		Min = UINT_MAX; 
 		j = 0;
 		for (i = 1; i <= AnzCache; i++)
@@ -258,13 +258,14 @@ void Deallocate(void *Ptr)
 int LoadAndRun(char *Prg, char *Arg)
 {
     
-	long result;
+	long result = 0;
+	/*
 	char path[128], file[128];
 	int i, l;
 	int ok;
 	//Rectangle save;
     
-	/*
+	
 	if (StrEqual(Prg, "EDITOR.PRG") || StrEqual(Prg, "HASCSSPR.PRG")
 	    || StrEqual(Prg, "HASCSIII.PRG"))
 		{
@@ -465,11 +466,12 @@ void RenameFile(char *s, char *d)
 
 int SelectFile(char *msg, char *path, char *file)
 {
+	/*
 	int ok;
 	int result;
 	char pathandfile[128];
     
-	/*
+
 	  Assign(path, EasyGEM1.SelectMask, ok);
 	  Assign(file, pathandfile, ok);
 	  GrafMouse(arrow, NIL);
@@ -493,7 +495,7 @@ void RedrawWindow(void* frame)
 	SDL_Flip(ScreenMFDB);
 }
 
-BITSET WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, int WarteZeit)
+void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, int WarteZeit)
 {
 	RedrawWindow(NULL);
 

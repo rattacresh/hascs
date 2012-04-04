@@ -6,6 +6,7 @@
    Grafik- und Textausgaben auf den HASCS II Bildschirm.
 
    Version 1.00 02.08.93
+   Version 2.00 03.04.12  ;-)
 */
 
 

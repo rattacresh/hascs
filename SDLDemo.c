@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <SDL/SDL.h>
 #include "HASCSSystem.h"
 #include "HASCSGraphics.h"
 

@@ -83,7 +83,7 @@ int SelectFile(char *msg, char *path, char *file);
 
 /* Eingaben *********************************************************/
 
-BITSET WaitInput(unsigned *x, unsigned *y, BITSET *b, char *ch, int WarteZeit);
+void WaitInput(unsigned *x, unsigned *y, BITSET *b, char *ch, int WarteZeit);
 void WaitKey(void);
 void WaitTime(unsigned t);
 unsigned long GetTime();
