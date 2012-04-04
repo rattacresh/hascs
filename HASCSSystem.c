@@ -445,12 +445,8 @@ void ReadFile(FILE *Handle, unsigned long Bytes, void *Ptr)
 
 void WriteFile(FILE *Handle, unsigned long Bytes, void *Ptr)
 {
-	/*
-	unsigned long Count;
-	Count = Bytes;
-	Write(Handle, Bytes, Ptr);
-	FileError = Bytes != Count;
-	*/
+	size_t WroteBytes = fwrite(Ptr, 1, Bytes, Handle);
+	FileError = Bytes != WroteBytes;
 }
 
 void FileSeek(FILE *Handle, unsigned long pos)
