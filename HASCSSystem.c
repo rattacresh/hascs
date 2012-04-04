@@ -86,7 +86,9 @@ void InitWorkstation(char *WinName)
 	
 	SDL_WM_SetCaption(WinName, WinName);    
 
+	SystemInit();
 	GraphicsInit();
+
 #if 0
 
 	SDL_Color colors[256];

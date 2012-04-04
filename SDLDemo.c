@@ -37,6 +37,13 @@ void TestWaitInput() {
 	printf("HASCS-Taste: <%c> (ASCII dezimal %u)\n", ch, ch);
 }
 
+void TestError() {
+	printf("ShowError: %i\n", ShowError);
+	printf("Folgende Dummy-Fehlermeldung soll nur bei ShowError==1 angezeigt werden:\n");
+	Error("***Dummy-Fehlermeldung*** (die zu keinem Programmabbruch führt, da mode 1)", 1);
+}
+
+
 int main(void)
 {
 	printf("Test: InitWorkstation...\n");
@@ -57,6 +64,10 @@ int main(void)
 
 	printf("Test: WaitInput...\n");
 	TestWaitInput();
+	printf("OK\n\n");
+
+	printf("Test: Error...\n");
+	TestError();
 	printf("OK\n\n");
 
 
