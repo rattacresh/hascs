@@ -873,7 +873,7 @@ unsigned EvalTerm(CharPtr *ref_p, unsigned n)
 		switch (op) {
 		case  1 : n = v; break; /* Zuweisung */
 		case  2 : n += v; break; /* Addition */
-		case  3 : n = n > v ? n - v : 0; break; /* Subtraktion */
+		case  3 : if (n > v) n -= v; else n = 0; break; /* Subtraktion */
 		case  4 : n = n | v; break; /* Vereinigungsmenge */
 		case  5 : n = n & v; break; /* Schnittmenge */
 		case  6 : n = n == v; break; /* Gleichheit */
@@ -905,14 +905,22 @@ void EvalString(CharPtr *ref_p, char *s)
 		switch (op) {
 		case  1: Assign(s, h); break; /* = */
 		case  2: Concat(s, s, h); break; /* sp */
-		case  4: Assign(s, COMPARE(s, "1") || COMPARE(h, "1")
-				? "1" : "0"); break;
-		case  5: Assign(s, COMPARE(s, "1") && COMPARE(h, "1")
-				? "1" : "0"); break;
-		case  6: Assign(s, COMPARE(s, h) ? "1" : "0"); break;
-		case  9: Assign(s, !COMPARE(s, h) ? "1" : "0"); break;
-		case 12: Assign(s, InString(s, h) ? "1" : "0"); break;
-		case 13: Assign(s, InString(h, s) ? "1" : "0"); break;
+		case  4: if (COMPARE(s, "1") || COMPARE(h, "1"))
+				Assign(s, "1");
+			else 
+				Assign(s, "0");
+			break;
+		case  5: if (COMPARE(s, "1") && COMPARE(h, "1"))
+				Assign(s, "1");
+			else
+				Assign(s, "0");
+			break;
+		case  6: if (COMPARE(s, h)) Assign(s, "1") else Assign(s, "0"); break;
+		case  9: if (!COMPARE(s, h))
+				Assign(s, "1"); else Assign(s, "0");
+			break;
+		case 12: if (InString(s, h)) Assign(s, "1"); else Assign(s, "0"); break;
+		case 13: if (InString(h, s)) Assign(s, "1"); else Assign(s, "0"); break;
 		default:
 			DialogFehler("Falscher Operator in Stringausdruck!", "", 65535);
 			break;
@@ -1531,7 +1539,10 @@ void MakeFileName(int c, unsigned n, char *s)
 		Assign(s, /*HASCSSystem.*/Command);
 	else if (n < 1000) {
 		Assign(s, DiaPath);
-		Concat(s, s, c ? "XDIALOG.000" : "DIALOG.000");
+		if (c)
+			Concat(s, s, "XDIALOG.000");
+		else
+			Concat(s, s, "DIALOG.000");
 		i = LENGTH(s) - 3;
 		s[i]   = n / 100 + '0';
 		s[i+1] = n % 100 / 10 + '0';
