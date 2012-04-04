@@ -83,7 +83,7 @@ void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, SpriteType *ref_Sprite)
 		case 0 : z[i] = Sprite[j + i] / 4096 % 16; break;
 		case 1 : z[i] = Sprite[j + i] / 256 % 16; break;
 		case 2 : z[i] = Sprite[j + i] / 16 % 16; break;
-		case 3 : z[i] = Sprite[j + i] * 16; break;
+		case 3 : z[i] = Sprite[j + i] % 16; break;
 		}
 		switch (x % 4) {
 		case 0 : z[i] = z[i] * 4096; break;
