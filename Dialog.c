@@ -916,7 +916,7 @@ void EvalString(CharPtr *ref_p, char *s)
 			else
 				Assign(s, "0");
 			break;
-		case  6: if (COMPARE(s, h)) Assign(s, "1") else Assign(s, "0"); break;
+		case  6: if (COMPARE(s, h)) Assign(s, "1"); else Assign(s, "0"); break;
 		case  9: if (!COMPARE(s, h))
 				Assign(s, "1"); else Assign(s, "0");
 			break;
