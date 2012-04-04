@@ -65,6 +65,30 @@ int RcIntersect(SDL_Rect *ref_p1, SDL_Rect *ref_p2)
 #undef p2
 
 
+/**
+ * Alles initialisieren. Muss vor der Benutzung der Funktionen dieses
+ * Moduls einmal aufgerufen werden.
+ */
+void SystemInit(void)
+{
+	ShowError = 1;
+	FileError = 0;
+	LastFileName = "";
+	NewXMin = 40; 
+	NewYMin = 25; 
+	NewXMax = 0; 
+	NewYMax = 0;
+    
+	BufferLen = 0;
+	BufferAdr = NULL;
+    
+	AnzCache = 0; CacheCounter = 0;
+    
+	losgelassen = 1;
+	mousetime = 1;
+}
+
+
  /* Programmverwaltung ***********************************************/
 
 void InitWorkstation(char *WinName)
@@ -228,12 +252,11 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 	return AnzCache;
 }
 
-void Deallocate(void *Ptr)
+void Deallocate(void **Ptr)
 {
-	if (Ptr) {
-		printf("ICH DEALLOZIERE\n");
-		free(Ptr);
-		Ptr = NULL;
+	if (*Ptr) {
+		free(*Ptr);
+		*Ptr = NULL;
 	}
 }
 
@@ -586,21 +609,3 @@ int PrinterStatus()
 	return 0;
 }
 
-void SystemInit(void)
-{
-	ShowError = 1;
-	FileError = 0;
-	LastFileName = "";
-	NewXMin = 40; 
-	NewYMin = 25; 
-	NewXMax = 0; 
-	NewYMax = 0;
-    
-	BufferLen = 0;
-	BufferAdr = NULL;
-    
-	AnzCache = 0; CacheCounter = 0;
-    
-	losgelassen = 1;
-	mousetime = 1;
-}
