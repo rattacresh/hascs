@@ -382,16 +382,19 @@ int FileName(char *Pattern, char *FileName)
 
 unsigned long FileLength(char *Filename)
 {
-	/*
-	int result;
-	SearchFirst(Filename, 0, result);
-	FileError = result < 0;
-	if (FileError) // nicht gefunden 
+	FILE *fp = fopen(Filename, "r");
+	if (!fp)
 		return 0;
-	else
-		return 0; //DTABuffer.size;
-	*/
-	return 0;		
+	
+	if (fseek(fp, 0, SEEK_END))
+		Error("FileLength: fseek funktioniert nicht!?", -1);
+
+	unsigned long result = ftell(fp);
+
+	if (fclose(fp))
+		Error("Fehler beim Schließen einer Datei!", 1);
+
+	return result;		
 }
 
 int OpenFile(char *Name)
