@@ -541,7 +541,7 @@ void MonsterBewegung(void)
 
 /* Monster nur zeigen ****************************************************/
 
-void KeineMonsterBewegung (void)
+void KeineMonsterBewegung(void)
 {
 	unsigned i;
 	for (i = 1; i <= AnzahlMonster; i++)
