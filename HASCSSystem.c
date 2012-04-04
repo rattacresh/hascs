@@ -85,7 +85,7 @@ void InitWorkstation(char *WinName)
 	
 	SDL_WM_SetCaption(WinName, WinName);    
 
-/*
+
 #if 0
 
 	SDL_Color colors[256];
@@ -96,7 +96,7 @@ void InitWorkstation(char *WinName)
 	
 	SDL_Rect  dst = {0,0,640,400};
 #endif
-*/
+
 
 }
 
@@ -109,13 +109,11 @@ void ExitWorkstation(int result)
 
 void *Allocate(unsigned long Bytes)
 {
-	/*
 	void *Ptr;
-	if (Bytes == 0) { return NULL; }
-	Alloc(Bytes, Ptr);
+	if (Bytes == 0) 
+		return NULL;
+	Ptr = malloc(Bytes);
 	return Ptr;
-	*/
-	return 0;
 }
 
 void *GetBuffer(unsigned long Bytes)
