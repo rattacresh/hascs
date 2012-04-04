@@ -27,8 +27,8 @@
            11.0  13.10.94 GetBuffer, Cache
 */
 
-#define MausLinks   0 /* linker Mausknopf */
-#define MausRechts  1 /* rechter Mausknopf */
+#define MausLinks   (1<<0) /* linker Mausknopf */
+#define MausRechts  (1<<1) /* rechter Mausknopf */
 #define MaxCache  100
 
 typedef struct {
