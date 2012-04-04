@@ -201,12 +201,8 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 		return 0; // Der Rückgabewert wird vom Aufrufer (unten) gar nicht verwendet.
 	}
     
-    
-	/*
-	  InOut.WriteLn();
-	  InOut.WriteString("NewCache: id = "); InOut.WriteCard(id, 1);
-	  InOut.WriteString("  Bytes = "); InOut.WriteLNum(Bytes, 10, 1, ' ');
-	*/
+	printf("NewCache: id = %u\n", id);
+	printf("  Bytes = %lu\n", Bytes);
 
 	i = GetCache(id);
 	if (i != 0) 
@@ -238,52 +234,21 @@ void Deallocate(void *Ptr)
 	}
 }
 
-
+/**
+ * Startet ein externes Programm. Wird momentan nur von HASCSEditor
+ * zum Starten eines externen Texteditors genutzt. IMHO brauchen wir
+ * das nicht, da man heutzutage in einer Multitasking-Umgebung lebt,
+ * in der man sich den Texteditor auch anderweitig starten kann.
+ *
+ * Ich ignoriere die Args, da sie nirgends in HASCS übergeben werden.
+ */
 int LoadAndRun(char *Prg, char *Arg)
-{
+{    
+	int result = system(Prg);
+   
+	if (result < 0)
+		Error("Programmstart nicht möglich", 1);
     
-	long result = 0;
-	/*
-	char path[128], file[128];
-	int i, l;
-	int ok;
-	//Rectangle save;
-    
-	
-	if (StrEqual(Prg, "EDITOR.PRG") || StrEqual(Prg, "HASCSSPR.PRG")
-	    || StrEqual(Prg, "HASCSIII.PRG"))
-		{
-			SplitPath(Name, path, file);
-			Concat(path, Prg, file, ok);
-		} else
-		Assign(Prg, file, ok);
-	*/
-    
-	/* Arg umrechnen in PASCAL String */
-	/*
-	i = 0; while (Arg[i] != 0) i++; l = i;
-	while (i > 0) {
-		Arg[i] = Arg[i-1]; i--;
-	}
-	Arg[0] = l;
-	*/
-    
-	//if (type != 0 && MenuAdr != NIL)
-	//MenuBar(MenuAdr, FALSE);
-	//save = WindowSize(win, borderSize);
-	//CloseWindow(win);
-    
-	//Pexec(loadExecute, file, Arg, NULL, result);
-	/*
-	if (result < 0) {
-		Concat("Programmstart nicht möglich: ",file, file, ok);
-		Error(file, 1);
-	}
-	*/
-    
-	//OpenWindow(win, save);
-	//if (type != 0 && MenuAdr != NIL)
-	//	MenuBar(MenuAdr, TRUE);
 	return result;
 }
 

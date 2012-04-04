@@ -2,10 +2,7 @@
 #include "HASCSSystem.h"
 #include "HASCSGraphics.h"
 
-int main(void)
-{
-	InitWorkstation("HASCSSystem-Test");
-
+void TestPaint() {
 	DOutlineBar(27, 10, 38, 11);
 	HorzLine(40, 200, 590);
 	VertLine(140, 140, 100);
@@ -13,7 +10,22 @@ int main(void)
 	InvertFeld(10,12);
 	InvertFeld(12,12);
 	InvertFeld(14,12);
+}
 
+void TestAllocate() {
+	int GAmount = 10;
+	char *meinRAM = Allocate(GAmount + 1);
+	if (meinRAM == NULL)
+		printf("Fehler: allozieren hat nicht geklappt!\n");
+	int i;
+	for (i=0; i<GAmount; ++i) 
+		meinRAM[i] = 'G';
+	meinRAM[GAmount] = '\0';
+	printf("String im allozierten RAM: <%s>\n", meinRAM);
+	printf("(Es sollten %i Buchstaben G zu sehen sein.)\n", GAmount);
+}
+
+void TestWaitInput() {
 	unsigned x;
 	unsigned y; 
 	BITSET s; 
@@ -23,6 +35,29 @@ int main(void)
 	printf("\nHASCS-Maustaste: %u\n", s);
 	printf("(0 ist links und 1 ist rechts)\n\n");
 	printf("HASCS-Taste: <%c> (ASCII dezimal %u)\n", ch, ch);
+}
+
+int main(void)
+{
+	printf("Test: InitWorkstation...\n");
+	InitWorkstation("HASCSSystem-Test");
+	printf("OK\n\n");
+
+	printf("Test: Zeichenfunktionen...\n");
+	TestPaint();
+	printf("OK\n\n");
+	
+	printf("Test: LoadAndRun...\n");
+	LoadAndRun("df -h /", "");
+	printf("OK\n\n");
+
+	printf("Test: Allocate...\n");
+	TestAllocate();
+	printf("OK\n\n");
+
+	printf("Test: WaitInput...\n");
+	TestWaitInput();
+	printf("OK\n\n");
 
 
 	ExitWorkstation(0);
