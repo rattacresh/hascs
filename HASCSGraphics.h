@@ -42,7 +42,7 @@ unsigned SetSpriteMode(unsigned mode);
 void EditSprite(SpriteType *Sprite, unsigned x,unsigned y,unsigned c);
 
 /* ermittelt die Farbe des Punktes x, y im Sprite */
-unsigned GetSprite(SpriteType *Sprite, unsigned x, unsigned y);
+unsigned GetSprite(SpriteType Sprite, unsigned x, unsigned y);
 
 
 /* kopiert Bildauschnitt eine Zeile nach oben */

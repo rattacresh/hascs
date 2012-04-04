@@ -94,8 +94,9 @@ void MakeSichtBereich(int Force)
 
 /* Spezialfelder **********************************************************/
 
-void Falle(ParameterTyp *p)
+void Falle(ParameterTyp *ref_p)
 {
+#define p (*ref_p)
 	unsigned i, s;
 	s = 0;
 	for (i = 1; i <= p.Schaden; i++)
@@ -108,8 +109,8 @@ void Falle(ParameterTyp *p)
 		Print("#304#");
 	} else
 		Print("#300#")
-	if (s == 0) { Print("#301#");
-	} else { PrintCard(s, 1); Print("#303#");
+	if (s == 0) Print("#301#");
+	else { PrintCard(s, 1); Print("#303#");
 	}
 	EndOutput;
 	if (p.Anzahl > 0) { /* Anzahl Wirkungen verringern */
@@ -117,10 +118,12 @@ void Falle(ParameterTyp *p)
 		if (p.Anzahl == 0) /* Falle löschen */
 			p.Art = 0;
 	}
+#undef p
 }
 
-void Teleport(ParameterTyp *p)
+void Teleport(ParameterTyp *ref_p)
 {
+#define p (*ref_p)
 	unsigned i, j; MonsterTyp Reittier;
 	WaitTime(0); /* ausgeben */
 	if (p.ZielLevel == 0) /* gelöst ! */
@@ -138,10 +141,12 @@ void Teleport(ParameterTyp *p)
 			LoadLevel(Spieler.LevelNumber);
 		}
 	}
+#undef p
 }
 
-void Feldaenderung(ParameterTyp *p)
+void Feldaenderung(ParameterTyp *ref_p)
 {
+#define p (*ref_p)
 	unsigned xs, ys, i, a;
 	Level[p.FeldX][p.FeldY].Feld = p.FeldNummer;
 	if (LevelParameter & Level[p.FeldX][p.FeldY].Spezial) {
@@ -155,10 +160,12 @@ void Feldaenderung(ParameterTyp *p)
 			SetOneLight(Parameter[i].x, Parameter[i].y, Parameter[i].Weite, TRUE);
 	}
 	MakeSichtBereich(TRUE); /* neuer Sichtbereich */
+#undef p
 }
 
-void Info(ParameterTyp *p)
+void Info(ParameterTyp *ref_p)
 {
+#define p (*ref_p)
 	if (p.automatisch > 0) { /* Automatischer Text */
 		if (p.Zaehler > 0) {
 			p.Zaehler--;
@@ -174,6 +181,7 @@ void Info(ParameterTyp *p)
 		case FBild  : ShowPicture(p.Nummer, TRUE); break;
 		}
 	}
+#undef p
 }
 
 /**************************************************************************/
@@ -261,8 +269,9 @@ unsigned DoGame(void)
 		}
 	}
 
-	void MinusLicht(GegenstandTyp *Hand)
+	void MinusLicht(GegenstandTyp *ref_Hand)
 	{
+#define Hand (*ref_Hand)
 		if (Zufall(10) == 1) /* 10% Chance */
 			if (Hand.LichtDauer > 0) {
 				Hand.LichtDauer--;
@@ -273,6 +282,7 @@ unsigned DoGame(void)
 				}
 				PrintCharakter(5);
 			}
+#undef Hand
 	}
 
 

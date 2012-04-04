@@ -532,24 +532,29 @@ void LoadOldPlayer(void);
 
 /* Leveldatei *************************************************/
 
-void Skip(CharPtr p, char c)
+void Skip(CharPtr *ref_p, char c)
 {
+#define p (*ref_p)
 	while (*p != c && *p >= ' ') p++;
 	if (*p != '\0') p++;
+#undef p
 }
 
-void GetLine(CharPtr p, char *s)
+void GetLine(CharPtr *ref_p, char *s)
 {
+#define p (*ref_p)
 	unsigned i;
 	i = 0;
 	while (*p >= ' ') {
 		s[i] = *p; i++; p++;
 	}
 	s[i] = '\0';
+#undef p
 }
 
-unsigned GetCard(CharPtr p)
+unsigned GetCard(CharPtr *ref_p)
 {
+#define p (*ref_p)
 	unsigned v;
 	v = 0;
 	while (*p == ' ' || *p == '#') p++;
@@ -558,37 +563,46 @@ unsigned GetCard(CharPtr p)
 		p++;
 	}
 	return v;
+#undef p
 }
 
-int NextLine(CharPtr p)
+int NextLine(CharPtr *ref_p)
 {
+#define p (*ref_p)
 	while (*p >= ' ') p++;
 	while (*p != '\0' && *p != 10) p++;
 	if (*p != 0) p++;
 	return *p != '\0';
+#undef p
 }
 
-void SetString(CharPtr p, char *s)
+void SetString(CharPtr *ref_p, char *s)
 {
+#define p (*ref_p)
 	unsigned i;
 	for (i = 0; i <= HIGH(s); i++) {
 		if (s[i] == '\0') return;
 		*p++ = s[i];
 	}
+#undef p
 }
 
-void SetCard(CharPtr p, unsigned c, l)
+void SetCard(CharPtr *ref_p, unsigned c, l)
 {
+#define p (*ref_p)
 	String20Typ s;
 	CardToString(c, l, s);
 	SetString(p, s);
 	if (l != 1) SetString(p, "#");
+#undef p
 }
 
-void SetLF(CharPtr p )
+void SetLF(CharPtr *p)
 {
+#define p (*ref_p)
 	*p++ = 13;
 	*p++ = 10;
+#undef p
 }
 
 void WriteLevel(char *Name)
@@ -597,33 +611,39 @@ void WriteLevel(char *Name)
 	unsigned i;
 	int h;
 		
-	void WriteMonster(MonsterTyp *m)
+	void WriteMonster(MonsterTyp *ref_m)
 	{
+#define m (*ref_m)
 		SetString(p, "M#");
-		SetCard(p, m->x, 4); SetCard(p, m->y, 4); SetCard(p, m->Typ, 4); SetCard(p, m->Status, 4);
-		SetCard(p, m->Trefferwurf, 4); SetCard(p, m->Schaden, 4); SetCard(p, m->Bonus, 4);
-		SetCard(p, m->TP, 4); SetCard(p, m->Sprich, 4); SetCard(p, m->Spezial, 4);
-		SetString(p, m->Name);
+		SetCard(p, m.x, 4); SetCard(p, m.y, 4); SetCard(p, m.Typ, 4); SetCard(p, m.Status, 4);
+		SetCard(p, m.Trefferwurf, 4); SetCard(p, m.Schaden, 4); SetCard(p, m.Bonus, 4);
+		SetCard(p, m.TP, 4); SetCard(p, m.Sprich, 4); SetCard(p, m.Spezial, 4);
+		SetString(p, m.Name);
 		SetLF(p);
+#undef m
 	}
 
-	void WriteGegenstand(GegenstandTyp *g)
+	void WriteGegenstand(GegenstandTyp *ref_g)
 	{
+#define g (*ref_g)
 		SetString(p, "G#");
-		SetCard(p, g->x, 4); SetCard(p, g->y, 4); SetCard(p, g->Sprite, 4);
-		SetCard(p, g->Flags, 4); SetCard(p, g->Spezial, 4);
-		SetCard(p, g->KennNummer, 4); SetCard(p, g->Ring, 4); SetCard(p, g->RingWirkung, 4);
-		SetCard(p, g->RingDauer, 4); SetString(p, g->Name);
+		SetCard(p, g.x, 4); SetCard(p, g.y, 4); SetCard(p, g.Sprite, 4);
+		SetCard(p, g.Flags, 4); SetCard(p, g.Spezial, 4);
+		SetCard(p, g.KennNummer, 4); SetCard(p, g.Ring, 4); SetCard(p, g.RingWirkung, 4);
+		SetCard(p, g.RingDauer, 4); SetString(p, g.Name);
 		SetLF(p);
+#undef g
 	}
 
-	void WriteParameter(ParameterTyp *a)
+	void WriteParameter(ParameterTyp *ref_a)
 	{
+#define a (*ref_a)
 		SetString(p, "P#");
-		SetCard(p, a->x, 4); SetCard(p, a->y, 4); SetCard(p, a->Art, 4);
-		SetCard(p, a->xhoch, 4); SetCard(p, a->yhoch, 4); SetCard(p, a->Levelhoch, 4);
-		SetCard(p, a->xrunter, 4); SetCard(p, a->yrunter, 4); SetCard(p, a->Levelrunter, 4);
+		SetCard(p, a.x, 4); SetCard(p, a.y, 4); SetCard(p, a.Art, 4);
+		SetCard(p, a.xhoch, 4); SetCard(p, a.yhoch, 4); SetCard(p, a.Levelhoch, 4);
+		SetCard(p, a.xrunter, 4); SetCard(p, a.yrunter, 4); SetCard(p, a.Levelrunter, 4);
 		SetLF(p);
+#undef a
 	}
 
 {

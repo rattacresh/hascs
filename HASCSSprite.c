@@ -44,12 +44,14 @@ void PaintBufferSprites(void)
 			SetSprite(x+22,y+11,SpriteBuffer[3*x+y]);
 }
 
-void PrintAllSprites(SpriteArrayType *s)
+void PrintAllSprites(SpriteArrayType *ref_s)
 /* malt alle Sprites eines Feldes in die untersten 4 Zeilen */
 {
+#define s (*ref_s)
 	unsigned x;
 	for (x = 0; x <= MaxSprites - 1; x++)
 		SetSprite(x % 40, 17 + x / 40, s[x]);
+#undef s
 }
 
 
@@ -121,8 +123,9 @@ void MakeScreen(unsigned SpriteArray)
 
 /* Spritebearbeitung */
 
-void RollUp(SpriteType *Sprite)
+void RollUp(SpriteType *ref_Sprite)
 {
+#define Sprite (*ref_Sprite)
 	unsigned x, y;
 	unsigned c[16];
 
@@ -134,11 +137,13 @@ void RollUp(SpriteType *Sprite)
 
 	for (x = 0; x <= 15; x++)
 		EditSprite(Sprite, x, 15, c[x]);
+#undef Sprite
 }
 
 
-void RollDown(SpriteType *Sprite)
+void RollDown(SpriteType *ref_Sprite)
 {
+#define Sprite (*ref_Sprite)
 	unsigned x, y;
 	unsigned c[16];
 
@@ -149,12 +154,13 @@ void RollDown(SpriteType *Sprite)
 			EditSprite(Sprite, x, y, GetSprite(Sprite, x, y-1));
 	for (x = 0; x <= 15; x++)
 		EditSprite(Sprite, x, 0, c[x]);
+#undef Sprite
 }
 
 
-void RollRight(SpriteType *Sprite)
+void RollRight(SpriteType *ref_Sprite)
 {
-
+#define Sprite (*ref_Sprite)
 	unsigned x, y;
 	unsigned c[16];
 
@@ -165,11 +171,13 @@ void RollRight(SpriteType *Sprite)
 			EditSprite(Sprite, x, y, GetSprite(Sprite, x-1, y));
 	for (y = 0; y <= 15; y++)
 		EditSprite(Sprite, 0, y, c[y]);
+#undef Sprite
 }
 
 
-void RollLeft(SpriteType *Sprite)
+void RollLeft(SpriteType *ref_Sprite)
 {
+#define Sprite (*ref_Sprite)
 	unsigned x, y;
 	unsigned c[16];
 
@@ -180,10 +188,12 @@ void RollLeft(SpriteType *Sprite)
 			EditSprite(Sprite, x, y, GetSprite(Sprite, x+1, y));
 	for (y = 0; y <= 15; y++)
 		EditSprite(Sprite, 15, y, c[y]);
+#undef Sprite
 }
 
-void Horizontal(SpriteType *Sprite)
+void Horizontal(SpriteType *ref_Sprite)
 {
+#define Sprite (*ref_Sprite)
 	unsigned x, y, c1, c2;
 	for (y = 0; y <= 15; y++)
 		for (x = 0; x <= 7; x++) {
@@ -192,10 +202,12 @@ void Horizontal(SpriteType *Sprite)
 			EditSprite(Sprite, x, y, c2);
 			EditSprite(Sprite, 15-x, y, c1);
 		}
+#undef Sprite
 }
 
-void Vertikal(SpriteType *Sprite)
+void Vertikal(SpriteType *ref_Sprite)
 {
+#define Sprite (*ref_Sprite)
 	unsigned x, y, c1, c2;
 
 	for (y = 0; y <= 7; y++)
@@ -205,19 +217,23 @@ void Vertikal(SpriteType *Sprite)
 			EditSprite(Sprite, x, y, c2);
 			EditSprite(Sprite, x, 15-y, c1);
 		}
+#undef Sprite
 }
 
-void RotateRight(SpriteType *Sprite)
+void RotateRight(SpriteType *ref_Sprite)
 {
+#define Sprite (*ref_Sprite)
 	unsigned x, y; SpriteType h;
 	for (x = 0; x <= 15; x++)
 		for (y = 0; y <= 15; y++)
 			EditSprite(h, 15-y, x, GetSprite(Sprite, x, y));
 	Sprite = h;
+#undef Sprite
 }
 
-void Fill(SpriteType *Sprite, unsigned Farbe)
+void Fill(SpriteType *ref_Sprite, unsigned Farbe)
 {
+#define Sprite (*ref_Sprite)
 	/* Füllt Sprite mit Farbe */
 
 	unsigned x, y, a;
@@ -225,10 +241,12 @@ void Fill(SpriteType *Sprite, unsigned Farbe)
 	for (y = 0; y <= 15; y++)
 		for (x = 0; x <= 15; x++)
 			EditSprite(Sprite, x, y, Farbe);
+#undef Sprite
 }
 
-void ChangeColors(SpriteType *Sprite, unsigned OldColor, unsigned NewColor);
+void ChangeColors(SpriteType *ref_Sprite, unsigned OldColor, unsigned NewColor);
 {
+#define Sprite (*ref_Sprite)
 	/* Wechselt Farbe aus */
 
 	unsigned x, y;
@@ -239,6 +257,7 @@ void ChangeColors(SpriteType *Sprite, unsigned OldColor, unsigned NewColor);
 				EditSprite(Sprite, x, y, NewColor);
 			else if (GetSprite(Sprite, x, y) == NewColor)
 				EditSprite(Sprite, x, y, OldColor);
+#undef Sprite
 }
 
 /* editieren Sie jetzt... */

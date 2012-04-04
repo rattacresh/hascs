@@ -48,9 +48,9 @@ int Min(int a, int b)
 }
 
 int RcIntersect(SDL_Rect *ref_p1, SDL_Rect *ref_p2)
+{
 #define p1 (*ref_p1)
 #define p2 (*ref_p2)
-{
 	SDL_Rect r;
 
 	r.x = Max(p2.x, p1.x);
@@ -61,9 +61,9 @@ int RcIntersect(SDL_Rect *ref_p1, SDL_Rect *ref_p2)
 	r.h = r.h - r.y;
 	p2  = r;
 	return p2.w > 0 && p2.h > 0;
-}
 #undef p1
 #undef p2
+}
 
 
 /**
@@ -271,14 +271,14 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 	return AnzCache;
 }
 
-void Deallocate(void **Ptr)
+void Deallocate(void *ref_Ptr)
 {
-	if (*Ptr) {
-		free(*Ptr);
+#define Ptr (*ref_Ptr)
+	if (Ptr != NULL) {
+		free(ptr);
 		*Ptr = NULL;
-	} else {
-		Error("NULL-Pointer an Deallocate übergeben", 0);
 	}
+#endif
 }
 
 /**
@@ -493,6 +493,10 @@ void RedrawWindow(void* frame)
 
 void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, int WarteZeit)
 {
+#define xx (*ref_x)
+#define yy (*ref_y)
+#define ch (*ref_ch)
+#define b (*ref_b)
 	RedrawWindow(NULL);
 
 	SDL_Event event;
@@ -506,23 +510,23 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 	switch (event.type) {
 	case SDL_MOUSEBUTTONDOWN:
 		printf("Mouse button %d pressed at (%d,%d)\n", event.button.button, event.button.x, event.button.y);		
-		*ref_x = event.button.x;
-		*ref_y = event.button.y;
+		xx = event.button.x;
+		yy = event.button.y;
 		switch (event.button.button) {
 		case SDL_BUTTON_LEFT: 
-			*ref_b = MausLinks;
+			b = MausLinks;
 			break;
 		case SDL_BUTTON_RIGHT: 
-			*ref_b = MausRechts;
+			b = MausRechts;
 			break;
 		default:
-			*ref_b = MausRechts;
+			b = MausRechts;
 		}
                 break;
         case SDL_KEYDOWN:
 		printf("The %s key was pressed (code %i)!\n",
 		       SDL_GetKeyName(event.key.keysym.sym), event.key.keysym.sym);		
-		*ref_ch = event.key.keysym.sym;
+		ch = event.key.keysym.sym;
 		break;
         case SDL_QUIT:
 		ExitWorkstation(0);
@@ -532,6 +536,10 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 
 	if (WarteZeit > 0)
 		usleep(WarteZeit);
+#undef xx
+#undef yy
+#undef ch
+#undef b
 }
 
 

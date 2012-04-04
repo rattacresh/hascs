@@ -17,8 +17,8 @@ uint16_t mask[4] = {
 
 /* Setzt ein 16 x 16 Sprite auf Monochrombildschirm */
 void SetMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
-#define Sprite (*ref_Sprite)
 {
+#define Sprite (*ref_Sprite)
 	register unsigned i,j;
 	i = y * 640 + x;
 	for (j = 0; j <= 15; j++) {
@@ -29,13 +29,13 @@ void SetMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
 	if (NewYMin > y) NewYMin = y;
 	if (NewXMax < x) NewXMax = x;
 	if (NewYMax < y) NewYMax = y;
-}
 #undef Sprite
+}
 
 /* Setzt ein 16 x 16 Sprite auf Monochrombildschirm(Oder Modus) */
 void OrMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
-#define Sprite (*ref_Sprite)
 {
+#define Sprite (*ref_Sprite)
 	register unsigned i, j;
 	i = y * 640 + x;
 	for (j = 0; j <= 15; j++) {
@@ -46,8 +46,8 @@ void OrMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
 	if (NewYMin > y) NewYMin = y;
 	if (NewXMax < x) NewXMax = x;
 	if (NewYMax < y) NewYMax = y;
-}
 #undef Sprite
+}
 
 void SetMonoChar(unsigned x,unsigned y, char ch)
 {
@@ -72,8 +72,8 @@ void SetMonoChar(unsigned x,unsigned y, char ch)
 }
 
 void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, SpriteType *ref_Sprite)
-#define Sprite (*ref_Sprite)
 {
+#define Sprite (*ref_Sprite)
 	register unsigned i,j;
 	register uint16_t m;
 	unsigned z[4];
@@ -96,24 +96,23 @@ void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, SpriteType *ref_Sprite)
 		Bildschirm[j] = htons((ntohs(Bildschirm[j]) & ~m) | z[i]);
 		j += 40;
 	}
-}
 #undef Sprite
+}
 
 
 void EditSprite(SpriteType *ref_Sprite, unsigned x,unsigned y,unsigned c)
-#define Sprite (*ref_Sprite)
 {
+#define Sprite (*ref_Sprite)
 	/* setzt Punkt x,y im Sprite auf Farbe c */
 	if (c == 0)
 		Sprite[y] &= ~(1<<(15 - x));
 	else
 		Sprite[y] |= 1<<(15 - x);
-}
 #undef Sprite
+}
 
 
-unsigned GetSprite(SpriteType *ref_Sprite, unsigned x, unsigned y)
-#define Sprite (*ref_Sprite)
+unsigned GetSprite(SpriteType Sprite, unsigned x, unsigned y)
 {
 	/* ermittelt Farbe des Punktes x, y im Sprite */
 	unsigned c;
@@ -123,7 +122,6 @@ unsigned GetSprite(SpriteType *ref_Sprite, unsigned x, unsigned y)
 		c = 0;
 	return c;
 }
-#undef Sprite
 
 
 void InvertFeld(unsigned x, unsigned y)

@@ -141,8 +141,9 @@ int LoadSoundFile(char *f, unsigned id, SoundType s)
 	return ok;
 }
 
-int LoadSound(unsigned n, SoundType s)
+int LoadSound(unsigned n, SoundType *ref_s)
 {
+#define s (*ref_s)
 	char FileName[128];
 	int ok;
 	unsigned i, id;
@@ -162,11 +163,13 @@ int LoadSound(unsigned n, SoundType s)
 		Concat(SoundPath, FileName, FileName, ok);
 		return LoadSoundFile(FileName, id, s);
 	}
+#undef s
 }
 
 
-void PlaySoundDMA(SoundType *s)
+void PlaySoundDMA(SoundType *ref_s)
 {
+#define s (*ref_s)
 	union {
 		unsigned long ptr;
 		char e[4];
@@ -191,12 +194,13 @@ void PlaySoundDMA(SoundType *s)
 			sndmactl = 1; /* Let's go... */
 	}
 	LeaveSupervisorMode(stack);
-
+#undef s
 }
 
 
-void PlaySoundInterrupt(SoundType *s)
+void PlaySoundInterrupt(SoundType *ref_s)
 {
+#define s (*ref_s)
 	unsigned long FrameStart, FrameEnd;
 	unsigned f;
 	if (!SoundAusgabe) return;
@@ -333,6 +337,7 @@ void PlaySoundInterrupt(SoundType *s)
 		ds   4096
 	bye:
 	} /*$C+ Case sensitive */
+#undef s
 }
 
 

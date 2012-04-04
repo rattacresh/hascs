@@ -5,8 +5,10 @@
 #include "HASCSMonster.h"
 #include "HASCSSystem.h"
 
-int Vision(unsigned Weite, unsigned Art, unsigned *lx, unsigned *ly)
+int Vision(unsigned Weite, unsigned Art, unsigned *ref_lx, unsigned *ref_ly)
 {
+#define lx (*ref_lx)
+#define ly (*ref_ly)
 #define MaxWeite 44
 
 	unsigned VAR xl, yl, Anzahl, RahmenX, RahmenY, RahmenBreite,
@@ -129,6 +131,8 @@ int Vision(unsigned Weite, unsigned Art, unsigned *lx, unsigned *ly)
 			return TRUE;
 		}
 	return FALSE;
+#undef lx
+#undef ly
 }
 
 void Todeshauch(unsigned Weite, unsigned Wirkung)

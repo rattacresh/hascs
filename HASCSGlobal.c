@@ -5,7 +5,7 @@
 #include "HASCSSystem.h"
 #include "Screen.h"
 
-int ScreenReserved;
+int ScreenReserved = Editor;
 
 /* Bildschirm-Ausgaben ****************************************************/
 
@@ -61,17 +61,21 @@ void SetOldSprite(unsigned x, unsigned y)
 }
 
 
-void FillRectangle(int x0, int y0, int x1, int y1, SpriteType Sprite)
+void FillRectangle(int x0, int y0, int x1, int y1, SpriteType *ref_Sprite)
 {
+#define Sprite (*ref_Sprite)
 	int x, y;
 	for (x = x0; x <= x1; x++)
 		for (y = y0; y <= y1; y++)
 			SetSprite(x, y, Sprite);
+#undef Sprite
 }
 
-int MakeShoot(unsigned *qx, unsigned *qy, unsigned zx, unsigned zy, unsigned time,
-		int mode);
+int MakeShoot(unsigned *ref_qx, unsigned *ref_qy, unsigned zx, unsigned zy, unsigned time,
+		int mode)
 {
+#define qx (*ref_qx)
+#define qy (*ref_qy)
 	int x0, y0, x1, y1, dx, dy, ix, iy, ax, ay, of, ct;
 	unsigned mx, my, i; BITSET mb; char mch;
 	int ausserhalb, hit;
@@ -123,6 +127,8 @@ int MakeShoot(unsigned *qx, unsigned *qy, unsigned zx, unsigned zy, unsigned tim
 	qx = x0;
 	qy = y0;
 	return hit;
+#undef qx
+#undef qy
 }
 
 
@@ -509,8 +515,9 @@ void DeleteParameter(unsigned px, unsigned py)
 	}
 }
 
-void NewMonster(unsigned mx, unsigned my, MonsterTyp *m)
+void NewMonster(unsigned mx, unsigned my, MonsterTyp *ref_m)
 {
+#define m (*ref_m)
 	unsigned sx, sy;
 	if (AnzahlMonster < MaxMonster && mx <= MaxBreite && my <= MaxHoehe) {
 		AnzahlMonster++;
@@ -524,10 +531,12 @@ void NewMonster(unsigned mx, unsigned my, MonsterTyp *m)
 				SetNewSprite(sx, sy);
 		}
 	}
+#undef m
 }
 
-void NewGegenstand(unsigned gx, unsigned gy, GegenstandTyp *g)
+void NewGegenstand(unsigned gx, unsigned gy, GegenstandTyp *ref_g)
 {
+#define g (*ref_g)
 	unsigned sx, sy;
 	if (AnzahlGegen < MaxGegen && gx <= MaxBreite && gy <= MaxHoehe) {
 		AnzahlGegen++;
@@ -541,10 +550,12 @@ void NewGegenstand(unsigned gx, unsigned gy, GegenstandTyp *g)
 				SetNewSprite(sx, sy);
 		}
 	}
+#undef g
 }
 
 void NewParameter(unsigned px, unsigned py, ParameterTyp *p)
 {
+#define p (*ref_p)
 	unsigned sx, sy;
 	if (AnzahlParameter < MaxPar && px <= MaxBreite && py <= MaxHoehe) {
 		AnzahlParameter++;
@@ -555,6 +566,7 @@ void NewParameter(unsigned px, unsigned py, ParameterTyp *p)
 		if (LevelSichtUmrechnung(px, py, sx, sy))
 			SichtBereich[sx][sy].Spezial |= LevelParameter;
 	}
+#undef p
 }
 
 /************************************************************************/
@@ -691,33 +703,39 @@ int LegeGegenstand(unsigned px, unsgned py, GegenstandTyp *r)
 
 /* Koordinatenumrechnungen ************************************************/
 
-void NormalKoords(int xh, int yh, unsigned i, unsignedj)
-
+void NormalKoords(int xh, int yh, unsigned *ref_i, unsigned *ref_j)
 /* Clippt Koordinaten ins Level */
 
 {
+#define i (*ref_i)
+#define j (*ref_j)
 	i = (xh + LevelBreite + 1) % (LevelBreite + 1);
 	j = (yh + LevelHoehe + 1) % (LevelHoehe + 1);
+#undef i
+#undef j
 }
 
-void SichtLevelUmrechnung(unsigned x, unsigned y, unsigned i, unsigned j)
+void SichtLevelUmrechnung(unsigned x, unsigned y, unsigned *ref_i, unsigned *ref_j)
 {
+#define i (*ref_i)
+#define j (*ref_j)
 	i = (Spieler.x + x + LevelBreite + 1 - MaxSichtweite) % (LevelBreite + 1);
 	j = (Spieler.y + y + LevelHoehe + 1 - MaxSichtweite) % (LevelHoehe + 1);
+#undef i
+#undef j
 }
 
-int LevelSichtUmrechnung(unsigned x, unsigned y, unsigned i, unsigned j)
+int LevelSichtUmrechnung(unsigned x, unsigned y, unsigned *ref_i, unsigned *ref_j)
 {
+#define i (*ref_i)
+#define j (*ref_j)
 	unsigned xh,yh;
 	xh = (x + LevelBreite + 1 + MaxSichtweite - Spieler.x) % (LevelBreite + 1);
 	yh = (y + LevelHoehe + 1 + MaxSichtweite - Spieler.y) % (LevelHoehe + 1);
 	if (xh <= MaxSichtmal2 && yh <= MaxSichtmal2) {
 		i = xh; j = yh; return TRUE;
 	} else return FALSE;
+#undef i
+#undef j
 }
 
-
-void GlobalInit(void)
-{
-	ScreenReserved = Editor;
-}

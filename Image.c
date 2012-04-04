@@ -113,7 +113,7 @@ int Decompress(BytePtr source, BytePtr dest)
 }
 
 
-int LoadImageN(unsigned n, unsigned w, h)
+int LoadImageN(unsigned n, unsigned *ref_w, unsigned *ref_h)
 {
 	int handle;
 	unsigned long length;
@@ -177,7 +177,7 @@ int SaveImage(char *Name)
 	unsigned z, counter, LineLength, NewLineLength;
 	int fh;
 			 
-	unsigned FillLine(unsigned z; BildZeile *x)
+	unsigned FillLine(unsigned z, BildZeile *ref_x)
 	{
 		unsigned c,  i,  j; BITSET f;
 
@@ -195,6 +195,7 @@ int SaveImage(char *Name)
 			return Sprite[z % 16];
 		 }
 
+#define x (*ref_x)
 		i = 0;
 		j = 0;
 		f = GetSpritePattern(i, z / 16, z);
@@ -216,14 +217,19 @@ int SaveImage(char *Name)
 				f = GetSpritePattern(i, z / 16, z);
 		} while (i <= HASCSGlobal.LevelBreite);
 		return j;
+#undef x
 	}
 
-	int Ungleich(BildZeile x, BildZeile y)
+	int Ungleich(BildZeile *x, BildZeile *y)
 	{
+#define x (*ref_x)
+#define y (*ref_y)
 		unsigned i;
 		for (i = 0; i <= LineLength-1; i++)
 			if (x[i] != y[i]) return TRUE;
 		return FALSE;
+#undef x
+#undef y
 	}
 	 
 	fh = HASCSSystem.CreateFile(Name);

@@ -336,9 +336,9 @@ unsigned Min(unsigned x, unsigned y)
 }
 
 unsigned GetToken(CharPtr *ref_p, unsigned *ref_n, char *s)
+{
 #define p (*ref_p)
 #define n (*ref_n)
-{
 	unsigned i, t;
 
 	t = *p;
@@ -380,13 +380,13 @@ unsigned GetToken(CharPtr *ref_p, unsigned *ref_n, char *s)
 		break;
 	}
 	return t;
-}
 #undef p
 #undef n
+}
 
 int NextLine(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned t, i;
 	String80Type s;
 
@@ -396,8 +396,8 @@ int NextLine(CharPtr *ref_p)
 	} while (t != ZeilenEndeToken);
 	p++;
 	return *p != TextEndeToken;
-}
 #undef p
+}
 
 
 int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
@@ -409,30 +409,30 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 	CharPtr start;
 
 	int LastLine(CharPtr *ref_p)
-#define p (*ref_p)
 	{
+#define p (*ref_p)
 		while (*p >= ' ') p++;
 		while (*p != '\0' && *p != 10) p++;
 		if (*p == 10) p++;
 		Line++;
 		return *p == '\0';
-	}
 #undef p
+	}
 
 	void GetLine(CharPtr *ref_p, char *s)
-#define p (*ref_p)
 	{
+#define p (*ref_p)
 		unsigned i;
 		for (i = 0; i <= HIGH(s); i++) {
 			if (*p < ' ') { s[i] = '\0'; break; }
 			s[i] = *p++;
 		}
-	}
 #undef p
+	}
 
 	unsigned GetToken(CharPtr *ref_p, char *s)
-#define p (*ref_p)
 	{
+#define p (*ref_p)
 		unsigned i = 0, t = 0;
 		while (*p == ' ' || *p == 8) p++;
 		if (INSet(*p,OpSet)) { /* Operator */
@@ -465,8 +465,8 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 		}
 		s[i] = '\0';
 		return t;
-	}
 #undef p
+	}
 
 	unsigned FindOperator(char *s)
 	{
@@ -571,8 +571,8 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 	Out(0); /* Endekennzeichnung */
 	l = q - start;
 	return ok;
-}
 #undef l
+}
 
 /************************************************************************/
 
@@ -597,8 +597,8 @@ void NewLabel(unsigned l, CharPtr p)
 }
 
 int FindLabel(CharPtr *ref_p, unsigned l)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned cmd, t; String80Type s;
 
 	p = GetLabel(l); /* Schon in Liste? */
@@ -614,8 +614,8 @@ int FindLabel(CharPtr *ref_p, unsigned l)
 	} while (NextLine(&p));
 	DialogFehler("Label nicht gefunden ", "", l);
 	return FALSE;
-}
 #undef p
+}
 
 /************************************************************************/
 
@@ -639,9 +639,9 @@ void PrinterLine(char *s)
 /* Variablenbearbeitung *************************************************/
 
 unsigned GetVariable(CharPtr *ref_p, unsigned *ref_c, char *s)
+{
 #define p (*ref_p)
 #define c (*ref_c)
-{
 	unsigned type, i, r;
 	char q[80];
 	/*CharPtr v;*/
@@ -678,13 +678,13 @@ unsigned GetVariable(CharPtr *ref_p, unsigned *ref_c, char *s)
 		DialogFehler("Fehlerhafter Ausdruck!", "", 65535);
 	}
 	return type;
-}
 #undef c
 #undef p
+}
 
 unsigned GetNumber(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned c, t;
 	String80Type s;
 
@@ -697,12 +697,12 @@ unsigned GetNumber(CharPtr *ref_p)
 	       return EvalTerm(&p, c);
 	else
 	       return 0;
-}
 #undef p
+}
 
 unsigned GetArgument(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	String80Type s;
 	unsigned n;
 	if (GetToken(&p, &n, s) == KlammerAufToken)
@@ -710,24 +710,24 @@ unsigned GetArgument(CharPtr *ref_p)
 	DialogFehler("Klammer auf '(' erwartet", "", 65535);
 	Continue = FALSE;
 	return 0;
-}
 #undef p
+}
 
 void GetString(CharPtr *ref_p, char *s)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned c;
 	if (GetVariable(&p, &c, s) == NumberToken)
 		CardToString(c, 1, s);
 	EvalString(&p, s);
-}
 #undef p
+}
 
 void *GetAddress(CharPtr *ref_p, unsigned *ref_t, unsigned *ref_c, char *s)
+{
 #define p (*ref_p)
 #define t (*ref_t)
 #define c (*ref_c)
-{
 	void *v;
 	unsigned i, k;
 	char q[80];
@@ -744,10 +744,10 @@ void *GetAddress(CharPtr *ref_p, unsigned *ref_t, unsigned *ref_c, char *s)
 	DialogFehler("Variable erwartet ", s, 65535);
 	Continue = FALSE;
 	return NULL;
-}
 #undef p
 #undef t
 #undef c
+}
 
 unsigned FindText(unsigned n)
 {
@@ -762,9 +762,9 @@ unsigned FindText(unsigned n)
 }
 
 void *GetItem(unsigned n, CharPtr *ref_p, unsigned *ref_r, char *s)
+{
 #define p (*ref_p)
 #define r (*ref_r)
-{
 	unsigned x, y; String80Type *str; CardPtr v;
 	v = NULL;
 	r = 0;
@@ -856,15 +856,15 @@ void *GetItem(unsigned n, CharPtr *ref_p, unsigned *ref_r, char *s)
 		}
 	}
 	return v;
-}
 #undef r
 #undef p
+}
 
 /* Zahlausdruck auswerten ***********************************************/
 
 unsigned EvalTerm(CharPtr *ref_p, unsigned n)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned v, op; String80Type h;
 
 	while (GetToken(&p, &op, h) == OperatorToken) {
@@ -889,14 +889,14 @@ unsigned EvalTerm(CharPtr *ref_p, unsigned n)
 		}
 	}
 	return n;
-}
 #undef p
+}
 
 /* Zeichenkettenausdruck auswerten **************************************/
 
 void EvalString(CharPtr *ref_p, char *s)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned /*t,*/ op, c; String80Type h;
 
 	while (GetToken(&p, &op, h) == OperatorToken) {
@@ -927,8 +927,8 @@ void EvalString(CharPtr *ref_p, char *s)
 			break;
 		}
 	}
-}
 #undef p
+}
 
 /* Textzeile aus-/eingeben **********************************************/
 
@@ -985,28 +985,28 @@ void Ausgabe(char *s)
 /* Kommandos  ***********************************************************/
 
 void Label(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned label;
 
 	label = GetNumber(&p);
 	NewLabel(label, p);
-}
 #undef p
+}
 
 void Goto(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned label;
 
 	label = GetNumber(&p);
 	Continue = FindLabel(&p, label);
-}
 #undef p
+}
 
 void Gosub(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned label;
 	
 	label = GetNumber(&p);
@@ -1018,31 +1018,31 @@ void Gosub(CharPtr *ref_p)
 		DialogFehler("Zuviele verschachtelte GOSUB", "", 65535);
 		Continue = FALSE;
 	}
-}
 #undef p
+}
 
 void Return(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	if (ReturnLevel > 0)
 		p = ReturnAddress[--ReturnLevel].LabelAddress;
 	else {
 		DialogFehler("RETURN ohne GOSUB", "", 65535);
 		Continue = FALSE;
 	}
-}
 #undef p
+}
 
 void End(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	Continue = FALSE;
-}
 #undef p
+}
 
 void Input(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned i, mx, my;
 	BITSET mb;
 
@@ -1089,12 +1089,12 @@ void Input(CharPtr *ref_p)
 	ZeilenAus = 0;
 	if (DruckerAusgabe)
 		PrinterLine(ein);
-}
 #undef p
+}
 
 void Aim(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned /*i,*/ x, y, qx, qy, mode, type;
 	BITSET b;
 	char ch;
@@ -1127,19 +1127,19 @@ void Aim(CharPtr *ref_p)
 		x = Spieler.x; y = Spieler.y;
 	}
 	*varx = x; *vary = y;
-}
 #undef p
+}
 
 
 void Nothing(CharPtr *ref_p)
-#define p (*ref_p)
 {
-}
+#define p (*ref_p)
 #undef p
+}
 
 void Window(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	if (!OpenWindow) {
 		RestoreScreen();
 		OpenWindow = TRUE;
@@ -1148,12 +1148,12 @@ void Window(CharPtr *ref_p)
 	y = GetNumber(&p);
 	w = GetNumber(&p);
 	h = GetNumber(&p);
-}
 #undef p
+}
 
 void Output(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	String80Type s;
 
 	if (ZeilenAus > 0) {
@@ -1165,29 +1165,29 @@ void Output(CharPtr *ref_p)
 	}
 	GetString(&p, s);
 	OutputText(s);
-}
 #undef p
+}
 
 void Invert(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned x, y;
 
 	x = GetNumber(&p);
 	y = GetNumber(&p);
 	if (LevelSichtUmrechnung(x, y, &x, &y))
 		InvertFeld(x+1, y+1);
-}
 #undef p
+}
 
 void Picture(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned n;
 	n = GetNumber(&p); /* Bildnummer */
 	ShowPicture(n, FALSE);
-}
 #undef p
+}
 
 void ShowPicture(unsigned n, int New)
 {
@@ -1230,8 +1230,8 @@ void ShowPicture(unsigned n, int New)
 
 
 void Let(CharPtr *ref_p, unsigned i)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	CardPtr var;
 	unsigned /*type,*/ value;
 	String80Type s;
@@ -1247,12 +1247,13 @@ void Let(CharPtr *ref_p, unsigned i)
 			str = (StringPtr)var; EvalString(&p, s); Assign(*str, s);
 			break;
 		}
+#undef p
 }
 
 
 void If(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned cmd, c, type;
 	String80Type h;
 
@@ -1268,13 +1269,13 @@ void If(CharPtr *ref_p)
 		Let(&p, cmd);
 	else if (type == CommandToken)
 		XCommand[cmd].action(&p);
-}
 #undef p
+}
 
 
 void Sound(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned n, mode; SoundType snd; /*String80Type s;*/
 
 	n = GetNumber(&p);
@@ -1285,27 +1286,26 @@ void Sound(CharPtr *ref_p)
 	default:
 		PlaySoundN(n); break;
 	}
-}
 #undef p
+}
 
 void Wait(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned t;
 
 	t = GetNumber(&p);
 	if (t == 0) {
 		WaitKey();
 		ZeilenAus = 0;
-	} else {
+	} else
 		WaitTime(t * 100);
-	}
-}
 #undef p
+}
 
 void Select(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned x, y, i;
 
 	x = GetNumber(&p);
@@ -1358,12 +1358,12 @@ void Select(CharPtr *ref_p)
 			SelectedParameter =&Parameter[i];
 		break;
 	}
-}
 #undef p
+}
 
 void XCopy(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned i, x, y;
 
 	x = GetNumber(&p);
@@ -1396,12 +1396,12 @@ void XCopy(CharPtr *ref_p)
 		else if (x == 60005 && SelectedMonster)
 			Spieler.ReitTier = *SelectedMonster;
 	}
-}
 #undef p
+}
 
 void Delete(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned x, y, i;
 
 	x = GetNumber(&p);
@@ -1432,13 +1432,13 @@ void Delete(CharPtr *ref_p)
 			Spieler.ReitTier.Typ = 0; Spieler.Status &= ~SReitet;
 		}
 	}
-}
 #undef p
+}
 
 
 void XTeleport(CharPtr *ref_p)
-#define p (*ref_p)
 {
+#define p (*ref_p)
 	unsigned x, y, l;
 
 	x = GetNumber(&p);
@@ -1456,14 +1456,14 @@ void XTeleport(CharPtr *ref_p)
 		Spieler.LevelNumber = 0;
 	}
 	Redraw = 1; /* Levelausschnitt neu zeichnen */
-}
 #undef p
+}
 
 void Call(CharPtr *ref_p)
-#define p (*ref_p)
 {
-}
+#define p (*ref_p)
 #undef p
+}
 
 
 /* Dialog ausführen *****************************************************/
@@ -1630,22 +1630,28 @@ void DoDialog(unsigned n)
 	ExecuteDialog();
 }
 
-void DoMonsterDialog(unsigned n, MonsterTyp *m)
+void DoMonsterDialog(unsigned n, MonsterTyp *ref_m)
 {
-	SelectedMonster = m;
+#define m (*ref_m)
+	SelectedMonster = &m;
 	DoDialog(n);
+#undef m
 }
 
-void DoGegenstandDialog(unsigned n, GegenstandTyp *g)
+void DoGegenstandDialog(unsigned n, GegenstandTyp *ref_g)
 {
-	SelectedGegenstand = g;
+#define g (*ref_g)
+	SelectedGegenstand = &g;
 	DoDialog(n);
+#undef g
 }
 
-void DoParameterDialog(unsigned n, ParameterTyp *p)
+void DoParameterDialog(unsigned n, ParameterTyp *ref_p)
 {
-	SelectedParameter = p;
+#define p (*ref_p)
+	SelectedParameter = &p;
 	DoDialog(n);
+#undef p
 }
 
 

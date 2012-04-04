@@ -38,8 +38,9 @@ void ClearMonster(unsigned x, unsigned y)
 
 /* Monster neu setzen ****************************************************/
 
-void MonsterParameter(MonsterTyp *m)
+void MonsterParameter(MonsterTyp *ref_m)
 {
+#define m (*ref_m)
 	ParameterTyp *p; unsigned s;
 	p = Parameter[FindParameter(m.x, m.y)];
 	switch (p.Art) {
@@ -68,6 +69,7 @@ void MonsterParameter(MonsterTyp *m)
 			Status = p.neuerStatus;
 		break;
 	}
+#undef m
 }
 
 void ShowMonster(unsigned i)
@@ -109,41 +111,44 @@ void ShowMonster(unsigned i)
 
 /* Monster pariert? *****************************************************/ 
 
-int MonsterParade(MonsterTyp *m, GegenstandTyp *w, unsigned Treffer)
+int MonsterParade(MonsterTyp *ref_m, GegenstandTyp *ref_w, unsigned Treffer)
 {
+#define m (*ref_m)
+#define w (*ref_w)
 	if (MonsterPariert & ~m.Spezial)
 		return FALSE;
 	if (GMagisch & w.Spezial && MonsterMagisch & ~m.Spezial)
 		return FALSE;
 	else
 		return Zufall(20) + m.Trefferwurf >= m.Treffer;
+#undef m
+#undef w
 }
 
 /* Monster bekommt was ab ***********************************************/ 
 
-int HitMonster(MonsterTyp *m, unsigned Damage)
+int HitMonster(MonsterTyp *ref_m, unsigned Damage)
 {
+#define m (*ref_m)
 	unsigned xs, ys, j, Reaktion, OldTyp; int Dead;
 	Dead = FALSE;
-	WITH  DO
-		if (LevelSichtUmrechnung(m.x, m.y, xs, ys)) {
-			InvertFeld(xs+1, ys+1);
-			WaitTime(300);
-			InvertFeld(xs+1, ys+1);
-		}
-		m.OldTyp = m.Typ;
-		if (m.TP >= m.Damage) {
-			m.TP -= m.Damage;
-			m.Status = 1;
-			if (m.TP < 2 && Zufall(2) == 1) m.Status = 4;
-			if (m.Sprich > 2000 && m.Sprich < 3000)
-				DoMonsterDialog(m.Sprich - 2000, m);
-		} else { /* schon tot... */
-			if (m.Sprich > 3000 && m.Sprich < 4000)
-				DoMonsterDialog(m.Sprich - 3000, m);
-			DeleteMonster(m.x, m.y);
-			Dead = TRUE;
-		}
+	if (LevelSichtUmrechnung(m.x, m.y, xs, ys)) {
+		InvertFeld(xs+1, ys+1);
+		WaitTime(300);
+		InvertFeld(xs+1, ys+1);
+	}
+	m.OldTyp = m.Typ;
+	if (m.TP >= m.Damage) {
+		m.TP -= m.Damage;
+		m.Status = 1;
+		if (m.TP < 2 && Zufall(2) == 1) m.Status = 4;
+		if (m.Sprich > 2000 && m.Sprich < 3000)
+			DoMonsterDialog(m.Sprich - 2000, m);
+	} else { /* schon tot... */
+		if (m.Sprich > 3000 && m.Sprich < 4000)
+			DoMonsterDialog(m.Sprich - 3000, m);
+		DeleteMonster(m.x, m.y);
+		Dead = TRUE;
 	}
 
 	if (LevelMonAll & LevelFlags) {
@@ -158,23 +163,27 @@ int HitMonster(MonsterTyp *m, unsigned Damage)
 				Monster[j].Status = 7;
 
 	return Dead;
+#undef m
 }
 
 /* Schutzwurf eines Monsters *********************************************/
 
-int MonsterSchutzwurf(MonsterTyp *m)
+int MonsterSchutzwurf(MonsterTyp *ref_m)
 {
+#define m (*ref_m)
 	unsigned w;
 	w = m.Schaden + m.Bonus * 2;
 	if (MonsterMagisch & m.Spezial) w = w * 2; /* magisch */
 	if (w > 90) w = 90 /* maximal 95% */
 	return Zufall(100) <= w;
+#undef m
 }
 
 /* Feld auf begehbar überprüfen ******************************************/
 
-int MonsterFrei(MonsterTyp *m, unsigned xl, unsigned yl)
+int MonsterFrei(MonsterTyp *ref_m, unsigned xl, unsigned yl)
 {
+#define m (*ref_m)
 	int frei;
 	BITSET FeldTyp;
 	unsigned xs, ys, i;
@@ -218,6 +227,7 @@ int MonsterFrei(MonsterTyp *m, unsigned xl, unsigned yl)
 			}
 		}
 	return frei;
+#undef m
 }
 
 /* Sieht das Monster den Spieler ? **************************************/
@@ -242,10 +252,12 @@ void MonsterBewegung(void)
 	{
 		unsigned Wurf, a, s;
 
-		int Parade(GegenstandTyp *r, unsigned Angriff)
+		int Parade(GegenstandTyp *ref_r, unsigned Angriff)
 		{
-#define ParadeMoeglich 4
-#define ParadeHalbe 5
+#define r (*ref_r)
+
+#define ParadeMoeglich (1<<4)
+#define ParadeHalbe (1<<5)
 			int pariert, unsigned as;
 			pariert = FALSE;
 			if (r.KennNummer == GWaffe)
@@ -268,6 +280,7 @@ void MonsterBewegung(void)
 					}
 				}
 			return pariert;
+#undef r
 		}
 
 		Wurf = Zufall(20);

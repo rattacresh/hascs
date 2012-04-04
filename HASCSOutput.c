@@ -90,10 +90,14 @@ void GotoXY(unsigned x, unsigned y)
 }
 
 
-void GetXY(unsigned x, unsigned y)
+void GetXY(unsigned *ref_x, unsigned *ref_y)
 /* Cursorposition holen */
 {
+#define x (*ref_x)
+#define y (*ref_y)
 	x = cx; y = cy;
+#undef x
+#undef y
 }
 
 
@@ -273,10 +277,10 @@ void InputString(char *s, unsigned l)
 
 
 void InputClick(char *s, unsigned l,unsigned *ref_x, unsigned *ref_y, BITSET *ref_b)
+{
 #define x (*ref_x)
 #define y (*ref_y)
 #define b (*ref_b)
-{
 	/* String einlesen mit maximal l Zeichen */
 	unsigned i; char ch;
 
@@ -306,20 +310,20 @@ void InputClick(char *s, unsigned l,unsigned *ref_x, unsigned *ref_y, BITSET *re
 	} while (ch != '\015' && b == 0); /* CR */
 	CharOut(' '); CharOut('\010');
 	s[i] = '\0';
-}
 #undef x
 #undef y
 #undef z
+}
 
 void InputCard(unsigned *ref_c, unsigned l)
-#define c (*ref_c)
 {
+#define c (*ref_c)
 	char s[21];
 	CardToString(c, 1, s);
 	InputString(s, l);
 	c = StringToCard(s);
-}
 #undef c
+}
 
 /* Textfenster Routinen *********************************************/
 

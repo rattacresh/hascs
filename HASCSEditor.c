@@ -280,11 +280,11 @@ void Insel(unsigned x, unsigned y, unsigned f,
 }
 
 int FindFeld(unsigned *ref_i, unsigned *ref_j, unsigned *ref_f, unsigned *ref_o)
+{
 #define i (*ref_i)
 #define j (*ref_j)
 #define f (*ref_f)
 #define o (*ref_o)
-{
 	/* Zufallsauswahl eines Feldes f im Level ohne Nachbarn o */
 	unsigned n, z, x, y;
 
@@ -309,11 +309,11 @@ int FindFeld(unsigned *ref_i, unsigned *ref_j, unsigned *ref_f, unsigned *ref_o)
 				}
 			}
 	return FALSE;
-}
 #undef i
 #undef j
 #undef f
 #undef o
+}
 
 void FeldAendern(unsigned f, unsigned o)
 {
@@ -389,8 +389,8 @@ void Generator(void)
 /************************************************************************/
 
 void InputMonster(unsigned x, unsigned y, unsigned neu, unsigned *ref_t)
-#define t (*ref_t)
 {
+#define t (*ref_t)
 	MonsterTyp m; unsigned i, a, s, n/*, d*/;
 
 	if (neu == 0 || neu == 2)
@@ -462,12 +462,12 @@ void InputMonster(unsigned x, unsigned y, unsigned neu, unsigned *ref_t)
 		FelderChanged = TRUE;
 	}
 	MakeScreen(x, y);
-}
 #undef t
+}
 
 void InputGegenstand(unsigned x, unsigned y, unsigned neu, unsigned *ref_s)
-#define s (*ref_s)
 {
+#define s (*ref_s)
 	GegenstandTyp g; unsigned i, /*d,*/ na, fl, ab;
 
 	if (neu == 0 || neu == 2)
@@ -528,13 +528,13 @@ void InputGegenstand(unsigned x, unsigned y, unsigned neu, unsigned *ref_s)
 		FelderChanged = TRUE;
 	}
 	MakeScreen(x, y);
-}
 #undef s
+}
 
 
 void InputParameter(unsigned x, unsigned y, int new, unsigned *ref_a)
-#define a (*ref_a)
 {
+#define a (*ref_a)
 	ParameterTyp p; unsigned i, f, /*d,*/ ab, ar;
 
 	if (new) {
@@ -582,8 +582,8 @@ void InputParameter(unsigned x, unsigned y, int new, unsigned *ref_a)
 	NewParameter(x, y, &p);
 	LevelChanged = TRUE;
 	MakeScreen(x, y);
-}
 #undef a
+}
 
 void InputFeld(unsigned n)
 {
@@ -620,8 +620,8 @@ void InputFeld(unsigned n)
 }
 
 void InputLevelFeld(unsigned x, unsigned y, int new, unsigned *ref_f)
-#define f (*ref_f)
 {
+#define f (*ref_f)
 	if (new) {
 		DeleteMonster(x, y);
 		DeleteGegenstand(x, y);
@@ -633,8 +633,8 @@ void InputLevelFeld(unsigned x, unsigned y, int new, unsigned *ref_f)
 		PrintFeld(x, y);
 	} else
 		f = Level[x][y].Feld;
-}
 #undef f
+}
 
 void FillBlock(unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsigned n)
 {
@@ -972,11 +972,11 @@ void XYEingabe(void)
 
 int BlockDefine(char *t, unsigned *ref_x1, unsigned *ref_y1, 
 		unsigned *ref_x2, unsigned *ref_y2)
+{
 #define x1 (*ref_x1)
 #define x2 (*ref_x2)
 #define y1 (*ref_y1)
 #define y2 (*ref_y2)
-{
 	unsigned x, y,/* d,*/ i/*, j*/; BITSET b; char ch;
 
 	NewScreen(25, 0, 15, 14, t);
@@ -993,11 +993,11 @@ int BlockDefine(char *t, unsigned *ref_x1, unsigned *ref_y1,
 	if (x1 > x2) {i = x1; x1 = x2; x2 = i;}
 	if (y1 > y2) {i = y1; y1 = y2; y2 = i;}
 	return TRUE;
-}
 #undef x1
 #undef x2
 #undef y1
 #undef y2
+}
 
 void BlockFuellen(void)
 {
@@ -1057,17 +1057,17 @@ void DoEdit(void)
 	char ch;
 
 	void KeyToMouse(char ch, unsigned *ref_mx, unsigned *ref_my, BITSET *ref_mb)
+	{
 #define mx (*ref_mx)
 #define my (*ref_my)
 #define mb (*ref_mb)
-	{
 		if (ch >= '1' && ch <= '9') {
 			mx = 24; my = 24;
 		}
-	}
 #undef mx
 #undef my
 #undef mb
+	}
 
 	void DoMenue(unsigned x, unsigned y, BITSET b, char ch)
 	{

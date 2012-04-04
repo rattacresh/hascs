@@ -17,15 +17,15 @@ unsigned Rueckgabe;
 int SpielerFrei(unsigned x, unsigned y);
 
 void Minus(unsigned *ref_x, unsigned y)
-#define x (*ref_x)
 {
+#define x (*ref_x)
 	if (y > x)
 		x = 0;
 	else {
 		x = x - y;
 	}
-}
 #undef x
+}
 
 int DiskScreen()
 {
@@ -73,8 +73,8 @@ int ZaubernGelungen(void)
 }
  
 int RingAnlegen(GegenstandTyp *ref_r)
-#define r (*ref_r)
 {
+#define r (*ref_r)
 	if (Spieler.Ring.KennNummer != 0) {
 		OutputText("#711#"); /* Zwei Ringe? */
 		return FALSE;
@@ -92,12 +92,12 @@ int RingAnlegen(GegenstandTyp *ref_r)
 		return TRUE;
 	} else
 		return FALSE;
-}
 #undef r
+}
 
 void RingAblegen(GegenstandTyp *ref_r)
-#define r (*ref_r)
 {
+#define r (*ref_r)
 	if (r.Ring == 1) { /* Statusänderung */
 		Spieler.Status = Spieler.Status & ~r.RingWirkung;
 		Spieler.Permanent = Spieler.Permanent & ~ r.RingWirkung;
@@ -106,12 +106,12 @@ void RingAblegen(GegenstandTyp *ref_r)
 	else if (r.Ring >= 20 && r.Ring <= 25) /* Basiswertsenkung */
 		ChangeBasiswert(r.Ring - 20, -r.RingWirkung);
 	r.KennNummer = 0;
-}
 #undef r
+}
 
 int RuestungAnlegen(GegenstandTyp *ref_r)
-#define r (*ref_r)
 {
+#define r (*ref_r)
 	if (Spieler.Ruestung.KennNummer == 0) {
 		if (GMagisch & Spieler.Ruestung.Flags) {
 			if (!ZaubernGelungen())
@@ -127,16 +127,16 @@ int RuestungAnlegen(GegenstandTyp *ref_r)
 #undef r
 
 void RuestungAblegen(GegenstandTyp *ref_r)
-#define r (*ref_r)
 {
+#define r (*ref_r)
 	r.KennNummer = 0;
-}
 #undef r
+}
 
 int GetButton(unsigned *ref_x, unsigned *ref_y)
+{
 #define x (*ref_x)
 #define y (*ref_y)
-{
 	BITSET m;
 	char ch;
 	WaitInput(&x, &y, &m, &ch, -1); x = x / 16; y = y / 16;
@@ -161,9 +161,9 @@ int GetButton(unsigned *ref_x, unsigned *ref_y)
 		} else
 			return FALSE;
 	}
-}
 #undef x
 #undef y
+}
 
 int Near(unsigned x, unsigned y)
 {
@@ -181,9 +181,9 @@ int NearSicht(unsigned xs, unsigned ys)
 }
 
 void *DisplayRucksack(unsigned *ref_n, BITSET *ref_mb)
+{
 #define n (*ref_n)
 #define mb (*ref_mb)
-{
 	unsigned i, mx, my;
 	char ch;
 	ReserveScreen(0, 4, 27, 19);
@@ -213,13 +213,13 @@ void *DisplayRucksack(unsigned *ref_n, BITSET *ref_mb)
 	else if (mx >= 27 && my == 11)
 		return &Spieler.Ring;
 	return NULL;
-}
 #undef n
 #undef mb
+}
 
 void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *ref_Waffe)
-#define Waffe (*ref_Waffe)
 {
+#define Waffe (*ref_Waffe)
 	unsigned Schaden, i,/*t ,*/ Trefferwurf, Punkte;
 	Trefferwurf = Zufall(20);
 	if (Trefferwurf + Spieler.Ge >= 20 + WM) {
@@ -272,8 +272,8 @@ void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *ref_Waffe)
 		Waffe.KennNummer = 0;
 		PrintCharakter(5);
 	}
-}
 #undef Waffe
+}
 
 void NahAngriff(unsigned zx, unsigned zy)
 {
@@ -464,8 +464,8 @@ void Ausruhen(void)
 void Benutze(GegenstandTyp *ref_r)
 {
 	void Fernkampf(GegenstandTyp *ref_r)
-#define r (*ref_r)
 	{
+#define r (*ref_r)
 		unsigned x, y, x2, y2, mx, my; int hit;
 		if ((1 << 1) & ~r.Spezial) {
 			OutputText("#667#"); return;
@@ -496,19 +496,19 @@ void Benutze(GegenstandTyp *ref_r)
 				r.KennNummer = 0;
 			}
 		}
-	}
 #undef r
+	}
 
 	void NimmZauberstab(GegenstandTyp *ref_r)
-#define r (*ref_r)
 	{
+#define r (*ref_r)
 		unsigned x, y, mx, my, i; /*int b;*/
 
 		void Verzaubert(MonsterTyp *ref_m, unsigned *ref_Stab, unsigned *ref_Wirkung)
+		{
 #define m (*ref_m)
 #define Stab (*ref_Stab)
 #define Wirkung (*ref_Wirkung)
-		{
 			unsigned i, j; /*int b;*/ MonsterTyp nm;
 			switch (Stab) {
 			case 1 : j = W6(Wirkung);
@@ -535,10 +535,10 @@ void Benutze(GegenstandTyp *ref_r)
 				return;
 			}
 			BeginOutput(); Print(Name); Print("#628#"); EndOutput();
-		}
 #undef m
 #undef Stab
 #undef Wirkung
+		}
 
 		if (ZaubernGelungen()) {
 			OutputText("#624#"); /* Wohin... */
@@ -562,12 +562,12 @@ void Benutze(GegenstandTyp *ref_r)
 				r.KennNummer = 0;
 			}
 		}
-	}
 #undef r
+	}
 
 	void NimmPhiole(GegenstandTyp *ref_r);
-#define r (*ref_r)
 	{
+#define r (*ref_r)
 		unsigned i, j; GegenstandTyp *g; BITSET b;
 		switch (r.Phiole) {
 		case 1: TrefferPunkte(W6(r.PhioleWirkung), TRUE); /* Heilung */
@@ -617,12 +617,12 @@ void Benutze(GegenstandTyp *ref_r)
 			if (r.PhioleAnwendungen == 0)
 				r.KennNummer = 0;
 		}
-	}
 #undef r
+	}
 
 	void NimmPergament(GegenstandTyp *ref_r)
-#define r (*ref_r)
 	{
+#define r (*ref_r)
 		if (ZaubernGelungen()) { 
 			Erfahrung(50 + Zufall(50));
 			NimmPhiole(&r);
@@ -633,12 +633,12 @@ void Benutze(GegenstandTyp *ref_r)
 					r.KennNummer = 0;
 			}
 		}
-	}
 #undef r
+	}
 
 	void BenutzeSchluessel(GegenstandTyp *ref_r)
-#define r (*ref_r)
 	{
+#define r (*ref_r)
 		unsigned x, y, i;
 
 		int KeyFits(void)
@@ -674,19 +674,19 @@ void Benutze(GegenstandTyp *ref_r)
 			}
 		}
 		EndOutput();
-	}
 #undef r
+	}
 
 	void NimmNahrung(GegenstandTyp *ref_r)
-#define r (*ref_r)
 	{
+#define r (*ref_r)
 		Spieler.Nahrung += r.Nahrung;
 		if (Spieler.Nahrung > MaxNahrung)
 			Spieler.Nahrung = MaxNahrung;
 		PrintCharakter(3);
 		r.KennNummer = 0;
-	}
 #undef r
+	}
 	
 #define r (*ref_r)
 	switch (r.KennNummer) {
@@ -707,13 +707,13 @@ void Benutze(GegenstandTyp *ref_r)
 				}
 			}
 	}
-}
 #undef r
+}
 
 
 void LegeAb(GegenstandTyp *ref_r)
-#define r (*ref_r)
 {
+#define r (*ref_r)
 	unsigned x, y; int abgelegt;
 
 	abgelegt = FALSE;
@@ -755,8 +755,8 @@ void LegeAb(GegenstandTyp *ref_r)
 			r.KennNummer = 0;
 		PrintCharakter(5);
 	}
-}
 #undef r
+}
 
 /**********************************************************************/
 
@@ -776,8 +776,8 @@ void  InfoFeld(unsigned x, unsigned y)
 	unsigned i;
 
 	int SucheFalle(ParameterTyp *ref_p)
-#define p (*ref_p)
 	{
+#define p (*ref_p)
 		unsigned EP;
 		EP = 0;
 		if (SchutzWurf(Spieler.In)
@@ -800,8 +800,8 @@ void  InfoFeld(unsigned x, unsigned y)
 			}
 		}
 		return FALSE;
-	}
 #undef p
+	}
 
 	if (Near(x, y) && LevelParameter & Level[x][y].Spezial) {
 		i = FindParameter(x, y);
@@ -857,16 +857,14 @@ void Nimm(unsigned number)
 {
 	int rfrei, lfrei; GegenstandTyp r;
 
-	int Beidhaendig(GegenstandTyp *ref_r)
-#define r (*ref_r)
+	int Beidhaendig(GegenstandTyp r)
 	{
 		return r.KennNummer == GWaffe && (1 << 2) & r.Spezial;
 	}
-#undef r
 		
 	rfrei = Spieler.rechteHand.KennNummer == 0;
 	lfrei = Spieler.linkeHand.KennNummer == 0;
-	if (Beidhaendig(&Spieler.rechteHand)) lfrei = FALSE;
+	if (Beidhaendig(Spieler.rechteHand)) lfrei = FALSE;
 	r = Spieler.Rucksack[number];
 	switch (r.KennNummer) {
 	case GRuestung:
@@ -880,7 +878,7 @@ void Nimm(unsigned number)
 	default:
 		if (!rfrei && !lfrei)
 			OutputText("#712#");
-		else if (Beidhaendig(&r) && !(rfrei && lfrei))
+		else if (Beidhaendig(r) && !(rfrei && lfrei))
 			OutputText("#713#");
 		else {
 			if (rfrei) Spieler.rechteHand = r;

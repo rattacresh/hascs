@@ -8,7 +8,9 @@
 #include "HASCSOutput.h"
 
 
-int CreateCharakter(SpielerTyp *Spieler)
+int CreateCharakter(SpielerTyp *ref_Spieler)
+{
+#define Spieler (*ref_Spieler)
 	unsinged mx, my, i, VP, TY;
 	BITSET mb;
 	unsigned B[6]; /* Basiswerte */
@@ -131,5 +133,6 @@ int CreateCharakter(SpielerTyp *Spieler)
 		Flags[i] = 0;
 	OldLevels = 0;
 	return TRUE;
+#undef Spieler
 }
 
