@@ -176,21 +176,17 @@ unsigned GetCache(unsigned id)
 
 void FreeCache(unsigned n)
 {
-	/*
 	unsigned i;
 	if (n == 0) { // alles löschen 
 		for (i = 1; i <= AnzCache; i++)
-			if (!Free(Cache[i].CacheBuffer))
-				Error("Fehler in der Speicherverwaltung(1)!", 0);
+			free(Cache[i].CacheBuffer);
 		AnzCache = 0;
 	} else {
-		if (!(Free(Cache[n].CacheBuffer)))
-			Error("Fehler in der Speicherverwaltung(2)!", 0);
+		free(Cache[n].CacheBuffer);
 		for (i = n; i <= AnzCache - 1; i++)
 			Cache[i] = Cache[i+1];
-		AnzCache--;
+		--AnzCache;
 	}
-	*/
 }
 
 unsigned NewCache(unsigned id, unsigned long Bytes)
