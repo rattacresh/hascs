@@ -480,7 +480,7 @@ void FindeSteigungen(void)
 			NeueSteigung(x - MaxSichtweite, y - MaxSichtweite);
 }
 
-void GameInit(void)
+static void __attribute__ ((constructor)) at_init(void)
 {
 	oldx = 999; oldy = 999; Weite = 999;
 	FindeSteigungen();

@@ -1668,7 +1668,8 @@ void NewVariable(char *s, void *l, unsigned n, unsigned t)
 
 /************************************************************************/
 
-void DialogInit()
+#if 0
+int main(void)
 {
 /*
 	InitWorkstation("DIALOG");
@@ -1678,4 +1679,4 @@ void DialogInit()
 			ExecuteDialog();
 */
 }
-
+#endif

@@ -19,6 +19,12 @@ int XOff, YOff;
 		
 //void *MenuAdr;
 
+int ShowError = TRUE;
+int FileError = FALSE;
+unsigned NewXMin = 40, NewYMin = 25, NewXMax = 0, NewYMax = 0;
+    
+unsigned AnzCache = 0, CacheCounter = 0;
+    
 SDL_Surface *ScreenMFDB, *BufferMFDB, *PicMFDB;
 int CompatBufferMFDB_set = 0;
 int CompatPicMFDB_set = 0;
@@ -27,13 +33,13 @@ unsigned int MonoBuffer_w, MonoBuffer_h;
 unsigned int MonoPic_w, MonoPic_h;
 
 //SearchRec DTABuffer;
-char *LastFileName;
+char *LastFileName = "";
 
-unsigned char *BufferAdr;
-unsigned long BufferLen;
+unsigned char *BufferAdr = NULL;
+unsigned long BufferLen = 0;
 
-unsigned long mousetime;
-int losgelassen;
+unsigned long mousetime = 1;
+int losgelassen = TRUE;
 
 /* Min max */
 
@@ -65,36 +71,18 @@ int RcIntersect(SDL_Rect *ref_p1, SDL_Rect *ref_p2)
 #undef p2
 }
 
-
-/**
- * Alles initialisieren. Muss vor der Benutzung der Funktionen dieses
- * Moduls einmal aufgerufen werden.
- */
-void SystemInit(void)
-{
-	ShowError = 1;
-	FileError = 0;
-	LastFileName = "";
-	NewXMin = 40; 
-	NewYMin = 25; 
-	NewXMax = 0; 
-	NewYMax = 0;
-    
-	BufferLen = 0;
-	BufferAdr = NULL;
-    
-	AnzCache = 0; CacheCounter = 0;
-    
-	losgelassen = 1;
-	mousetime = 1;
-}
-
-
  /* Programmverwaltung ***********************************************/
 
+int __argc;
+char **__argv;
 void InitWorkstation(char *WinName)
 {
-	SystemInit();
+	static char cwd[128], cmd[128] = {};
+	extern char *program_invocation_name;
+
+	Name = program_invocation_name;
+	Command = strncpy(cmd, __argc > 1 ? __argv[1] : "", sizeof cmd - 1);
+	ActPath = getcwd(cwd, sizeof cwd);
 
 	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "SDL konnte nicht initialisiert werden: %s\n", SDL_GetError());
@@ -112,8 +100,6 @@ void InitWorkstation(char *WinName)
 	}
 	
 	SDL_WM_SetCaption(WinName, WinName);    
-
-	GraphicsInit();
 
 #if 0
 

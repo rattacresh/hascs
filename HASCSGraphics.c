@@ -236,7 +236,7 @@ void Fill(unsigned x, unsigned y, unsigned w, unsigned h, unsigned pattern)
 }
 
 
-void GraphicsInit(void)
+static void __attribute__ ((constructor)) at_init(void)
 {
 	SetSprite     = SetMonoSprite;
 	SetChar       = SetMonoChar;

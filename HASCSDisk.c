@@ -741,7 +741,7 @@ void ReadLevel(char *Name)
 }
 
 
-void InitDisk(void)
+static void __attribute__ ((constructor)) at_init(void)
 {
 	/* VersionsNummer = 7; erste Farbversion */
 	/* VersionsNummer = 8; HASCS II schwarz-weiﬂ */

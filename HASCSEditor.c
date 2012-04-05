@@ -1223,8 +1223,9 @@ void InitEditor(void)
 }
 
 
-int main(void)
+int main(int argc, char *argv[])
 {
+	extern int __argc; extern char **__argv; __argc = argc; __argv = argv;
 
 	Editor = TRUE;
 	SoundAusgabe = TRUE;

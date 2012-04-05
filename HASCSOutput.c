@@ -524,7 +524,7 @@ void AssignC(char *s, char c)
 		s[1] = '\0';
 }
 
-void OutputInit(void)
+static void __attribute__ ((constructor)) at_init(void)
 { /* Initialisierung */
 	TextFensterAusgabe = FALSE;
 	*TextFenster[TextZeilen] = *"";
