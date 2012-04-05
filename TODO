@@ -1,0 +1,27 @@
+** TODO for HASCS **
+
+  1. check for meaning of deleted INTEGER -- does it need to be changed 
+     to (int) cast to get negative values right?
+  2. check all switch() for break
+  3. Bool values for A IN B => !!(A & B)
+  4. (done) undo changed INC()/DEC() order in dialog.c hascsedi.c 
+     hascsspi.c
+  5. check for missing {} around single-line bodies
+  6. (done) 0C => '\0'
+  7. replace ~ü~ü and other charset  specific stuff (umlauts)
+     by correct \u...
+  8. search for sizeof, usually near direct read into memory
+  9. check for BITSET variables with arithmetic operators, change them 
+     to C bitwise operators
+ 10. some funcs really rely on HIGH(...)
+ 11. sometimes the original source code usees  BeginOutput instead of 
+     BeginOutput(). Does Modula execute the function in this case or 
+     does it merely compute the address and disposes of it?
+ 12. Check With for evaluation (has any of the expressions specified on 
+     WITH changed value on use and it should of course not have in the 
+     C code to make it equivalent to the MODUAL version)?
+ 13. make non-exported funtions static 13. FIXME/XXX/--rtc/machine 
+     dependencies
+ 14. at_init
+
+
