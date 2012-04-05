@@ -46,7 +46,7 @@ void TestWaitInput() {
 void TestError() {
 	printf("ShowError: %i\n", ShowError);
 	printf("Folgende Dummy-Fehlermeldung soll nur bei ShowError==1 angezeigt werden:\n");
-	Error("***Dummy-Fehlermeldung*** (die zu keinem Programmabbruch fÃ¼hrt, da mode 1)", 1);
+	Error("***Dummy-Fehlermeldung*** (die zu keinem Programmabbruch führt, da mode 1)", 1);
 }
 
 void TestBuffer() {
@@ -58,22 +58,22 @@ void TestBuffer() {
 	char *otherBufPtr = GetBuffer(10);
 	printf("Die BufferAdr sollten gleich sein.\n");
 	printf("Hier sollten 7 Gs zu sehen sein: %s\n", otherBufPtr);
-	printf("(Wenn ein kleinerer Puffer geholt wird, dann wird der alte nicht gelÃ¶scht.)\n");
+	printf("(Wenn ein kleinerer Puffer geholt wird, dann wird der alte nicht gelöscht.)\n");
 }
 
 void TestCaches() {
-	printf("RÃ¼ckgabe NewCache(7, 1024): %u\n\n", NewCache(7, 1024));
-	printf("RÃ¼ckgabe NewCache(0, 2666): %u\n\n", NewCache(0, 2666));
-	printf("RÃ¼ckgabe GetCache(7): %u\n\n", GetCache(7));
-	printf("RÃ¼ckgabe GetCache(0): %u\n\n", GetCache(0));
-	printf("RÃ¼ckgabe GetCache(3): %u\n\n", GetCache(3));
-	printf("LÃ¶sche Cache mit Index 1 (Cache mit id 7):\nFreeCache(1)\n\n"); FreeCache(1);
-	printf("RÃ¼ckgabe GetCache(7): %u\n", GetCache(7));
+	printf("Rückgabe NewCache(7, 1024): %u\n\n", NewCache(7, 1024));
+	printf("Rückgabe NewCache(0, 2666): %u\n\n", NewCache(0, 2666));
+	printf("Rückgabe GetCache(7): %u\n\n", GetCache(7));
+	printf("Rückgabe GetCache(0): %u\n\n", GetCache(0));
+	printf("Rückgabe GetCache(3): %u\n\n", GetCache(3));
+	printf("Lösche Cache mit Index 1 (Cache mit id 7):\nFreeCache(1)\n\n"); FreeCache(1);
+	printf("Rückgabe GetCache(7): %u\n", GetCache(7));
 }
 
 void TestFileFunc() {
-	printf("GrÃ¶ÃŸe HASCSMonster.c: %lu\n", FileLength("HASCSMonster.c"));
-	printf("GrÃ¶ÃŸe NOTAFILE:       %lu\n", FileLength("NOTAFILE"));
+	printf("Größe HASCSMonster.c: %lu\n", FileLength("HASCSMonster.c"));
+	printf("Größe NOTAFILE:       %lu\n", FileLength("NOTAFILE"));
 	
 	int dummyfile = CreateFile("einDummyFile");
 	if (!dummyfile)
@@ -82,7 +82,7 @@ void TestFileFunc() {
 		printf("Habe die Datei einDummyFile angelegt:\n");
 	LoadAndRun("ls -l einDummyFile", "");
 	DeleteFile("einDummyFile");
-	printf("Habe einDummyFile gelÃ¶scht:\n");
+	printf("Habe einDummyFile gelöscht:\n");
 	LoadAndRun("ls -l einDummyFile", "");
 }
 
