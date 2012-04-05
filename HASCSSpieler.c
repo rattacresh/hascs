@@ -195,7 +195,7 @@ void *DisplayRucksack(unsigned *ref_n, BITSET *ref_mb)
 			SetSprite(2 + 12 * ((i-1) / 10), 7 + i - 10 * ((i-1) / 10),
 				  &SystemSprite[Spieler.Rucksack[i].Sprite]);
 			GotoXY(7 + 24 * ((i-1) / 10), 7 + i - 10 * ((i-1) / 10));
-			PrintGegenstand(&Spieler.Rucksack[i]);
+			PrintGegenstand(Spieler.Rucksack[i]);
 		}
 	}
 	WaitInput(&mx, &my, &mb, &ch, -1); mx = mx / 16; my = my / 16;
@@ -249,11 +249,11 @@ void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *ref_Waffe)
 				Schaden = 0; /* keine magische Waffe */
 			Punkte = (Monster[i].Trefferwurf + Monster[i].Schaden * 2 +
 				Monster[i].Bonus * 3) / 10;
-			/* BeginOutput; FIXME --rtc */
+			BeginOutput();
 			Print("#511#"); PrintCard(Schaden, 1); Print("#512#");
 			if (HitMonster(&Monster[i], Schaden))
 				Print("#510#");
-			/* EndOutput; FIXME --rtc */
+			EndOutput();
 			Erfahrung(Punkte * Schaden);
 		}
 	} else { /* nicht getroffen */
@@ -489,7 +489,7 @@ void Benutze(GegenstandTyp *ref_r)
 			}
 			if ((1 << 3) & r.Spezial && r.KennNummer != 0) {
 				if (SchutzWurf(Spieler.Ge) || SchutzWurf(Spieler.Ge)) {
-					if (!LegeGegenstand(mx, my, &r))
+					if (!LegeGegenstand(mx, my, r))
 						OutputText("#601#");
 				} else
 					OutputText("#601#");
@@ -565,7 +565,7 @@ void Benutze(GegenstandTyp *ref_r)
 #undef r
 	}
 
-	void NimmPhiole(GegenstandTyp *ref_r);
+	void NimmPhiole(GegenstandTyp *ref_r)
 	{
 #define r (*ref_r)
 		unsigned i, j; GegenstandTyp *g; BITSET b;
@@ -588,7 +588,7 @@ void Benutze(GegenstandTyp *ref_r)
 						g->Flags |= r.PhioleWirkung;
 					else
 						g->Flags &= ~r.PhioleWirkung;
-					BeginOutput(); Print("#631#"); PrintGegenstand(g); EndOutput();
+					BeginOutput(); Print("#631#"); PrintGegenstand(*g); EndOutput();
 				}
 			break;
 		case 8: OutputText("#632#");
@@ -726,7 +726,7 @@ void LegeAb(GegenstandTyp *ref_r)
 	BeginOutput(); Print("#720#"); /* Wohin ablegen... */
 	if (GetButton(&x, &y)) { /* ins Level */
 		if (Near(x, y)) {
-			if (LegeGegenstand(x, y, &r)) {
+			if (LegeGegenstand(x, y, r)) {
 				abgelegt = TRUE;
 				Print("#721#"); /* OK */
 			} else
@@ -764,11 +764,11 @@ void InfoGegenstand(unsigned gx, unsigned gy)
 {
 	unsigned i;
 
-	/*BeginOutput; XXX --rtc */
+	BeginOutput();
 	i = FindGegenstand(gx,gy);
 	Print("#695#");
-	PrintGegenstand(&Gegenstand[i]);
-	/*EndOutput; XXX --rtc */
+	PrintGegenstand(Gegenstand[i]);
+	EndOutput();
 }
 
 void  InfoFeld(unsigned x, unsigned y)
@@ -828,9 +828,9 @@ void  InfoFeld(unsigned x, unsigned y)
 			return;
 		}
 	}
-	/*BeginOutput; XXX --rtc */
+	BeginOutput();
 	Print("#700#"); Print(Felder[Level[x][y].Feld].Name);
-	/*EndOutput; XXX --rtc */
+	EndOutput();
 }
 
 void InfoMonster(unsigned mx, unsigned my)
@@ -843,7 +843,7 @@ void InfoMonster(unsigned mx, unsigned my)
 		else
 			InfoFeld(mx, my);
 	} else {
-		/*BeginOutput; XXX --rtc */
+		BeginOutput();
 		Print("#680#"); Print(Name); /* Du siehst: ... */
 		EndOutput();
 		if (Monster[i].Sprich > 0 && Monster[i].Sprich < 1000 && Monster[i].Status > 1)
@@ -904,7 +904,7 @@ void DoRucksack(void)
 			BeginOutput(); Print("#720#"); /* Wohin ablegen... */
 			if (GetButton(&x, &y)) /* dahin ablegen */
 				if (Near(x, y))
-					if (LegeGegenstand(x, y, &Spieler.Rucksack[i])) {
+					if (LegeGegenstand(x, y, Spieler.Rucksack[i])) {
 						Wegwerfen(i);
 						Print("#721#"); /* OK */
 						EndOutput();
@@ -921,10 +921,10 @@ void DoGegenstand(unsigned x, unsigned y)
 	int aufgenommen;
 
 	aufgenommen = NimmGegenstand(x, y, TRUE, &g);
-	/*BeginOutput; XXX --rtc */
+	BeginOutput();
 		Print("#322#");      /* Du findest: */
-		PrintGegenstand(&g);
-	/* EndOutput; XXX --rtc */
+		PrintGegenstand(g);
+	EndOutput();
 	if (aufgenommen) {
 		PrintCharakter(3);
 		PrintCharakter(4);

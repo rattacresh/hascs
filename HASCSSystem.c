@@ -37,12 +37,12 @@ int losgelassen;
 
 /* Min max */
 
-int Max(int a, int b)
+static int Max(int a, int b)
 {
 	if (a > b) return a; else return b;
 }
 
-int Min(int a, int b)
+static int Min(int a, int b)
 {
 	if (a < b) return a; else return b;
 }
@@ -271,14 +271,14 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 	return AnzCache;
 }
 
-void Deallocate(void *ref_Ptr)
+void Deallocate(void **ref_Ptr)
 {
 #define Ptr (*ref_Ptr)
 	if (Ptr != NULL) {
-		free(ptr);
-		*Ptr = NULL;
+		free(Ptr);
+		Ptr = NULL;
 	}
-#endif
+#undef Ptr
 }
 
 /**

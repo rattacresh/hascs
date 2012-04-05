@@ -1,5 +1,6 @@
 #ifndef SCREEN_H
 #define SCREEN_H
+#include "compat.h"
 
 #define MaxObjects 100
 

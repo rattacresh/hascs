@@ -14,7 +14,7 @@ ACHTUNG: Am Programmende muss unbedingt "PlaySound(SoundOff)" aufgerufen
          werden, wenn der Interruptplayer läuft.
 */
 
-const int MaxSounds = 50;
+#define MaxSounds 50
 
 typedef char *CharPtr;
 
@@ -35,7 +35,7 @@ int SoundAusgabe;
 
 void (*PlaySound)(SoundType *);
 
-int LoadSound(unsigned n, SoundType s);
+int LoadSound(unsigned n, SoundType *s);
 
 int LoadSoundFile(char *f, unsigned id, SoundType s);
 

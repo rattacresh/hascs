@@ -293,10 +293,10 @@ void ReserveScreen(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
 
 void PrintCharakter(unsigned Was);
 void PrintMenue(void);
-void PrintGegenstand(GegenstandTyp *g);
+void PrintGegenstand(GegenstandTyp g);
 void PrintLevelName(char *s);
 
-void DisplayCharakter(SpielerTyp *s);
+void DisplayCharakter(SpielerTyp s);
 
 /* Hilfsprozeduren ********************************************************/
 
@@ -318,14 +318,14 @@ unsigned SetLightRange();
 void SetOneLight(int x, int y, int w, int on);
 void SetLightLevel(int clear);
 unsigned GetBasiswert(unsigned n);
-unsigned ChangeBasiswert(unsigned n, int x);
+void ChangeBasiswert(unsigned n, int x);
 
 void Erfahrung(unsigned Punkte);
 void TrefferPunkte(unsigned Punkte, int Plus);
 
 int NimmGegenstand(unsigned px, unsigned py, int Einmal,
                           GegenstandTyp *g);
-int LegeGegenstand(unsigned px, unsigned py, GegenstandTyp *g);
+int LegeGegenstand(unsigned px, unsigned py, GegenstandTyp g);
 
 
 /* Koordinatentransformationen ********************************************/

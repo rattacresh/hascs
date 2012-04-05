@@ -19,16 +19,16 @@ int sign(int i)
 void ClearMonster(unsigned x, unsigned y)
 {
 	unsigned xs, ys, Sprite;
-	Level[x,y].Spezial &= ~LevelMonster;
-	if (LevelSichtUmrechnung(x, y, xs, ys)) {
+	Level[x][y].Spezial &= ~LevelMonster;
+	if (LevelSichtUmrechnung(x, y, &xs, &ys)) {
 		if (LevelBekannt & SichtBereich[xs][ys].Spezial) {
 			if (LevelGegenstand & SichtBereich[xs][ys].Spezial) {
 				Sprite = Gegenstand[FindGegenstand(x, y)].Sprite;
-				SetSprite(xs+1, ys+1, SystemSprite[Sprite]);
+				SetSprite(xs+1, ys+1, &SystemSprite[Sprite]);
 				OldScreen[xs][ys] = 512 + Sprite;
 			} else {
-				Sprite = SichtBereich[xs, ys].Feld;
-				SetSprite(xs+1, ys+1, FelderSprite[Sprite]);
+				Sprite = SichtBereich[xs][ys].Feld;
+				SetSprite(xs+1, ys+1, &FelderSprite[Sprite]);
 				OldScreen[xs][ys] = Sprite;
 			}
 		}
@@ -41,7 +41,7 @@ void ClearMonster(unsigned x, unsigned y)
 void MonsterParameter(MonsterTyp *ref_m)
 {
 #define m (*ref_m)
-	ParameterTyp *p; unsigned s;
+	ParameterTyp p; unsigned s;
 	p = Parameter[FindParameter(m.x, m.y)];
 	switch (p.Art) {
 	case FTeleport :
@@ -64,9 +64,9 @@ void MonsterParameter(MonsterTyp *ref_m)
 			m.TP -= s;
 		break;
 	case FMonsterStatus :
-		if ((Typ == p.alterTyp || p.alterTyp == 0)
-		 && (Status == p.alterStatus || p.alterStatus == 0))
-			Status = p.neuerStatus;
+		if ((m.Typ == p.alterTyp || p.alterTyp == 0)
+		 && (m.Status == p.alterStatus || p.alterStatus == 0))
+			m.Status = p.neuerStatus;
 		break;
 	}
 #undef m
@@ -77,29 +77,29 @@ void ShowMonster(unsigned i)
 	unsigned xs, ys;
 	if (Monster[i].Status > 0 && Monster[i].Status < 1000) {
 		if ((LevelParameter & Level[Monster[i].x][Monster[i].y].Spezial)) {
-			MonsterParameter(Monster[i]);
+			MonsterParameter(&Monster[i]);
 			if (Monster[i].Status == 0) {
 				ClearMonster(Monster[i].x, Monster[i].y);
 				WaitTime(0);
 				return;
 			}
 		}
-		Level[x][y].Spezial |= LevelMonster;
-		if (LevelSichtUmrechnung(Monster[i].x, Monster[i].y, xs, ys)) {
+		Level[Monster[i].x][Monster[i].y].Spezial |= LevelMonster;
+		if (LevelSichtUmrechnung(Monster[i].x, Monster[i].y, &xs, &ys)) {
 			SichtBereich[xs][ys].Spezial |= LevelMonster;
-			if (LevelBekannt & SichtBereich[xs,ys].Spezial) {
+			if (LevelBekannt & SichtBereich[xs][ys].Spezial) {
 				if (MonsterUnsichtbar & ~Monster[i].Spezial
 				  && OldScreen[xs][ys] != 256 + Monster[i].Typ)
 				{
-					SetSprite(xs+1, ys+1, MonsterSprite[Monster[i].Typ]);
+					SetSprite(xs+1, ys+1, &MonsterSprite[Monster[i].Typ]);
 					OldScreen[xs][ys] = 256 + Monster[i].Typ;
 					WaitTime(0); /* anzeigen */
 				}
 				if (Monster[i].Sprich > 1000 && Monster[i].Sprich < 2000
 				  && SUnsichtbar & ~Spieler.Status) /* ansprechen */
 				{
-					Sprich -= 1000;
-					DoMonsterDialog(Monster[i].Sprich, Monster[i]);
+					Monster[i].Sprich -= 1000;
+					DoMonsterDialog(Monster[i].Sprich, &Monster[i]);
 				}
 			}
 		}
@@ -120,7 +120,7 @@ int MonsterParade(MonsterTyp *ref_m, GegenstandTyp *ref_w, unsigned Treffer)
 	if (GMagisch & w.Spezial && MonsterMagisch & ~m.Spezial)
 		return FALSE;
 	else
-		return Zufall(20) + m.Trefferwurf >= m.Treffer;
+		return Zufall(20) + m.Trefferwurf >= Treffer;
 #undef m
 #undef w
 }
@@ -130,23 +130,23 @@ int MonsterParade(MonsterTyp *ref_m, GegenstandTyp *ref_w, unsigned Treffer)
 int HitMonster(MonsterTyp *ref_m, unsigned Damage)
 {
 #define m (*ref_m)
-	unsigned xs, ys, j, Reaktion, OldTyp; int Dead;
+	unsigned xs, ys, j, /*Reaktion, */OldTyp; int Dead;
 	Dead = FALSE;
-	if (LevelSichtUmrechnung(m.x, m.y, xs, ys)) {
+	if (LevelSichtUmrechnung(m.x, m.y, &xs, &ys)) {
 		InvertFeld(xs+1, ys+1);
 		WaitTime(300);
 		InvertFeld(xs+1, ys+1);
 	}
-	m.OldTyp = m.Typ;
-	if (m.TP >= m.Damage) {
-		m.TP -= m.Damage;
+	OldTyp = m.Typ;
+	if (m.TP >= Damage) {
+		m.TP -= Damage;
 		m.Status = 1;
 		if (m.TP < 2 && Zufall(2) == 1) m.Status = 4;
 		if (m.Sprich > 2000 && m.Sprich < 3000)
-			DoMonsterDialog(m.Sprich - 2000, m);
+			DoMonsterDialog(m.Sprich - 2000, &m);
 	} else { /* schon tot... */
 		if (m.Sprich > 3000 && m.Sprich < 4000)
-			DoMonsterDialog(m.Sprich - 3000, m);
+			DoMonsterDialog(m.Sprich - 3000, &m);
 		DeleteMonster(m.x, m.y);
 		Dead = TRUE;
 	}
@@ -174,7 +174,7 @@ int MonsterSchutzwurf(MonsterTyp *ref_m)
 	unsigned w;
 	w = m.Schaden + m.Bonus * 2;
 	if (MonsterMagisch & m.Spezial) w = w * 2; /* magisch */
-	if (w > 90) w = 90 /* maximal 95% */
+	if (w > 90) w = 90; /* maximal 95% */
 	return Zufall(100) <= w;
 #undef m
 }
@@ -186,7 +186,7 @@ int MonsterFrei(MonsterTyp *ref_m, unsigned xl, unsigned yl)
 #define m (*ref_m)
 	int frei;
 	BITSET FeldTyp;
-	unsigned xs, ys, i;
+	unsigned /*xs, ys,*/ i;
 	if (xl == Spieler.x && yl == Spieler.y)
 		return (m.Status == 1 || m.Status == 7)
 			&& SVersteinert & ~Spieler.Status;
@@ -258,7 +258,7 @@ void MonsterBewegung(void)
 
 #define ParadeMoeglich (1<<4)
 #define ParadeHalbe (1<<5)
-			int pariert, unsigned as;
+			int pariert; unsigned as;
 			pariert = FALSE;
 			if (r.KennNummer == GWaffe)
 				if (ParadeMoeglich & r.Spezial) {
@@ -286,36 +286,36 @@ void MonsterBewegung(void)
 		Wurf = Zufall(20);
 		if (SAusruhen & Spieler.Status)
 			Wurf = 20;
-		if (Wurf + Monster[i].Trefferwurf >= 20 + Monster[i]. WM && Wurf != 1) {
+		if (Wurf + Monster[i].Trefferwurf >= 20 + WM && Wurf != 1) {
 			if (Monster[i].Schaden > 0)
 				s = Zufall(Monster[i].Schaden) + Monster[i].Bonus;
 			else
 				s = 0;
 			if (Wurf == 20) s = s * 2; /* natürliche 20 */
 			/* Parademöglichkeiten testen: */
-			if (Parade(Spieler.rechteHand, Wurf + Monster[i].Trefferwurf)
+			if (Parade(&Spieler.rechteHand, Wurf + Monster[i].Trefferwurf)
 				&& SAusruhen & ~Spieler.Status)
 			{
-				BeginOutput;
+				BeginOutput();
 				Print(Monster[i].Name);
 				Print("#801#"); /* pariert */
-				EndOutput;
+				EndOutput();
 				if (Spieler.rechteHand.KennNummer == 0)
 					OutputText("#807#");
-			} else if (Parade(Spieler.linkeHand, Wurf + Monster[i].Trefferwurf)
+			} else if (Parade(&Spieler.linkeHand, Wurf + Monster[i].Trefferwurf)
 				&& SAusruhen & ~Spieler.Status)
 			{
-				BeginOutput;
+				BeginOutput();
 				Print(Monster[i].Name);
 				Print("#801#"); /* pariert */
-				EndOutput;
+				EndOutput();
 				if (Spieler.linkeHand.KennNummer == 0)
 					OutputText("#807#");
 			} else { /* leider nicht pariert ... */
 				a = 0;
 				if (Spieler.Ruestung.KennNummer == GRuestung)
 					if (GMagisch & Spieler.Ruestung.Flags
-					 || MonsterMagisch & ~Spezial)
+					 || MonsterMagisch & ~Monster[i].Spezial)
 						a = Zufall(Spieler.Ruestung.RuestSchutz) +
 							     Spieler.Ruestung.RuestBonus;
 				if (SSchild & Spieler.Status) /* Zauberschild */
@@ -325,20 +325,20 @@ void MonsterBewegung(void)
 				if (s > a) { /* Getroffen und Schaden durchgekommen */
 					InvertFeld(SichtMitteX, SichtMitteY);
 					WaitTime(300);
-					BeginOutput;
+					BeginOutput();
 					Print(Monster[i].Name);
 					Print("#802#");
 					PrintCard(s - a, 1);
 					Print("#803#");
-					EndOutput;
+					EndOutput();
 					TrefferPunkte(s - a, FALSE);
 					InvertFeld(SichtMitteX, SichtMitteY);
 					WaitTime(0);
 				} else {
-					BeginOutput;
+					BeginOutput();
 					Print(Monster[i].Name);
 					Print("#805#");
-					EndOutput;
+					EndOutput();
 				}
 				if (Spieler.Ruestung.KennNummer == GRuestung) {
 					if (s > a && Zufall(500) <= s - a) {
@@ -356,17 +356,17 @@ void MonsterBewegung(void)
 				}
 			}
 		} else {
-			BeginOutput;
+			BeginOutput();
 			Print(Monster[i].Name);
 			Print("#806#");
-			EndOutput;
+			EndOutput();
 		}
 		WaitTime(0); /* ausgeben */
 	}
 
 	void MonsterGeht(unsigned i, unsigned zx, unsigned zy)
 	{
-		unsigned xs, ys, Sprite;
+		/*unsigned xs, ys, Sprite*/;
 		if (zx == Spieler.x && zy == Spieler.y)
 			GreifAn(i, 0);
 		else {
@@ -387,23 +387,23 @@ void MonsterBewegung(void)
 		switch (Zufall(3)) {
 			case 1 : my++; break; case 2 : my--; break;
 		}
-		NormalKoords(mx, my, xl, yl);
-		if (MonsterFrei(Monster[i], xl, yl)) 
+		NormalKoords(mx, my, &xl, &yl);
+		if (MonsterFrei(&Monster[i], xl, yl)) 
 			MonsterGeht(i, xl, yl);
 	}
 			
 	void WegBewegung(unsigned i)
 	{
 		unsigned zx,zy; int mx,my;
-		if (LevelSichtUmrechnung(Monster[i].x,Monster[i].y,zx,zy)) {
+		if (LevelSichtUmrechnung(Monster[i].x,Monster[i].y,&zx,&zy)) {
 			mx = Monster[i].x; my = Monster[i].y;
 			if (zx > MaxSichtweite) mx++;
 			else if (zx < MaxSichtweite) mx--;
 			if (zy > MaxSichtweite) my++;
 			else if (zy < MaxSichtweite) my--;
-			NormalKoords(mx, my, zx, zy);
-			if (MonsterFrei(Monster[i], zx, zy))
-				MonsterGeht(i, zx, zy)
+			NormalKoords(mx, my, &zx, &zy);
+			if (MonsterFrei(&Monster[i], zx, zy))
+				MonsterGeht(i, zx, zy);
 			else
 				ZufallsBewegung(i);
 		} else ZufallsBewegung(i);
@@ -411,44 +411,42 @@ void MonsterBewegung(void)
 
 	void ZielBewegung(unsigned i, int aggressiv)
 	{
-		unsigned zx, zy, mx, my, lx, ly; int dx, dy; int hit, ms;
-		if ((SUnsichtbar | SVersteinert) & Spieler.Status) {
+		unsigned zx, zy, mx, my, lx, ly; int dx, dy; int /*hit,*/ ms;
+		if (((SUnsichtbar | SVersteinert) & Spieler.Status) != 0) {
 			ZufallsBewegung(i);
 			return;
 		}
 		ms = FALSE; zx = 0; zy = 0;
-		if (LevelSichtUmrechnung(Monster[i].x, Monster[i].y, zx, zy)) {
+		if (LevelSichtUmrechnung(Monster[i].x, Monster[i].y, &zx, &zy)) {
 			ms = MonsterSiehtSpieler(zx, zy);
-			if (ms AND aggressiv AND(MonsterFern & Monster[i].Spezial)) {
+			if (ms && aggressiv && MonsterFern & Monster[i].Spezial)
 				if (Zufall(2) == 1) {
-					hit = MakeShoot(zx, zy, MaxSichtweite, MaxSichtweite, 100, TRUE);
-					if ((zx == MaxSichtweite && zy == MaxSichtweite)) {
+					/*hit =*/ MakeShoot(&zx, &zy, MaxSichtweite, MaxSichtweite, 100, TRUE);
+					if (zx == MaxSichtweite && zy == MaxSichtweite)
 						GreifAn(i, 2); /* WM - 2 auf Fernkampf */
-					}
 					return;
 				}
-			}
 		}
-		if ((Status == 1) OR ms) {
+		if (Monster[i].Status == 1 || ms) {
 			mx = Monster[i].x; my = Monster[i].y;
 			dx = (int)Spieler.x - mx;
 			dy = (int)Spieler.y - my;
 			if (LevelNotZyklisch & ~LevelFlags) { /* zykl. Level */
-				if (ABS(dx) > LevelBreite / 2) { dx = -dx }
-				if (ABS(dy) > LevelHoehe / 2) { dy = -dy }
+				if (ABS(dx) > LevelBreite / 2) dx = -dx;
+				if (ABS(dy) > LevelHoehe / 2) dy = -dy;
 			}
 			NormalKoords((int)mx+sign(dx),
-				(int)my+sign(dy), lx, ly);
-			if (MonsterFrei(Monster[i], lx, ly)) {
+				(int)my+sign(dy), &lx, &ly);
+			if (MonsterFrei(&Monster[i], lx, ly)) {
 				MonsterGeht(i, lx, ly);
 				return;
 			} else if (ABS(dx) > ABS(dy) 
-				&& MonsterFrei(Monster[i], lx, my))
+				&& MonsterFrei(&Monster[i], lx, my))
 			{
 				MonsterGeht(i, lx, my);
 				return;
 			} else if (ABS(dy) > ABS(dx)
-				&& MonsterFrei(Monster[i], mx, ly))
+				&& MonsterFrei(&Monster[i], mx, ly))
 			{
 				MonsterGeht(i, mx, ly);
 				return;
@@ -472,16 +470,16 @@ void MonsterBewegung(void)
 		case 17 : my--; break;
 		case 18 : mx++; my--; break;
 		}
-		NormalKoords(mx, my, xl, yl);
-		if (MonsterFrei(Monster[i], xl, yl))
+		NormalKoords(mx, my, &xl, &yl);
+		if (MonsterFrei(&Monster[i], xl, yl))
 			MonsterGeht(i, xl, yl);
 	}
 
 	void Aktivierung(unsigned i)
 	{
 		unsigned xl, yl;
-		if (LevelSichtUmrechnung(Monster[i].x,Monster[i].y,xl,yl))
-			if (LevelBekannt & SichtBereich[xl,yl].Spezial)
+		if (LevelSichtUmrechnung(Monster[i].x,Monster[i].y,&xl,&yl))
+			if (LevelBekannt & SichtBereich[xl][yl].Spezial)
 				Monster[i].Status = 7;
 	}
 
@@ -491,17 +489,17 @@ void MonsterBewegung(void)
 		if ((LevelMaxMonster > 0 && AnzahlMonster >= LevelMaxMonster)
 			|| AnzahlMonster >= MaxMonster)
 			return;
-		if (LevelMonster & Level[x][y].Spezial || Zufall(1000) > Monster[i].Sprich)
+		if (LevelMonster & Level[Monster[i].x][Monster[i].y].Spezial || Zufall(1000) > Monster[i].Sprich)
 			return;
-		if (LevelSichtUmrechnung(Monster[i].x, Monster[i].y, sx, sy))
+		if (LevelSichtUmrechnung(Monster[i].x, Monster[i].y, &sx, &sy))
 			if (LevelBekannt & SichtBereich[sx][sy].Spezial
 			 || (sx == MaxSichtweite && sy == MaxSichtweite))
 				return;
 		AnzahlMonster++;
 		Monster[AnzahlMonster] = Monster[i];
-		Monster[AnzahlMonster].Status = Status % 1000;
-		Monster[AnzahlMonster].Sprich = Bonus / 256;
-		Monster[AnzahlMonster].Bonus = Bonus % 256;
+		Monster[AnzahlMonster].Status = Monster[i].Status % 1000;
+		Monster[AnzahlMonster].Sprich = Monster[i].Bonus / 256;
+		Monster[AnzahlMonster].Bonus = Monster[i].Bonus % 256;
 	}
 
 	for (i = 1; i <= AnzahlMonster; i++) {
@@ -524,7 +522,7 @@ void MonsterBewegung(void)
 				}
 				break;
 			case 4 : WegBewegung(i);
-				if (Zufall(20) == 1) { INC(Monster[i].TP) }
+				if (Zufall(20) == 1) Monster[i].TP++;
 				if (Zufall(1000) > (980 + Spieler.Ch)) {
 					Monster[i].Status = 7;
 				}
@@ -536,12 +534,11 @@ void MonsterBewegung(void)
 				 } */
 				break;
 			case 8 : WegBewegung(i); break;
-			case 9 : if ((SUnsichtbar|SVersteinert) & Spieler.Status == 0) {
+			case 9 : if (((SUnsichtbar|SVersteinert) & Spieler.Status) == 0)
 					Aktivierung(i);
-				}
 				break;
 			case 10 : ZielBewegung(i, FALSE); break;
-			case 11...18 : RichtungsBewegung(i); break;
+			case 11 ... 18 : RichtungsBewegung(i); break;
 			default:
 				if (Monster[i].Status >= 1000) Generator(i);
 			}

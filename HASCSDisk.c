@@ -5,7 +5,7 @@
 #include "HASCSGlobal.h"
 #include "HASCSGraphics.h"
 #include "HASCSSystem.h"
-#include "HASCSOutput"
+#include "HASCSOutput.h"
 
 
 #define BufferSize 40000
@@ -46,6 +46,7 @@ void WriteBlock(int handle, unsigned anzahl, CharPtr a)
 	unsigned long count, pruef, start;
 	if (anzahl == 0) return;
 	pruef = 0;
+	/* FIXME Order dependend --rtc*/
 	ZufallsZahl = ((long)(Zufall(256)-1)*256+(long)(Zufall(256)-1))*256+
 		(long)(Zufall(256)-1);
 	start = ZufallsZahl; /* Startwert */
@@ -72,7 +73,7 @@ void ReadBlock(int handle, unsigned anzahl, CharPtr a)
 	count = (long)anzahl + 5;
 	ReadFile(handle, count, Buffer);
 	if (FileError) return;
-	ZufallsZahl = (long)Buffer[anzahl]) * 65536 + 
+	ZufallsZahl = (long)Buffer[anzahl] * 65536 + 
 		(long)Buffer[anzahl+1] * 256 +
 		(long)Buffer[anzahl+2];
 	test = (long)Buffer[anzahl+3] * 256 +
@@ -93,33 +94,43 @@ void LoadOrSaveDat(int Load, char *FileName)
 {
 	int h;
 	String60Typ s;
+
+	/*
+	char FelderPack[(21+2)*MaxSprites],
+	     MonsterPack[(21+9*2+2)*MaxSprites],
+	     GegenPack[(2*2+21+2+2*2+2+3*2)*MaxSprites];
+	     
+	     FIXME machine dependent --rtc
+	     */
+
 	Buffer = GetBuffer(BufferSize);
 	Concat(s, PrgPath, FileName);
 	if (Load) {
 		h = OpenFile(s);
 		if (FileError)
 			Fehler("Felderdaten Lesefehler: ", s); return;
-		ReadBlock(h, sizeof Felder, &Felder);
+		ReadBlock(h, sizeof Felder, (CharPtr)&Felder);
 		if (Editor) {
-			ReadBlock(h, sizeof MonsterKlasse, &MonsterKlasse);
-			ReadBlock(h, sizeof GegenKlasse, &GegenKlasse);
+			ReadBlock(h, sizeof MonsterKlasse, (CharPtr)&MonsterKlasse);
+			ReadBlock(h, sizeof GegenKlasse, (CharPtr)&GegenKlasse);
 		}
 	} else {
 		h = CreateFile(s);
 		if (FileError)
 			Fehler("Felderdaten Schreibfehler: ", s); return;
-		WriteBlock(h, sizeof Felder, &Felder);
-		WriteBlock(h, sizeof MonsterKlasse, &MonsterKlasse);
-		WriteBlock(h, sizeof GegenKlasse, &GegenKlasse);
+		WriteBlock(h, sizeof Felder, (CharPtr)&Felder);
+		WriteBlock(h, sizeof MonsterKlasse, (CharPtr)&MonsterKlasse);
+		WriteBlock(h, sizeof GegenKlasse, (CharPtr)&GegenKlasse);
 	}
 	CloseFile(h);
 }
 
-void LoadOrSaveSprites(int Load; char *FileName)
+void LoadOrSaveSprites(int Load, char *FileName)
 {
 	int h;
 	unsigned long Count;
 	String60Typ s;
+	/* FIXME machinhe dependent */
 	Assign(LastSprites, FileName);
 	Concat(s, PrgPath, FileName);
 	if (Load) {
@@ -153,7 +164,7 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 {
 	unsigned long Count;
 	unsigned shortlength, i;
-	String60Typ s;
+	/*String60Typ s;*/
 	int h;
 
 	void MakeLevelPars(void)
@@ -202,25 +213,25 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 						Buffer[counter] = old; counter++;
 					}
 					anzahl = 1;
-					old = Level[x,y].Feld;
+					old = Level[x][y].Feld;
 				}
 			}
 		}
 		if (anzahl < 3)
 			for (i = 1; i <= anzahl; i++) {
-				Buffer[counter] = CHR(old); counter++;
+				Buffer[counter++] = old;
 			}
 		else {
-			Buffer[counter] = CHR(255); counter++;
-			Buffer[counter] = CHR(anzahl); counter++;
-			Buffer[counter] = CHR(old); counter++;
+			Buffer[counter++] = 255;
+			Buffer[counter++] = anzahl;
+			Buffer[counter++] = old;
 		}
 		return counter;
 	}
 
-	void AuswertLevelPar(void)
+	void AuswertLevelPars(void)
 	{
-		unsigned x, p;
+		unsigned x/*, p*/;
 		LevelVersion    = LevelPars[0];
 		LevelBreite     = LevelPars[1];
 		LevelHoehe      = LevelPars[2];
@@ -280,7 +291,7 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 					return;
 			}
 			if (k)
-				Level[x,y].Spezial |= LevelKarte;
+				Level[x][y].Spezial |= LevelKarte;
 			x++;
 			if (x > LevelBreite) {
 				x = 0; y++;
@@ -289,7 +300,7 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 		}
 	}
 	
-	unsigned KarteSpeichern();
+	unsigned KarteSpeichern()
 	{
 		unsigned x, y, c, i, k, n;
 		x = 1; y = 0; i = 0; k = 0; c = 1;
@@ -298,7 +309,7 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 			n = 0;
 			if (LevelKarte & Level[x][y].Spezial) n = 128;
 			if (n != k || c >= 127) {
-				Buffer^[i] = CHR(k + c);
+				Buffer[i] =k + c;
 				i++;
 				c = 1;
 			} else {
@@ -318,21 +329,22 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 	if (Load) { /* Level laden */
 	
 		h = OpenFile(Name);
-		if (FileError) { return; }
+		if (FileError) return;
+		/* FIXME machine dependent --rtc */
 		Count = sizeof LevelPars;
-		ReadBlock(h, Count, &LevelPars);
-		AuswertLevelPars;
+		ReadBlock(h, Count, LevelPars);
+		AuswertLevelPars();
 
 		ReadFile(h, sizeof shortlength, &shortlength);
 		ReadFile(h, shortlength, Buffer);
 		AuswertBuffer(shortlength);
 
 		Count = sizeof (MonsterTyp) * AnzahlMonster;
-		ReadBlock(h, Count, &Monster);
+		ReadBlock(h, Count, (CharPtr)&Monster);
 		Count = sizeof (GegenstandTyp) * AnzahlGegen;
-		ReadBlock(h, Count, &Gegenstand);
+		ReadBlock(h, Count, (CharPtr)&Gegenstand);
 		Count = sizeof (ParameterTyp) * AnzahlParameter;
-		ReadBlock(h, Count, &Parameter);
+		ReadBlock(h, Count, (CharPtr)&Parameter);
 
 		if (!Editor) { /* Karte laden */
 			ReadFile(h,  sizeof shortlength, &shortlength);
@@ -343,39 +355,40 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 		}
 
 		for (i = 1; i <= AnzahlGegen; i++)
-			Level[Gegenstand[i].x, Gegenstand[i].y].Spezial |= LevelGegenstand;
+			Level[Gegenstand[i].x][Gegenstand[i].y].Spezial |= LevelGegenstand;
 		if (Editor)
 			for (i = 1; i <= AnzahlMonster; i++)
-				Level[Monster[i].x,Monster[i].y].Spezial |= LevelMonster;
+				Level[Monster[i].x][Monster[i].y].Spezial |= LevelMonster;
 		else
 			for (i = 1; i <= AnzahlMonster; i++)
-				if (Status > 0 && Status < 1000)
-					Level[Monster[i].x,Monster[i].y].Spezial |= LevelMonster;
+				if (Monster[i].Status > 0 && Monster[i].Status < 1000)
+					Level[Monster[i].x][Monster[i].y].Spezial |= LevelMonster;
 		for (i = 1; i <= AnzahlParameter; i++) {
-			Level[Parameter[i].x, Parameter[i].y].Spezial |= LevelParameter;
-			if (Art == FLicht)
-				SetOneLight(Parameter[i].x, Parameter[i].y, Weite, TRUE);
+			Level[Parameter[i].x][Parameter[i].y].Spezial |= LevelParameter;
+			if (Parameter[i].Art == FLicht)
+				SetOneLight(Parameter[i].x, Parameter[i].y, Parameter[i].Weite, TRUE);
 		}
 
 	} else { /* Level speichern */
 
 		h = CreateFile(Name);
-		if (FileError) { return; }
+		if (FileError) return;
 
+		/* FIXME machine dependent --rtc */
 		Count = sizeof LevelPars;
-		MakeLevelPars;
-		WriteBlock(h, Count, &LevelPars);
+		MakeLevelPars();
+		WriteBlock(h, Count, LevelPars);
 
 		shortlength = MakeBuffer();
 		WriteFile(h, sizeof shortlength, &shortlength);
 		WriteFile(h, shortlength, Buffer);
 
 		Count = sizeof (MonsterTyp) * AnzahlMonster;
-		WriteBlock(h, Count, &Monster);
+		WriteBlock(h, Count, (CharPtr)&Monster);
 		Count = sizeof (GegenstandTyp) * AnzahlGegen;
-		WriteBlock(h, Count, &Gegenstand);
-		Count = sizeof ParameterTyp * AnzahlParameter;
-		WriteBlock(h, Count, &Parameter);
+		WriteBlock(h, Count, (CharPtr)&Gegenstand);
+		Count = sizeof (ParameterTyp) * AnzahlParameter;
+		WriteBlock(h, Count, (CharPtr)&Parameter);
 		
 		if (!Editor) { /* Karte speichern */
 			shortlength = KarteSpeichern();
@@ -393,7 +406,7 @@ void Korrektur(char *s)
 	unsigned i;
 	for (i = 0; i <= HIGH(s); i++) {
 		if (s[i] == '\0') return;
-		if (s[i] != '.' && s[i] != '\' && s[i] != ':') {
+		if (s[i] != '.' && s[i] != '\\' && s[i] != ':') {
 			s[i] = CAP(s[i]);
 			if ((s[i] < 'A' || s[i] > 'Z')
 				&& (s[i] < '0' || s[i] > '9'))
@@ -403,7 +416,7 @@ void Korrektur(char *s)
 	}
 }
 
-void MakeLevelName(String60Typ s, unsigned org, n)
+void MakeLevelName(String60Typ s, unsigned org, unsigned n)
 {
 	unsigned i;
 	switch (org) {
@@ -424,10 +437,10 @@ void MakeLevelName(String60Typ s, unsigned org, n)
 		Concat(s, s, ".???");
 	else {
 		i = 0;
-		while (s[i] != '\0') i++
-		while (s[i] != ".") i--
+		while (s[i] != '\0') i++;
+		while (s[i] != '.') i--;
 		s[i+1] = n / 100 + '0';
-		s[i+2] = (n % 100) / 10 + '0;
+		s[i+2] = (n % 100) / 10 + '0';
 		s[i+3] = n % 10 + '0';
 		s[i+4] = '\0';
 	}
@@ -444,7 +457,7 @@ void SaveLevel(unsigned n)
 		RenameFile(LName, backup);
 	} else {
 		MakeLevelName(LName, 0, n);
-		Spieler.OldLevels |= n;
+		/*Spieler.OldLevels |= n; FIXME --rtc*/
 	}
 	LoadOrSaveLevel(FALSE, LName);
 	if (FileError) {
@@ -455,7 +468,7 @@ void SaveLevel(unsigned n)
 void LoadLevel(unsigned n)
 {
 	String60Typ s, LName;
-	if (n & Spieler.OldLevels)
+	if (n /*& Spieler.OldLevels FIXME --rtc */)
 		MakeLevelName(LName, 0, n); /* saved Level */
 	else
 		MakeLevelName(LName, 1, n); /* original Level */
@@ -465,7 +478,7 @@ void LoadLevel(unsigned n)
 	} else {
 		Spieler.Sichtweite = SetLightRange();
 		if (Compare(LevelSprites, ""))
-			LevelSprites = "HASCSIII";
+			Assign(LevelSprites, "HASCSIII");
 		Concat(s, LevelSprites, ".SPR");
 		if (!Compare(LastSprites, s)) {
 			NewSprites = TRUE;
@@ -486,7 +499,7 @@ void DeleteLevels(void)
 
 /* Spieler ***************************************************************/
 
-void LoadOrSavePlayer(int Load);
+void LoadOrSavePlayer(int Load)
 {
 	int h; 
 	String60Typ s;
@@ -499,22 +512,24 @@ void LoadOrSavePlayer(int Load);
 	if (Load) { 
 		h = OpenFile(s);
 		if (FileError) {
-			Concat(s, "Spieler Lesefehler: ", s); Error(s, 0); return
+			Concat(s, "Spieler Lesefehler: ", s); Error(s, 0); return;
 		}
-		ReadBlock(h, sizeof Spieler, &Spieler);
+		/* FIXME machine dependent */
+		ReadBlock(h, sizeof Spieler, (CharPtr)&Spieler);
 	} else {
 		h = CreateFile(s);
 		if (FileError) {
 			Concat(s, "Spieler Schreibfehler: ", s); Error(s, 0);
 		}
-		WriteBlock(h, sizeof Spieler, &Spieler);
+		/* FIXME machine dependent */
+		WriteBlock(h, sizeof Spieler, (CharPtr)&Spieler);
 	}
 	CloseFile(h);
 }
 
-void LoadOldPlayer(void);
+void LoadOldPlayer(void)
 {
-	unsigned long Count; unsigned i; String60Typ s; int b;
+	/*unsigned long Count;*/ unsigned i; /*String60Typ s; int b;*/
 	LoadOrSavePlayer(TRUE);
 	Spieler.Gold = 0; Spieler.Nahrung = 0; Spieler.Moves = 0;
 	Spieler.Permanent = STot|SAusruhen|SReitet|SMann;
@@ -523,10 +538,10 @@ void LoadOldPlayer(void);
 	Spieler.rechteHand.KennNummer = 0; Spieler.linkeHand.KennNummer = 0;
 	Spieler.Ruestung.KennNummer = 0; Spieler.Ring.KennNummer = 0;
 	for (i = 1; i <= MaxRuck; i++)
-		Rucksack[i].KennNummer = 0;
+		Spieler.Rucksack[i].KennNummer = 0;
 	for (i = 1; i <= MaxFlags; i++)
-		Flags[i] = 0;
-	OldLevels = 0;
+		Spieler.Flags[i] = 0;
+	/*Spieler.OldLevels = 0; FIXME --rtc */
 }
 
 
@@ -566,7 +581,7 @@ unsigned GetCard(CharPtr *ref_p)
 #undef p
 }
 
-int NextLine(CharPtr *ref_p)
+static int NextLine(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	while (*p >= ' ') p++;
@@ -587,17 +602,17 @@ void SetString(CharPtr *ref_p, char *s)
 #undef p
 }
 
-void SetCard(CharPtr *ref_p, unsigned c, l)
+void SetCard(CharPtr *ref_p, unsigned c, unsigned l)
 {
 #define p (*ref_p)
 	String20Typ s;
 	CardToString(c, l, s);
-	SetString(p, s);
-	if (l != 1) SetString(p, "#");
+	SetString(&p, s);
+	if (l != 1) SetString(&p, "#");
 #undef p
 }
 
-void SetLF(CharPtr *p)
+void SetLF(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	*p++ = 13;
@@ -614,56 +629,55 @@ void WriteLevel(char *Name)
 	void WriteMonster(MonsterTyp *ref_m)
 	{
 #define m (*ref_m)
-		SetString(p, "M#");
-		SetCard(p, m.x, 4); SetCard(p, m.y, 4); SetCard(p, m.Typ, 4); SetCard(p, m.Status, 4);
-		SetCard(p, m.Trefferwurf, 4); SetCard(p, m.Schaden, 4); SetCard(p, m.Bonus, 4);
-		SetCard(p, m.TP, 4); SetCard(p, m.Sprich, 4); SetCard(p, m.Spezial, 4);
-		SetString(p, m.Name);
-		SetLF(p);
+		SetString(&p, "M#");
+		SetCard(&p, m.x, 4); SetCard(&p, m.y, 4); SetCard(&p, m.Typ, 4); SetCard(&p, m.Status, 4);
+		SetCard(&p, m.Trefferwurf, 4); SetCard(&p, m.Schaden, 4); SetCard(&p, m.Bonus, 4);
+		SetCard(&p, m.TP, 4); SetCard(&p, m.Sprich, 4); SetCard(&p, m.Spezial, 4);
+		SetString(&p, m.Name);
+		SetLF(&p);
 #undef m
 	}
 
 	void WriteGegenstand(GegenstandTyp *ref_g)
 	{
 #define g (*ref_g)
-		SetString(p, "G#");
-		SetCard(p, g.x, 4); SetCard(p, g.y, 4); SetCard(p, g.Sprite, 4);
-		SetCard(p, g.Flags, 4); SetCard(p, g.Spezial, 4);
-		SetCard(p, g.KennNummer, 4); SetCard(p, g.Ring, 4); SetCard(p, g.RingWirkung, 4);
-		SetCard(p, g.RingDauer, 4); SetString(p, g.Name);
-		SetLF(p);
+		SetString(&p, "G#");
+		SetCard(&p, g.x, 4); SetCard(&p, g.y, 4); SetCard(&p, g.Sprite, 4);
+		SetCard(&p, g.Flags, 4); SetCard(&p, g.Spezial, 4);
+		SetCard(&p, g.KennNummer, 4); SetCard(&p, g.Ring, 4); SetCard(&p, g.RingWirkung, 4);
+		SetCard(&p, g.RingDauer, 4); SetString(&p, g.Name);
+		SetLF(&p);
 #undef g
 	}
 
 	void WriteParameter(ParameterTyp *ref_a)
 	{
 #define a (*ref_a)
-		SetString(p, "P#");
-		SetCard(p, a.x, 4); SetCard(p, a.y, 4); SetCard(p, a.Art, 4);
-		SetCard(p, a.xhoch, 4); SetCard(p, a.yhoch, 4); SetCard(p, a.Levelhoch, 4);
-		SetCard(p, a.xrunter, 4); SetCard(p, a.yrunter, 4); SetCard(p, a.Levelrunter, 4);
-		SetLF(p);
+		SetString(&p, "P#");
+		SetCard(&p, a.x, 4); SetCard(&p, a.y, 4); SetCard(&p, a.Art, 4);
+		SetCard(&p, a.xhoch, 4); SetCard(&p, a.yhoch, 4); SetCard(&p, a.Levelhoch, 4);
+		SetCard(&p, a.xrunter, 4); SetCard(&p, a.yrunter, 4); SetCard(&p, a.Levelrunter, 4);
+		SetLF(&p);
 #undef a
 	}
 
-{
 	Buffer = GetBuffer(BufferSize);
 	p = Buffer;
-	SetString(p, "*    x    y  Typ Stat Tref Scha Bonu   TP  Dia Spez Name");
-	SetLF(p);
-	for (i = 1; i <= AnzahlMonster; i++) WriteMonster(Monster[i]);
-	SetString(p, "*    x    y Must Flag Spez  Typ   P1   P2   P3 Name");
-	SetLF(p);
-	for (i = 1; i <= AnzahlGegen; i++) WriteGegenstand(Gegenstand[i]);
-	SetString(p, "*    x    y  Typ   P1   P2   P3   P4   P5   P6");
-	SetLF(p);
-	for (i = 1; i <= AnzahlParameter; i++) WriteParameter(Parameter[i]);
+	SetString(&p, "*    x    y  Typ Stat Tref Scha Bonu   TP  Dia Spez Name");
+	SetLF(&p);
+	for (i = 1; i <= AnzahlMonster; i++) WriteMonster(&Monster[i]);
+	SetString(&p, "*    x    y Must Flag Spez  Typ   P1   P2   P3 Name");
+	SetLF(&p);
+	for (i = 1; i <= AnzahlGegen; i++) WriteGegenstand(&Gegenstand[i]);
+	SetString(&p, "*    x    y  Typ   P1   P2   P3   P4   P5   P6");
+	SetLF(&p);
+	for (i = 1; i <= AnzahlParameter; i++) WriteParameter(&Parameter[i]);
 /*
 	for (i = 0; i <= MaxSprites-1; i++) {
-		SetString(p, "#FELD.NAME("); SetCard(p, i, 1); SetString(p, ') = "');
-		SetString(p, Felder[i].Name); SetString(p, '"'); SetLF(p);
-		SetString(p, "#FELD.SPEZIAL("); SetCard(p, i, 1); SetString(p, ') = ');
-		SetCard(p, Felder[i].Spezial % 128, 1); SetLF(p);
+		SetString(&p, "#FELD.NAME("); SetCard(&p, i, 1); SetString(&p, ') = "');
+		SetString(&p, Felder[i].Name); SetString(&p, '"'); SetLF(&p);
+		SetString(&p, "#FELD.SPEZIAL("); SetCard(&p, i, 1); SetString(&p, ') = ');
+		SetCard(&p, Felder[i].Spezial % 128, 1); SetLF(&p);
 	}
 */
 	h = CreateFile(Name);
@@ -681,32 +695,32 @@ void ReadLevel(char *Name)
 	{
 		MonsterTyp m;
 		p++;
-		m.x = GetCard(p); m.y = GetCard(p); m.Typ = GetCard(p); m.Status = GetCard(p);
-		m.Trefferwurf = GetCard(p); m.Schaden = GetCard(p); m.Bonus = GetCard(p);
-		m.TP = GetCard(p); m.Sprich = GetCard(p); m.Spezial = GetCard(p);
-		Skip(p, '#'); GetLine(p, m.Name);
-		NewMonster(m.x, m.y, m);
+		m.x = GetCard(&p); m.y = GetCard(&p); m.Typ = GetCard(&p); m.Status = GetCard(&p);
+		m.Trefferwurf = GetCard(&p); m.Schaden = GetCard(&p); m.Bonus = GetCard(&p);
+		m.TP = GetCard(&p); m.Sprich = GetCard(&p); m.Spezial = GetCard(&p);
+		Skip(&p, '#'); GetLine(&p, m.Name);
+		NewMonster(m.x, m.y, &m);
 	}
 	
 	void ReadGegen(void)
 	{
 		GegenstandTyp g;
 		p++;
-		g.x = GetCard(p); g.y = GetCard(p); g.Sprite = GetCard(p);
-		g.Flags = GetCard(p); g.Spezial = GetCard(p);
-		g.KennNummer = GetCard(p); g.Ring = GetCard(p); g.RingWirkung = GetCard(p);
-		g.RingDauer = GetCard(p); Skip(p, '#'); GetLine(p, g.Name);
-		NewGegenstand(g.x, g.y, g);
+		g.x = GetCard(&p); g.y = GetCard(&p); g.Sprite = GetCard(&p);
+		g.Flags = GetCard(&p); g.Spezial = GetCard(&p);
+		g.KennNummer = GetCard(&p); g.Ring = GetCard(&p); g.RingWirkung = GetCard(&p);
+		g.RingDauer = GetCard(&p); Skip(&p, '#'); GetLine(&p, g.Name);
+		NewGegenstand(g.x, g.y, &g);
 	}
 	
 	void ReadParameter(void)
 	{
 		ParameterTyp o;
 		p++;
-		o.x = GetCard(p); o.y = GetCard(p); o.Art = GetCard(p);
-		o.xhoch = GetCard(p); o.yhoch = GetCard(p); o.Levelhoch = GetCard(p);
-		o.xrunter = GetCard(p); o.yrunter = GetCard(p); o.Levelrunter = GetCard(p);
-		NewParameter(o.x, o.y, o);
+		o.x = GetCard(&p); o.y = GetCard(&p); o.Art = GetCard(&p);
+		o.xhoch = GetCard(&p); o.yhoch = GetCard(&p); o.Levelhoch = GetCard(&p);
+		o.xrunter = GetCard(&p); o.yrunter = GetCard(&p); o.Levelrunter = GetCard(&p);
+		NewParameter(o.x, o.y, &o);
 	}
 
 	l = FileLength(Name);
@@ -723,7 +737,7 @@ void ReadLevel(char *Name)
 		case 'G' : ReadGegen(); break;
 		case 'P' : ReadParameter(); break;
 		}
-	} while (NextLine(p));
+	} while (NextLine(&p));
 }
 
 
@@ -734,9 +748,8 @@ void InitDisk(void)
 	/* VersionsNummer = 9; HASCS III */
 	VersionsNummer = 10; /* mit Karte */
 	
-	LastSprites = "";
+	*LastSprites = *"";
 	NewSprites = FALSE;
 
 	Buffer = GetBuffer(BufferSize);
 }
-

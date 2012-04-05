@@ -20,19 +20,19 @@ void MakeSichtBereich(int Force)
 {
 	unsigned i;
 
-	void CopySichtBereich;
+	void CopySichtBereich(void)
 	{
 		unsigned x, y, xl, yl;
 		for (x = 0; x <= MaxSichtmal2; x++)
 			for (y = 0; y <= MaxSichtmal2; y++) {
-				SichtLevelUmrechnung(x, y, xl, yl);
+				SichtLevelUmrechnung(x, y, &xl, &yl);
 				SichtBereich[x][y] = Level[xl][yl];
 			}
 	}
 
 	void PrintSichtBereich(void)
 	{
-		unsigned x, y, xl, yl;
+		unsigned x, y/*, xl, yl*/;
 		for (x = 0; x <= MaxSichtmal2; x++)
 			for (y = 0; y <= MaxSichtmal2; y++)
 				SetNewSprite(x, y);
@@ -60,7 +60,7 @@ void MakeSichtBereich(int Force)
 				 || (LevelSichtbar & SichtBereich[x0][y0].Spezial 
 				  && SLicht & ~Spieler.Status))
 					SichtBereich[x0][y0].Spezial |= LevelBekannt;
-			if (FeldDurchsichtig & ~Felder[Feld].Spezial)
+			if (FeldDurchsichtig & ~Felder[SichtBereich[x0][y0].Feld].Spezial)
 				return;
 			ct++;
 		}
@@ -103,16 +103,16 @@ void Falle(ParameterTyp *ref_p)
 		s += Zufall(6); /* Schaden auswürfeln */
 	if (SAbenteurer & Spieler.Typ) { s = s / 2; }
 	TrefferPunkte(s, FALSE);
-	BeginOutput;
+	BeginOutput();
 	if ((1 << 0) & p.Flag) {
 		Print(Felder[Level[Spieler.x][Spieler.y].Feld].Name);
 		Print("#304#");
 	} else
-		Print("#300#")
+		Print("#300#");
 	if (s == 0) Print("#301#");
 	else { PrintCard(s, 1); Print("#303#");
 	}
-	EndOutput;
+	EndOutput();
 	if (p.Anzahl > 0) { /* Anzahl Wirkungen verringern */
 		p.Anzahl--;
 		if (p.Anzahl == 0) /* Falle löschen */
@@ -124,7 +124,7 @@ void Falle(ParameterTyp *ref_p)
 void Teleport(ParameterTyp *ref_p)
 {
 #define p (*ref_p)
-	unsigned i, j; MonsterTyp Reittier;
+	/*unsigned i, j; MonsterTyp Reittier;*/
 	WaitTime(0); /* ausgeben */
 	if (p.ZielLevel == 0) /* gelöst ! */
 		Spieler.LevelNumber = 0;
@@ -147,7 +147,7 @@ void Teleport(ParameterTyp *ref_p)
 void Feldaenderung(ParameterTyp *ref_p)
 {
 #define p (*ref_p)
-	unsigned xs, ys, i, a;
+	unsigned /*xs, ys,*/ i, a;
 	Level[p.FeldX][p.FeldY].Feld = p.FeldNummer;
 	if (LevelParameter & Level[p.FeldX][p.FeldY].Spezial) {
 		i = FindParameter(p.FeldX, p.FeldY);
@@ -156,7 +156,7 @@ void Feldaenderung(ParameterTyp *ref_p)
 		if (a == FLicht) {
 			SetOneLight(Parameter[i].x, Parameter[i].y, Parameter[i].Weite, FALSE);
 			SetLightLevel(FALSE);
-		} else if (ParNummer == FLicht)
+		} else if (p.ParNummer == FLicht)
 			SetOneLight(Parameter[i].x, Parameter[i].y, Parameter[i].Weite, TRUE);
 	}
 	MakeSichtBereich(TRUE); /* neuer Sichtbereich */
@@ -176,7 +176,7 @@ void Info(ParameterTyp *ref_p)
 		if (p.automatisch == 2)
 			p.automatisch = 0;
 		switch (p.Art) {
-		case FDialog : DoParameterDialog(p.Nummer, p); break;
+		case FDialog : DoParameterDialog(p.Nummer, &p); break;
 		case FSound : PlaySoundN(p.Nummer); break;
 		case FBild  : ShowPicture(p.Nummer, TRUE); break;
 		}
@@ -190,13 +190,13 @@ void MakeTeleport(void)
 {
 	ParameterTyp p;
 	BeginOutput();
-	p.ZielX = 0; Print("x="); InputCard(p.ZielX, 4);
+	p.ZielX = 0; Print("x="); InputCard(&p.ZielX, 4);
 	Print("  ");
-	p.ZielY = 0; Print("y="); InputCard(p.ZielY, 4);
+	p.ZielY = 0; Print("y="); InputCard(&p.ZielY, 4);
 	Print("  ");
-	p.ZielLevel = 0; Print("l="); InputCard(p.ZielLevel, 4);
-	EndOutput;
-	Teleport(p);
+	p.ZielLevel = 0; Print("l="); InputCard(&p.ZielLevel, 4);
+	EndOutput();
+	Teleport(&p);
 }
 
 /**************************************************************************/
@@ -204,30 +204,30 @@ void MakeTeleport(void)
 unsigned DoGame(void)
 {
 	unsigned mx, my, c, SpielerAktion; BITSET mt, FeldSpezial;
-	int beschleunigt, aufgenommen, b;
+	int beschleunigt, /*aufgenommen,*/ b;
 	char ch;
-	ParameterTyp p;
+	/*ParameterTyp p;*/
 
 	void KeyBoard(char Taste)
-	unsigned i, x, y;
 	{
+		unsigned i, x, y;
 		switch (CAP(Taste)) {
-		case '1' : mt = {MausLinks}; mx = SichtMitteX - 1; my = SichtMitteY + 1; break;
-		case '2' : mt = {MausLinks}; mx = SichtMitteX    ; my = SichtMitteY + 1; break;
-		case '3' : mt = {MausLinks}; mx = SichtMitteX + 1; my = SichtMitteY + 1; break;
-		case '4' : mt = {MausLinks}; mx = SichtMitteX - 1; my = SichtMitteY; break;
-		case '5' : mt = {MausLinks}; mx = SichtMitteX    ; my = SichtMitteY; break;
-		case '6' : mt = {MausLinks}; mx = SichtMitteX + 1; my = SichtMitteY; break;
-		case '7' : mt = {MausLinks}; mx = SichtMitteX - 1; my = SichtMitteY - 1; break;
-		case '8' : mt = {MausLinks}; mx = SichtMitteX    ; my = SichtMitteY - 1; break;
-		case '9' : mt = {MausLinks}; mx = SichtMitteX + 1; my = SichtMitteY - 1; break;
-		case '(' : mt = {MausLinks}; mx = 25; my = 13; break; /* Leiter hoch */
-		case ')' : mt = {MausLinks}; mx = 27; my = 13; break; /* Leiter runter */
-		case '/' : mt = {MausLinks}; mx = 29; my = 13; break; /* Besteigen */
-		case 'K' : mt = {MausLinks}; mx = 33; my = 13; break; /* Karte */
-		case 'R' : mt = {MausLinks}; mx = 31; my = 13; break; /* Rucksack */
-		case '0' : mt = {MausLinks}; mx = 25; my = 8; break; /* rechte Hand */
-		case '.' : mt = {MausLinks}; mx = 25; my = 9; break; /* linke Hand */
+		case '1' : mt = MausLinks; mx = SichtMitteX - 1; my = SichtMitteY + 1; break;
+		case '2' : mt = MausLinks; mx = SichtMitteX    ; my = SichtMitteY + 1; break;
+		case '3' : mt = MausLinks; mx = SichtMitteX + 1; my = SichtMitteY + 1; break;
+		case '4' : mt = MausLinks; mx = SichtMitteX - 1; my = SichtMitteY; break;
+		case '5' : mt = MausLinks; mx = SichtMitteX    ; my = SichtMitteY; break;
+		case '6' : mt = MausLinks; mx = SichtMitteX + 1; my = SichtMitteY; break;
+		case '7' : mt = MausLinks; mx = SichtMitteX - 1; my = SichtMitteY - 1; break;
+		case '8' : mt = MausLinks; mx = SichtMitteX    ; my = SichtMitteY - 1; break;
+		case '9' : mt = MausLinks; mx = SichtMitteX + 1; my = SichtMitteY - 1; break;
+		case '(' : mt = MausLinks; mx = 25; my = 13; break; /* Leiter hoch */
+		case ')' : mt = MausLinks; mx = 27; my = 13; break; /* Leiter runter */
+		case '/' : mt = MausLinks; mx = 29; my = 13; break; /* Besteigen */
+		case 'K' : mt = MausLinks; mx = 33; my = 13; break; /* Karte */
+		case 'R' : mt = MausLinks; mx = 31; my = 13; break; /* Rucksack */
+		case '0' : mt = MausLinks; mx = 25; my = 8; break; /* rechte Hand */
+		case '.' : mt = MausLinks; mx = 25; my = 9; break; /* linke Hand */
 
 		case 'P' : DruckerAusgabe = !DruckerAusgabe; break;
 		case 'T' : if (DebugMode) {
@@ -243,9 +243,9 @@ unsigned DoGame(void)
 				Print(" x="); PrintCard(Spieler.x, 1);
 				Print(" y="); PrintCard(Spieler.y, 1);
 				Print(" l="); PrintCard(Spieler.LevelNumber, 1);
-				Print(" s="); PrintCard(CARDINAL(Spieler.Status), 1);
-				Print(" p="); PrintCard(CARDINAL(Spieler.Permanent), 1);
-				Print(" t="); PrintCard(CARDINAL(Spieler.Typ), 1);
+				Print(" s="); PrintCard(Spieler.Status, 1);
+				Print(" p="); PrintCard(Spieler.Permanent, 1);
+				Print(" t="); PrintCard(Spieler.Typ, 1);
 				EndOutput();
 			}
 			break;
@@ -253,13 +253,13 @@ unsigned DoGame(void)
 				BeginOutput();
 				for (i = 1; i <= MaxFlags; i++) {
 					Print("S"); PrintCard(i,1); Print("=");
-					PrintCard(Spieler.Flags[i], 1); Print(', ');
+					PrintCard(Spieler.Flags[i], 1); Print(", ");
 				}
 				EndOutput();
 			}
 			break;
 		case 'V' : if (DebugMode) {
-				if (Vision(44, 0, x, y)) {
+				if (Vision(44, 0, &x, &y)) {
 					Spieler.x = x; Spieler.y = y;
 					MakeSichtBereich(FALSE);
 				}
@@ -292,7 +292,7 @@ unsigned DoGame(void)
 
 		if (LevelNotZyklisch & LevelFlags) /* nicht zyklisch ? */
 			if (Spieler.x < 11 || Spieler.y < 11
-			 || (LevelBreite - x) < 11 || (LevelHoehe - y) < 11)
+			 || (LevelBreite - Spieler.x) < 11 || (LevelHoehe - Spieler.y) < 11)
 				if (LevelDialog != 0)
 					DoDialog(LevelDialog);
 
@@ -304,22 +304,22 @@ unsigned DoGame(void)
 
 		FeldSpezial = Felder[Level[Spieler.x][Spieler.y].Feld].Spezial;
 		if (FeldLava & FeldSpezial
-		  && ((SReitet|SFeuer) & Spieler.Status == 0))
+		  && ((SReitet|SFeuer) & Spieler.Status) == 0)
 		{
 			c = 10 + Zufall(10); TrefferPunkte(c, FALSE);
-			BeginOutput;
+			BeginOutput();
 			Print(Felder[Level[Spieler.x][Spieler.y].Feld].Name);
 			Print("! "); PrintCard(c, 1); Print("#321#");
-			EndOutput;
+			EndOutput();
 		}
 		if (FeldWasser & FeldSpezial 
-		 && (SReitet|SSchwimmt) & Spieler.Status == 0)
+		 && ((SReitet|SSchwimmt) & Spieler.Status) == 0)
 		{
 			c = 4 + Zufall(4); TrefferPunkte(c, FALSE);
-			BeginOutput;
+			BeginOutput();
 			Print(Felder[Level[Spieler.x][Spieler.y].Feld].Name);
 			Print("! "); PrintCard(c, 1); Print("#321#");
-			EndOutput;
+			EndOutput();
 		}
 		if (FeldHunger & FeldSpezial && Spieler.Nahrung > 0) {
 			Spieler.Nahrung--;
@@ -348,15 +348,15 @@ unsigned DoGame(void)
 		if (LevelParameter & Level[Spieler.x][Spieler.y].Spezial) {
 			c = FindParameter(Spieler.x, Spieler.y);
 			switch (Parameter[c].Art) {
-			case FFalle         : Falle(Parameter[c]); break;
-			case FTeleport      : Teleport(Parameter[c]);
+			case FFalle         : Falle(&Parameter[c]); break;
+			case FTeleport      : Teleport(&Parameter[c]);
 				MakeSichtBereich(TRUE);
 				PrintLevelName(LevelName);
 				break;
-			case FFeldAenderung : Feldaenderung(Parameter[c]); break;
+			case FFeldAenderung : Feldaenderung(&Parameter[c]); break;
 			case FDialog:
 			case FBild:
-			case FSound         : Info(Parameter[c]); break;
+			case FSound         : Info(&Parameter[c]); break;
 			}
 		}
 
@@ -387,16 +387,16 @@ unsigned DoGame(void)
 			if (Zufall(100) <= 2) {
 				if (SLicht & Spieler.Status) {
 					Spieler.Status &= ~SLicht;
-					Sichtweite = SetLightRange();
+					Spieler.Sichtweite = SetLightRange();
 					MakeSichtBereich(TRUE);
 				}
 				Spieler.Status = Spieler.Status & Spieler.Permanent; /* Sonderstati löschen */
 			}
 
 		if (Spieler.rechteHand.KennNummer == GLicht) /* Lichtspender ? */
-			MinusLicht(Spieler.rechteHand);
+			MinusLicht(&Spieler.rechteHand);
 		if (Spieler.linkeHand.KennNummer == GLicht)
-			MinusLicht(Spieler.linkeHand);
+			MinusLicht(&Spieler.linkeHand);
 
 		if (Spieler.Ring.KennNummer == GRing) /* Ring wird getragen */
 			if (Zufall(10) == 1) /* 10% Chance */
@@ -404,7 +404,7 @@ unsigned DoGame(void)
 					Spieler.Ring.RingDauer--;
 					if (Spieler.Ring.RingDauer == 0) {
 						OutputText("#338#");
-						RingAblegen(Spieler.Ring);
+						RingAblegen(&Spieler.Ring);
 					}
 					PrintCharakter(5);
 				}
@@ -431,7 +431,7 @@ unsigned DoGame(void)
 		else if (SAusruhen & ~Spieler.Status 
 			&& SVersteinert & ~Spieler.Status)
 		{
-			WaitInput(mx, my, mt, ch, -1);
+			WaitInput(&mx, &my, &mt, &ch, -1);
 			if (mt == 0)
 				KeyBoard(ch); /* Tasten-Befehl ? */
 			else
@@ -445,7 +445,7 @@ unsigned DoGame(void)
 			}
 		} else
 			WaitTime(0); /* Neuzeichnen */
-	} while (Rueckgabe == 0)
+	} while (Rueckgabe == 0);
 
 	return Rueckgabe;
 

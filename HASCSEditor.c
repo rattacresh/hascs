@@ -69,19 +69,19 @@ char LevelDatei[21], LevelImage[21];
 void LoescheLevel(unsigned f, int All);
 
 
-unsigned Min(unsigned x, unsigned y)
+static unsigned Min(unsigned x, unsigned y)
 {
 	if (x < y) return x; else return y;
 }
 
-unsigned Max(unsigned x, unsigned y)
+static unsigned Max(unsigned x, unsigned y)
 {
 	if (x > y) return x; else return y;
 }
 
 /* Bildschirmausgaben ***************************************************/
 
-void PrintMenue(void)
+static void XPrintMenue(void)
 {
 	unsigned i;
 
@@ -194,11 +194,11 @@ void PrintInfo(unsigned x, unsigned y)
 	OutlineBar(0,24,24,24); OutlineBar(24,0,24,24);
 }
 
-void MakeScreen(unsigned x, unsigned y)
+static void MakeScreen(unsigned x, unsigned y)
 {
 	FillRectangle(0, 0, 39, 24, &SystemSprite[0]);
 	PrintLevelPart();
-	PrintMenue();
+	XPrintMenue();
 	PrintSprites();
 	PrintInfo(x, y);
 }
@@ -1049,7 +1049,7 @@ void BlockEinfuegen(void)
 
 /************************************************************************/
 
-void DoEdit(void)
+static void DoEdit(void)
 {
 	int Ende;
 	unsigned x, y;

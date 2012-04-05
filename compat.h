@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdint.h>
+#include <limits.h>
 #define CAP(c) toupper(c)
 #define HIGH(s) 1024 /* greater than any string */
 #define TRUE 1
@@ -10,6 +11,7 @@
 #define INSet(a,b) strchr(b,a)
 #define BITSET unsigned
 #define LENGTH(s) strlen(s)
+#define ABS(x) ((x) < 0 ? -(x) : x)
 #if 0
 /* compat stubs begin */
 #define bee 0
@@ -94,4 +96,8 @@ void SetDefaultPath(char *x, int y) {}
 typedef unsigned EventSet;
 /* compat stubs end */
 #endif
+typedef char ModeBuf[4000];
+#define GetCookie(x, y) (y = 2)
+#define EnterSupervisorMode(x) ((void)0)
+#define LeaveSupervisorMode(x) ((void)0)
 #endif

@@ -39,7 +39,7 @@ void  (*PrintChar)(char); /* ZeichenAusgabe */
 
 void Cls(); /* Ganzen Bildschirm löschen */
 void GotoXY(unsigned x, unsigned y); /* Cursorpositionierung */
-void GetXY(unsigned x, unsigned y); /* aktuelle Cursorposition */
+void GetXY(unsigned *x, unsigned *y); /* aktuelle Cursorposition */
 
 /* Bildschirmausgaben */
 

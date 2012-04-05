@@ -11,7 +11,7 @@ int Vision(unsigned Weite, unsigned Art, unsigned *ref_lx, unsigned *ref_ly)
 #define ly (*ref_ly)
 #define MaxWeite 44
 
-	unsigned VAR xl, yl, Anzahl, RahmenX, RahmenY, RahmenBreite,
+	unsigned xl, yl, Anzahl, RahmenX, RahmenY, RahmenBreite,
 		m, mx, my, x, y;
 	SpriteType Sprite;
 	BITSET mb;
@@ -31,20 +31,20 @@ int Vision(unsigned Weite, unsigned Art, unsigned *ref_lx, unsigned *ref_ly)
 			zeigen = x1 >= 0 && x1 <= LevelBreite
 				&& y1 >= 0 && y1 <= LevelHoehe;
 		}
-		NormalKoords(x1, y1, xl, yl);
-		if ((1<<0) & Art) { /* Karte */
+		NormalKoords(x1, y1, &xl, &yl);
+		if ((1<<0) & Art) /* Karte */
 			zeigen = zeigen && LevelKarte & Level[xl][yl].Spezial;
-		}
 		xk = RahmenX * 4 + 4 + x;
 		yk = RahmenY * 4 + 4 + y;
 		if (zeigen) {
 			Farbe = Felder[Level[xl][yl].Feld].Spezial % 16;
-			SetSpritePart(xk, yk, Farbe, Sprite);
+			SetSpritePart(xk, yk, Farbe, &Sprite);
 		} else
-			SetSpritePart(xk, yk, 0, SystemSprite[0]);
+			SetSpritePart(xk, yk, 0, &SystemSprite[0]);
 	}
 
-	Sprite = SystemSprite[Art % 2 + 34];
+	/*Sprite = SystemSprite[Art % 2 + 34];*/
+	memcpy(Sprite, SystemSprite[Art % 2 + 34], sizeof (SpriteType));
 
 	if (Weite > MaxWeite) Weite = MaxWeite;
 	m = LevelBreite;
@@ -65,10 +65,10 @@ int Vision(unsigned Weite, unsigned Art, unsigned *ref_lx, unsigned *ref_ly)
 		for (y = 0; y <= Anzahl-1; y++)
 			ZeigeFeld(x, y);
 	if ((1<<1) & Art) /* keine Verschiebung */
-		WaitInput(mx, my, mb, ch, -1);
+		WaitInput(&mx, &my, &mb, &ch, -1);
 	else {
 		do {
-			WaitInput(mx, my, mb, ch, -1);
+			WaitInput(&mx, &my, &mb, &ch, -1);
 			if (mb) {
 				x = mx / 16; y = my / 16;
 				if (x == RahmenX && y >= RahmenY
@@ -127,7 +127,7 @@ int Vision(unsigned Weite, unsigned Art, unsigned *ref_lx, unsigned *ref_ly)
 			mx = (mx - (RahmenX+1)*16) / 4;
 			my = (my - (RahmenY+1)*16) / 4;
 			NormalKoords((int)(Spieler.x+mx) - Anzahl / 2 + XOff,
-				(int)(Spieler.y+my) - Anzahl / 2 + YOff, lx, ly);
+				(int)(Spieler.y+my) - Anzahl / 2 + YOff, &lx, &ly);
 			return TRUE;
 		}
 	return FALSE;
@@ -137,18 +137,18 @@ int Vision(unsigned Weite, unsigned Art, unsigned *ref_lx, unsigned *ref_ly)
 
 void Todeshauch(unsigned Weite, unsigned Wirkung)
 {
-	unsigned i, x, y, xl, yl; int b;
+	unsigned i, x, y, xl, yl; /*int b;*/
 	for (x = MaxSichtweite-Weite; x <= MaxSichtweite+Weite; x++)
 		for (y = MaxSichtweite-Weite; y <= MaxSichtweite+Weite; y++)
 			InvertFeld(x+1, y+1);
 	WaitTime(0);
 	for (x = MaxSichtweite-Weite; x <= MaxSichtweite+Weite; x++)
 		for (y = MaxSichtweite-Weite; y <= MaxSichtweite+Weite; y++) {
-			SichtLevelUmrechnung(x, y, xl, yl);
+			SichtLevelUmrechnung(x, y, &xl, &yl);
 			if (LevelMonster & Level[xl][yl].Spezial) {
 				i = FindMonster(xl, yl);
 				if (MonsterImmun & ~Monster[i].Spezial)
-					b = HitMonster(Monster[i], W6(Wirkung));
+					/*b =*/ HitMonster(&Monster[i], W6(Wirkung));
 			}
 		}
 	for (x = MaxSichtweite-Weite; x <= MaxSichtweite+Weite; x++)
@@ -162,8 +162,8 @@ void Erweckung(unsigned NeuerStatus)
 	nummer = 0; i = 1; min = UINT_MAX;
 	while (i <= AnzahlMonster) {
 		if (Monster[i].Status == 0) {
-			Entfernung = ABS(Spieler.x) - (int)Monster[i].x)
-				+ ABS(Spieler.y) - (int)Monster[i].y);
+			Entfernung = ABS(Spieler.x - (int)Monster[i].x)
+				+ ABS(Spieler.y - (int)Monster[i].y);
 			if (Entfernung < min) {
 				min = Entfernung;
 				nummer = i;

@@ -1,6 +1,7 @@
 CC = gcc
 CFLAGS = -g3 -O2 -Wall -funsigned-char
-LIBS = 
+LIBS = -lSDL
+#LIBS = -lSDL -lefence
 HASCSEDITOR_SOURCE = \
 	Dialog.c HASCSGame.c HASCSMagic.c HASCSSprite.c Sound.c \
 	HASCSCharakter.c HASCSGlobal.c HASCSMonster.c HASCSSystem.c Start.c \
@@ -19,8 +20,7 @@ SDLDEMO_OBJS := $(SDLDEMO_GEN:.c=.o) $(SDLDEMO_SOURCE:.c=.o)
 OBJS = $(HASCSEDITOR_OBJS) $(HASCSIII_OBJS) $(SDLDEMO_OBJS)
 SOURCE = $(HASCSEDITOR_SOURCE) $(HASCSIII_SOURCE) $(SDLDEMO_SOURCE)
 
-#TARGETS = SDLDemo HASCSEditor HASCSIII
-TARGETS = SDLDemo
+TARGETS = HASCSEditor HASCSIII SDLDemo
 
 all: $(TARGETS)
 
@@ -31,7 +31,7 @@ HASCSIII: $(HASCSIII_OBJS)
 	$(CC) $(LFLAGS) $+ -o $@ $(LIBS)
 
 SDLDemo: $(SDLDEMO_OBJS)
-	$(CC) $(LFLAGS) $+ -o $@ $(LIBS) -lSDL
+	$(CC) $(LFLAGS) $+ -o $@ $(LIBS)
 
 clean:
 	rm -f $(OBJS)

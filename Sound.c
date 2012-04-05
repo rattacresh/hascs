@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include "HASCSSystem.h"
+#define Concat(x, y, z, a) (strcat(strcpy(x,z),y), memcpy(&ok,&ok,0))
 
 /* Hardware Register für DMA Sound */
 #define sndmactl (*(volatile unsigned char *)0xFF8901) /* Sound-DMA-Control Register */
@@ -19,7 +20,7 @@
 #define conterm (*(volatile unsigned *)0x484)
 
 SoundType StaticSound;
-char FileName[81];
+/*char FileName[81];*/
 unsigned *IBuffer;
 int DoLoop;
 ModeBuf stack;
@@ -66,78 +67,80 @@ int LoadSoundFile(char *f, unsigned id, SoundType s)
 {
 	int h;
 	char header[128];
-	int ok, free;
+	int ok/*, free*/;
 
 	int LoadSMP(void)
 	{
 		unsigned long HeaderLength;
 		unsigned i;
 
+		/* FIXME Machine dependent --rtc */
 		HeaderLength = (long)IBuffer[2]+(long)IBuffer[3];
 		s.Length = 65536*(long)IBuffer[4]+(long)IBuffer[5];
-		i = HASCSSystem.NewCache(id, s.Length);
-		s.Buffer = HASCSSystem.Cache[i].CacheBuffer;
-		HASCSSystem.FileSeek(h, HeaderLength + 8);
-		HASCSSystem.ReadFile(h, s.Length, HASCSSystem.Cache[i].CacheBuffer);
+		i = /*HASCSSystem.*/NewCache(id, s.Length);
+		s.Buffer = /*HASCSSystem.*/Cache[i].CacheBuffer;
+		/*HASCSSystem.*/FileSeek(h, HeaderLength + 8);
+		/*HASCSSystem.*/ReadFile(h, s.Length, /*HASCSSystem.*/Cache[i].CacheBuffer);
 		s.Frequency = 12500; /* 12500 Hz */
-		HASCSSystem.Cache[i].CacheInfo1 = s.Frequency;
+		/*HASCSSystem.*/Cache[i].CacheInfo1 = s.Frequency;
 		return TRUE;
 	}
 
 	int LoadWAV(void)
-	unsigned i;
 	{
+		unsigned i;
 		s.Length = (long)(256*header[41]+header[40])
 			 + 65536*(long)(256*header[43]+header[42]);
 		s.Frequency = header[24] + 256*header[25];
-		i = HASCSSystem.NewCache(id, s.Length);
-		s.Buffer = HASCSSystem.Cache[i].CacheBuffer;
-		HASCSSystem.Cache[i].CacheInfo1 = s.Frequency;
-		HASCSSystem.FileSeek(h, 44);
-		HASCSSystem.ReadFile(h, s.Length, s.Buffer);
+		i = /*HASCSSystem.*/NewCache(id, s.Length);
+		s.Buffer = /*HASCSSystem.*/Cache[i].CacheBuffer;
+		/*HASCSSystem.*/Cache[i].CacheInfo1 = s.Frequency;
+		/*HASCSSystem.*/FileSeek(h, 44);
+		/*HASCSSystem.*/ReadFile(h, s.Length, s.Buffer);
 		ChangeVorz(s.Buffer, s.Length);
 		return TRUE;
 	}
 
 	int LoadHSN(unsigned Version)
 	{
+		/* FIXME Machine dependent --rtc */
 		unsigned i;
 		s.Length = 65536*(long)IBuffer[10]+(long)IBuffer[11];
 		s.Frequency = IBuffer[12] * 10;
-		i = HASCSSystem.NewCache(id, s.Length);
-		s.Buffer = HASCSSystem.Cache[i].CacheBuffer;
-		HASCSSystem.Cache[i].CacheInfo1 = s.Frequency;
+		i = /*HASCSSystem.*/NewCache(id, s.Length);
+		s.Buffer = /*HASCSSystem.*/Cache[i].CacheBuffer;
+		/*HASCSSystem.*/Cache[i].CacheInfo1 = s.Frequency;
 		if (Version == 0)
-			HASCSSystem.FileSeek(h, 49);
+			/*HASCSSystem.*/FileSeek(h, 49);
 		else
-			HASCSSystem.FileSeek(h, 90);
-		HASCSSystem.ReadFile(h, s.Length, s.Buffer);
+			/*HASCSSystem.*/FileSeek(h, 90);
+		/*HASCSSystem.*/ReadFile(h, s.Length, s.Buffer);
 		return TRUE;
 	}
 
 	int LoadUnknown(void)
 	{
 		unsigned i;
-		s.Length = HASCSSystem.FileLength(f);
-		i = HASCSSystem.NewCache(id, s.Length);
-		s.Buffer = HASCSSystem.Cache[i].CacheBuffer;
-		HASCSSystem.ReadFile(h, s.Length, s.Buffer);
+		s.Length = /*HASCSSystem.*/FileLength(f);
+		i = /*HASCSSystem.*/NewCache(id, s.Length);
+		s.Buffer = /*HASCSSystem.*/Cache[i].CacheBuffer;
+		/*HASCSSystem.*/ReadFile(h, s.Length, s.Buffer);
 		s.Frequency = 12500; /* 12500 Hz */
-		HASCSSystem.Cache[i].CacheInfo1 = s.Frequency;
+		/*HASCSSystem.*/Cache[i].CacheInfo1 = s.Frequency;
 		return TRUE;
 	}
 
-	h = HASCSSystem.OpenFile(f);
-	if (HASCSSystem.FileError) return FALSE; /* File Not Found */
-	HASCSSystem.ReadFile(h, 128, &header);
-	HASCSSystem.FileSeek(h, 0);
-	IBuffer = &header;
+	h = /*HASCSSystem.*/OpenFile(f);
+	if (/*HASCSSystem.*/FileError) return FALSE; /* File Not Found */
+	/*HASCSSystem.*/ReadFile(h, 128, &header);
+	/*HASCSSystem.*/FileSeek(h, 0);
+	IBuffer = (unsigned *)&header;
 	if (InBuffer(0, header, "~ü~ü")) ok = LoadSMP();
 	else if (InBuffer(8, header, "WAVEfmt")) ok = LoadWAV();
 	else if (InBuffer(0, header, "HSND1.0")) ok = LoadHSN(0);
 	else if (InBuffer(0, header, "HSND1.1")) ok = LoadHSN(1);
 	else ok = LoadUnknown();
-	HASCSSystem.CloseFile(h);
+	/*HASCSSystem.*/CloseFile(h);
 	return ok;
 }
 
@@ -149,14 +152,14 @@ int LoadSound(unsigned n, SoundType *ref_s)
 	unsigned i, id;
 
 	id = 2048 + n;
-	i = HASCSSystem.GetCache(id);
+	i = /*HASCSSystem.*/GetCache(id);
 	if (i != 0) {
-		s.Buffer = HASCSSystem.Cache[i].CacheBuffer;
-		s.Length = HASCSSystem.Cache[i].CacheLength;
-		s.Frequency = HASCSSystem.Cache[i].CacheInfo1;
+		s.Buffer = /*HASCSSystem.*/Cache[i].CacheBuffer;
+		s.Length = /*HASCSSystem.*/Cache[i].CacheLength;
+		s.Frequency = /*HASCSSystem.*/Cache[i].CacheInfo1;
 		return TRUE;
 	} else { /* neu laden */
-		FileName = "SAMPLE.000";
+		strcpy(FileName, "SAMPLE.000");
 		FileName[7] = n / 100 + '0';
 		FileName[8] = n / 10 % 10 + '0';
 		FileName[9] = n % 10 + '0';
@@ -179,7 +182,7 @@ void PlaySoundDMA(SoundType *ref_s)
 
 	EnterSupervisorMode(stack); /* Supervisormode */
 	sndmactl = 0; /* Stop */
-	if (s.Buffer != HASCSSystem.NULL) {
+	if (s.Buffer != /*HASCSSystem.*/NULL) {
 		ende.ptr = (unsigned long)s.Buffer + s.Length;
 		sndbashi = s.b[2];
 		sndbasmi = s.b[1];
@@ -201,6 +204,7 @@ void PlaySoundDMA(SoundType *ref_s)
 void PlaySoundInterrupt(SoundType *ref_s)
 {
 #define s (*ref_s)
+#if 0
 	unsigned long FrameStart, FrameEnd;
 	unsigned f;
 	if (!SoundAusgabe) return;
@@ -208,7 +212,6 @@ void PlaySoundInterrupt(SoundType *ref_s)
 	FrameStart = (unsigned long)s.Buffer;
 	FrameEnd = (unsigned long)s.Buffer + s.Length;
 	f = s.Frequency;
-
 	asm { /*$C- Case insensitive */
 		clr.l d0
 		lea volt(pc),a1       ; Adresse der Pegelwerte
@@ -337,18 +340,19 @@ void PlaySoundInterrupt(SoundType *ref_s)
 		ds   4096
 	bye:
 	} /*$C+ Case sensitive */
+#endif
 #undef s
 }
 
 
 void PlaySoundN(unsigned n)
 {
-	unsigned i; SoundType s;
+	/*unsigned i;*/ SoundType s;
 	if (!SoundAusgabe) return;
 	if (n == 0)
-		PlaySound(SoundOff);
-	else if (LoadSound(n, s))
-		PlaySound(s);
+		PlaySound(&SoundOff);
+	else if (LoadSound(n, &s))
+		PlaySound(&s);
 }
 
 void LoopSoundN(unsigned n)
@@ -359,12 +363,12 @@ void LoopSoundN(unsigned n)
 }
 
 
-void SoundInit(void)
+static void __attribute__ ((constructor)) at_init(void)
 {
-	SoundOff.Buffer = HASCSSystem.NULL;
+	SoundOff.Buffer = /*HASCSSystem.*/NULL;
 	DoLoop = FALSE;
 	SoundAusgabe = TRUE;
-	SoundPath = "";
+	*SoundPath = *"";
 
 	if (DMASound())
 		PlaySound = PlaySoundDMA;

@@ -9,5 +9,6 @@ int main(void)
 	if (ReadConfig())
 		StartGame();
 	ExitWorkstation(0);
+	return 0;
 }
 

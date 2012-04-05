@@ -30,8 +30,8 @@ int Decompress(BytePtr source, BytePtr dest)
 	BytePtr d, s;
 
 	void PatternRun(void)
-	unsigned long n, i, j;
 	{
+		unsigned long n, i, j;
 		n = *source++;
 		for (i = 1; i <= n; i++)
 			for (j = 1; j <= ImageHeader->PatternLength; j++) {
@@ -90,9 +90,9 @@ int Decompress(BytePtr source, BytePtr dest)
 				PatternRun();
 			else
 				source--;
-		else if (*source == 128)
+		} else if (*source == 128) {
 			source++; BitString();
-		else
+		} else
 			SolidRun();
 		if (Count % (long)LineBytes == 0) {
 			if (WordAusgleich == 1)
@@ -115,52 +115,56 @@ int Decompress(BytePtr source, BytePtr dest)
 
 int LoadImageN(unsigned n, unsigned *ref_w, unsigned *ref_h)
 {
+#define w (*ref_w)
+#define h (*ref_h)
 	int handle;
 	unsigned long length;
-	void *ImgBuffer, Start;
-	char Name[128]
+	void *ImgBuffer, *Start;
+	char Name[128];
 	unsigned i, id;
 	
 	id = n + 1024;
-	i = HASCSSystem.GetCache(id);
+	i = /*HASCSSystem.*/GetCache(id);
 	if (i != 0) {
-		w = HASCSSystem.Cache[i].CacheInfo1; h = HASCSSystem.Cache[i].CacheInfo2;
-		HASCSSystem.SetPicture(HASCSSystem.Cache[i].CacheInfo1, HASCSSystem.Cache[i].CacheInfo2, HASCSSystem.Cache[i].CacheBuffer);
+		w = /*HASCSSystem.*/Cache[i].CacheInfo1; h = /*HASCSSystem.*/Cache[i].CacheInfo2;
+		/*HASCSSystem.*/SetPicture(/*HASCSSystem.*/Cache[i].CacheInfo1, /*HASCSSystem.*/Cache[i].CacheInfo2, /*HASCSSystem.*/Cache[i].CacheBuffer);
 		return TRUE;
 	}
 
-	HASCSOutput.Concat(Name, HASCSDisk.DiaPath, "PICTURE.000");
+	/*HASCSOutput.*/Concat(Name, /*HASCSDisk.*/DiaPath, "PICTURE.000");
 	i = LENGTH(Name) - 3;
 	Name[i]   = n / 100 + '0';
 	Name[i+1] = n % 100 / 10 + '0';
 	Name[i+2] = n % 10 + '0';
 
 	CheckSum = 0;
-	length = HASCSSystem.FileLength(Name);
-	if (HASCSSystem.FileError) return FALSE;
-	handle = HASCSSystem.OpenFile(Name);
-	ImgBuffer = HASCSSystem.GetBuffer(length);
-	HASCSSystem.ReadFile(handle, length, ImgBuffer);
+	length = /*HASCSSystem.*/FileLength(Name);
+	if (/*HASCSSystem.*/FileError) return FALSE;
+	handle = /*HASCSSystem.*/OpenFile(Name);
+	ImgBuffer = /*HASCSSystem.*/GetBuffer(length);
+	/*HASCSSystem.*/ReadFile(handle, length, ImgBuffer);
 	ImageHeader = ImgBuffer;
-	if (HASCSSystem.FileError
+	if (/*HASCSSystem.*/FileError
 		|| ImageHeader->Version != 1
 		|| ImageHeader->Length < 8
 		|| ImageHeader->Planes != 1)
 		return FALSE;
-	if (ImageHeader^.Length > 8)
-		HASCSSystem.FileSeek(handle, 2 * ImageHeader->Length);
+	if (ImageHeader->Length > 8)
+		/*HASCSSystem.*/FileSeek(handle, 2 * ImageHeader->Length);
 	LineBytes = (ImageHeader->LineWidth + 7) / 8;
 	WordAusgleich = LineBytes % 2;
-	i = HASCSSystem.NewCache(id, (long)(LineBytes+WordAusgleich) * 
+	i = /*HASCSSystem.*/NewCache(id, (long)(LineBytes+WordAusgleich) * 
 				 ImageHeader->Lines);
-	Start = ImgBuffer + (2 * ImageHeader^.Length);
-	if (Decompress(Start, HASCSSystem.Cache[i].CacheBuffer)) {
-		HASCSSystem.Cache[i].CacheInfo1 = ImageHeader^.LineWidth;
-		HASCSSystem.Cache[i].CacheInfo2 = ImageHeader^.Lines;
-		HASCSSystem.SetPicture(HASCSSystem.Cache[i].CacheInfo1, HASCSSystem.Cache[i].CacheInfo2, HASCSSystem.Cache[i].CacheBuffer);
-		w = HASCSSystem.Cache[i].CacheInfo1; h = HASCSSystem.Cache[i].CacheInfo2;
+	Start = ImgBuffer + (2 * ImageHeader->Length);
+	if (Decompress(Start, /*HASCSSystem.*/Cache[i].CacheBuffer)) {
+		/*HASCSSystem.*/Cache[i].CacheInfo1 = ImageHeader->LineWidth;
+		/*HASCSSystem.*/Cache[i].CacheInfo2 = ImageHeader->Lines;
+		/*HASCSSystem.*/SetPicture(/*HASCSSystem.*/Cache[i].CacheInfo1, /*HASCSSystem.*/Cache[i].CacheInfo2, /*HASCSSystem.*/Cache[i].CacheBuffer);
+		w = /*HASCSSystem.*/Cache[i].CacheInfo1; h = /*HASCSSystem.*/Cache[i].CacheInfo2;
 	}
 	return TRUE;
+#undef w
+#undef h
 }
 
 
@@ -170,7 +174,7 @@ int SaveImage(char *Name)
 
 	BildZeile z1, z2;
 
-	struct { unsigned char x, n, b1, b2; } PatternRun;
+	/*struct { unsigned char x, n, b1, b2; } PatternRun;*/
 	struct { unsigned char x, n, flag, c; } ScanlineRun;
 	HeaderType ImgHeader;
 
@@ -183,15 +187,26 @@ int SaveImage(char *Name)
 
 		BITSET GetSpritePattern(unsigned x, unsigned y, unsigned z)
 		{
-			HASCSGraphics.SpriteType Sprite; 
-			if (HASCSGlobal.LevelMonster & HASCSGlobal.Level[x][y].Spezial)
-				Sprite = HASCSGraphics.MonsterSprite[HASCSGlobal.Monster
-							       [HASCSGlobal.FindMonster(x,y)].Typ];
-			else if (HASCSGlobal.LevelGegenstand & HASCSGlobal.Level[x][y].Spezial)
-				Sprite = HASCSGraphics.SystemSprite[HASCSGlobal.Gegenstand
-							       [HASCSGlobal.FindGegenstand(x,y)].Sprite];
+			/*HASCSGraphics.*/SpriteType Sprite; 
+			if (/*HASCSGlobal.*/LevelMonster & /*HASCSGlobal.*/Level[x][y].Spezial)
+#if 0
+				Sprite = /*HASCSGraphics.*/MonsterSprite[/*HASCSGlobal.*/Monster
+							       [/*HASCSGlobal.*/FindMonster(x,y)].Typ];
+#endif
+				memcpy(Sprite,/*HASCSGraphics.*/MonsterSprite[/*HASCSGlobal.*/Monster
+							       [/*HASCSGlobal.*/FindMonster(x,y)].Typ], sizeof (SpriteType));
+			else if (/*HASCSGlobal.*/LevelGegenstand & /*HASCSGlobal.*/Level[x][y].Spezial)
+#if 0
+				Sprite = /*HASCSGraphics.*/SystemSprite[/*HASCSGlobal.*/Gegenstand
+							       [/*HASCSGlobal.*/FindGegenstand(x,y)].Sprite];
+#endif
+				memcpy(Sprite, /*HASCSGraphics.*/SystemSprite[/*HASCSGlobal.*/Gegenstand
+							       [/*HASCSGlobal.*/FindGegenstand(x,y)].Sprite], sizeof (SpriteType));
 			else
-				 Sprite = HASCSGraphics.FelderSprite[HASCSGlobal.Level[x,y].Feld];
+#if 0
+				Sprite = /*HASCSGraphics.*/FelderSprite[/*HASCSGlobal.*/Level[x][y].Feld];
+#endif
+				memcpy(Sprite, /*HASCSGraphics.*/FelderSprite[/*HASCSGlobal.*/Level[x][y].Feld], sizeof (SpriteType));
 			return Sprite[z % 16];
 		 }
 
@@ -203,7 +218,7 @@ int SaveImage(char *Name)
 			c = 0;
 			for (;;) {
 				c++;
-				if (i+c > HASCSGlobal.LevelBreite)
+				if (i+c > /*HASCSGlobal.*/LevelBreite)
 					break;
 				if (f != GetSpritePattern(i+c, z / 16, z))
 					break;
@@ -213,14 +228,14 @@ int SaveImage(char *Name)
 			x[j++] = GetSpritePattern(i, z / 16, z) / 256;
 			x[j++] = GetSpritePattern(i, z / 16, z) % 256;
 			i = i + c;
-			if (i <= HASCSGlobal.LevelBreite)
+			if (i <= /*HASCSGlobal.*/LevelBreite)
 				f = GetSpritePattern(i, z / 16, z);
-		} while (i <= HASCSGlobal.LevelBreite);
+		} while (i <= /*HASCSGlobal.*/LevelBreite);
 		return j;
 #undef x
 	}
 
-	int Ungleich(BildZeile *x, BildZeile *y)
+	int Ungleich(BildZeile *ref_x, BildZeile *ref_y)
 	{
 #define x (*ref_x)
 #define y (*ref_y)
@@ -232,8 +247,8 @@ int SaveImage(char *Name)
 #undef y
 	}
 	 
-	fh = HASCSSystem.CreateFile(Name);
-	if (HASCSSystem.FileError) return FALSE;
+	fh = /*HASCSSystem.*/CreateFile(Name);
+	if (/*HASCSSystem.*/FileError) return FALSE;
 
 	ImgHeader.Version = 1;
 	ImgHeader.Length  = 8;
@@ -241,40 +256,39 @@ int SaveImage(char *Name)
 	ImgHeader.PatternLength = 2;
 	ImgHeader.PixelWidth = 0x0174;
 	ImgHeader.PixelHeight = 0x0174;
-	ImgHeader.LineWidth = (HASCSGlobal.LevelBreite+1) * 16;
-	ImgHeader.Lines = (HASCSGlobal.LevelHoehe+1) * 16;
+	ImgHeader.LineWidth = (/*HASCSGlobal.*/LevelBreite+1) * 16;
+	ImgHeader.Lines = (/*HASCSGlobal.*/LevelHoehe+1) * 16;
 	
-	HASCSSystem.WriteFile(fh, SIZE(ImgHeader), &ImgHeader);
-	if (HASCSSystem.FileError) return FALSE;
+	/* FIXME machine dependent --rtc */
+	/*HASCSSystem.*/WriteFile(fh, sizeof ImgHeader, &ImgHeader);
+	if (/*HASCSSystem.*/FileError) return FALSE;
 		
 	z = 0;
-	LineLength = FillLine(z, z1);
+	LineLength = FillLine(z, &z1);
 
 	do {
 		counter = 0;
 		for (;;) {
 			counter++;
 			if (counter >= 255 || z+counter >= ImgHeader.Lines) 
-				break
-			}
-			NewLineLength = FillLine(z+counter, z2);
-			if (Ungleich(z1, z2)) {
 				break;
-			}
+			NewLineLength = FillLine(z+counter, &z2);
+			if (Ungleich(&z1, &z2))
+				break;
 		}
 		if (counter > 1) {
 			ScanlineRun.x = 0; ScanlineRun.n = 0; ScanlineRun.flag = 0xFF; ScanlineRun.c = counter;
-			HASCSSystem.WriteFile(fh, sizeof ScanlineRun, &ScanlineRun);
-			if (HASCSSystem.FileError) return FALSE;
+			/*HASCSSystem.*/WriteFile(fh, sizeof ScanlineRun, &ScanlineRun);
+			if (/*HASCSSystem.*/FileError) return FALSE;
 		}
-		HASCSSystem.WriteFile(fh, LineLength, &z1);
-		if (HASCSSystem.FileError) return FALSE;
+		/*HASCSSystem.*/WriteFile(fh, LineLength, &z1);
+		if (/*HASCSSystem.*/FileError) return FALSE;
 
-		z1 = z2; LineLength = NewLineLength;
+		/*z1 = z2;*/memcpy(z1,z2,sizeof (BildZeile)); LineLength = NewLineLength;
 		z = z + counter;
 	} while (z < ImgHeader.Lines);
 
-	HASCSSystem.CloseFile(fh);
+	/*HASCSSystem.*/CloseFile(fh);
 	return TRUE;
 }
 

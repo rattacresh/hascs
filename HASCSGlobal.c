@@ -5,7 +5,7 @@
 #include "HASCSSystem.h"
 #include "Screen.h"
 
-int ScreenReserved = Editor;
+int ScreenReserved;
 
 /* Bildschirm-Ausgaben ****************************************************/
 
@@ -21,7 +21,7 @@ void SetNewSprite(unsigned x, unsigned y)
 			Nummer = 512 + Spieler.Sprite;
 	} else {
 		if (LevelBekannt & SichtBereich[x][y].Spezial) {
-			SichtLevelUmrechnung(x, y, xl, yl);
+			SichtLevelUmrechnung(x, y, &xl, &yl);
 			Level[xl][yl].Spezial |= LevelKarte;
 			Nummer = SichtBereich[x][y].Feld;
 			if (LevelGegenstand & SichtBereich[x][y].Spezial)
@@ -36,11 +36,11 @@ void SetNewSprite(unsigned x, unsigned y)
 	}
 	if (Nummer != OldScreen[x][y]) {
 		if (Nummer < 256) /* Feld */
-			SetSprite(x+1, y+1, FelderSprite[Nummer])
+			SetSprite(x+1, y+1, &FelderSprite[Nummer]);
 		else if (Nummer < 512) /* Monster */
-			SetSprite(x+1 ,y+1 , MonsterSprite[Nummer - 256]);
+			SetSprite(x+1 ,y+1 , &MonsterSprite[Nummer - 256]);
 		else if (Nummer < 1024) /* Gegenstand */
-			SetSprite(x+1, y+1, SystemSprite[Nummer - 512]);
+			SetSprite(x+1, y+1, &SystemSprite[Nummer - 512]);
 		OldScreen[x][y] = Nummer;
 	}
 }
@@ -51,13 +51,13 @@ void SetOldSprite(unsigned x, unsigned y)
 	unsigned Nummer;
 	Nummer = OldScreen[x][y];
 	if (Nummer < 256) /* Feld */
-		SetSprite(x+1, y+1, FelderSprite[Nummer])
+		SetSprite(x+1, y+1, &FelderSprite[Nummer]);
 	else if (Nummer < 512) /* Monster */
-		SetSprite(x+1 ,y+1, MonsterSprite[Nummer - 256]);
+		SetSprite(x+1 ,y+1, &MonsterSprite[Nummer - 256]);
 	else if (Nummer < 1024) /* Gegenstand */
-		SetSprite(x+1, y+1, SystemSprite[Nummer - 512]);
+		SetSprite(x+1, y+1, &SystemSprite[Nummer - 512]);
 	else
-		SetSprite(x+1, y+1, SystemSprite[0]);
+		SetSprite(x+1, y+1, &SystemSprite[0]);
 }
 
 
@@ -67,7 +67,7 @@ void FillRectangle(int x0, int y0, int x1, int y1, SpriteType *ref_Sprite)
 	int x, y;
 	for (x = x0; x <= x1; x++)
 		for (y = y0; y <= y1; y++)
-			SetSprite(x, y, Sprite);
+			SetSprite(x, y, &Sprite);
 #undef Sprite
 }
 
@@ -77,24 +77,24 @@ int MakeShoot(unsigned *ref_qx, unsigned *ref_qy, unsigned zx, unsigned zy, unsi
 #define qx (*ref_qx)
 #define qy (*ref_qy)
 	int x0, y0, x1, y1, dx, dy, ix, iy, ax, ay, of, ct;
-	unsigned mx, my, i; BITSET mb; char mch;
+	/*unsigned mx, my, i; BITSET mb; char mch;*/
 	int ausserhalb, hit;
 
 /* Führt Schuß im Sichtbereich durch von qx, qy in Richtung zx, zy */
 
 	int SichtFrei(unsigned x, unsigned y)
-	int sf; unsigned i, xl, yl;
 	{
+		int sf; unsigned i, xl, yl;
 		sf = TRUE;
 		if (mode || (x == zx && y == zy)) {
-			if (LevelMonster & SichtBereich[x,y].Spezial) {
-				SichtLevelUmrechnung(x, y, xl, yl);
+			if (LevelMonster & SichtBereich[x][y].Spezial) {
+				SichtLevelUmrechnung(x, y, &xl, &yl);
 				i = FindMonster(xl, yl);
 				sf = MonsterImmun & Monster[i].Spezial;
-				hit = NOT(sf);
+				hit = !sf;
 			}
 		}
-		sf = sf && FeldDurchsichtig & Felder[SichtBereich[x,y].Feld].Spezial;
+		sf = sf && FeldDurchsichtig & Felder[SichtBereich[x][y].Feld].Spezial;
 		sf = sf && (x != MaxSichtweite || y != MaxSichtweite);
 		return sf;
 	}
@@ -109,7 +109,7 @@ int MakeShoot(unsigned *ref_qx, unsigned *ref_qy, unsigned zx, unsigned zy, unsi
 	if (dx < dy) {
 		ct = dx; dx = dy; dy = ct; ay = ix; ax = iy; ix = 0; iy = 0;
 	}
-	i = 0;
+	/*i = 0;*/
 	x0 = qx; y0 = qy;
 	of = dx / 2;
 	hit = FALSE;
@@ -136,13 +136,13 @@ void RestoreScreen(void)
 /* Stellt den normalen Spiel-Bildschirm wieder her */
 {
 	unsigned x, y;
-	FillRectangle(0,  0, 39,  0, SystemSprite[9]);
-	FillRectangle(0, 24, 39, 24, SystemSprite[9]);
-	FillRectangle(0,  1,  0, 24, SystemSprite[9]);
-	FillRectangle(39, 1, 39, 24, SystemSprite[9]);
-	FillRectangle(24, 1, 24, 24, SystemSprite[9]);
-	FillRectangle(25,12, 38, 12, SystemSprite[9]);
-	FillRectangle(25,15, 38, 15, SystemSprite[9]);
+	FillRectangle(0,  0, 39,  0, &SystemSprite[9]);
+	FillRectangle(0, 24, 39, 24, &SystemSprite[9]);
+	FillRectangle(0,  1,  0, 24, &SystemSprite[9]);
+	FillRectangle(39, 1, 39, 24, &SystemSprite[9]);
+	FillRectangle(24, 1, 24, 24, &SystemSprite[9]);
+	FillRectangle(25,12, 38, 12, &SystemSprite[9]);
+	FillRectangle(25,15, 38, 15, &SystemSprite[9]);
 	PrintLevelName(LevelName);
 	for (x = 0; x <= MaxSichtmal2; x++)
 		for (y = 0; y <= MaxSichtmal2; y++)
@@ -160,19 +160,19 @@ void ReserveScreen(unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 	unsigned x, y;
 	if (x2 == 0 && y2 == 0)
 		return;
-	SetSprite(x1, y1, SystemSprite[25]); /* links oben */
-	SetSprite(x1, y2, SystemSprite[27]); /* links unten */
-	SetSprite(x2, y1, SystemSprite[26]); /* rechts oben */
-	SetSprite(x2, y2, SystemSprite[28]); /* rechts unten */
+	SetSprite(x1, y1, &SystemSprite[25]); /* links oben */
+	SetSprite(x1, y2, &SystemSprite[27]); /* links unten */
+	SetSprite(x2, y1, &SystemSprite[26]); /* rechts oben */
+	SetSprite(x2, y2, &SystemSprite[28]); /* rechts unten */
 	for (x = x1+1; x <= x2-1; x++) {
-		SetSprite(x, y1, SystemSprite[29]);
-		SetSprite(x, y2, SystemSprite[30]);
+		SetSprite(x, y1, &SystemSprite[29]);
+		SetSprite(x, y2, &SystemSprite[30]);
 	}
 	for (y = y1+1; y <= y2-1; y++) {
-		SetSprite(x1, y, SystemSprite[32]);
-		SetSprite(x2, y, SystemSprite[31]);
+		SetSprite(x1, y, &SystemSprite[32]);
+		SetSprite(x2, y, &SystemSprite[31]);
 	}
-	FillRectangle(x1+1, y1+1, x2-1, y2-1, SystemSprite[0]);
+	FillRectangle(x1+1, y1+1, x2-1, y2-1, &SystemSprite[0]);
 	ScreenReserved = TRUE;
 }
 
@@ -180,11 +180,11 @@ void ReserveScreen(unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 void PrintCharakter(unsigned What)
 /* Gibt Charakter(oder Teile) aus */
 {
-	unsigned i, n, cx, cy;
-	FillRectangle(25, 1, 38, 11, SystemSprite[0]);
+	unsigned /*i,*/ n/*, cx, cy*/;
+	FillRectangle(25, 1, 38, 11, &SystemSprite[0]);
 
 	n = Length(Spieler.Name);
-	FillRectangle(25, 0, 38, 0, SystemSprite[9]);
+	FillRectangle(25, 0, 38, 0, &SystemSprite[9]);
 	TextMode = 1; PrintAt(32 - n / 2, 0, Spieler.Name); TextMode = 0;
 
 	PrintAt(50, 1, "#10#"); GotoXY(61,1); PrintCard(Spieler.St, 2); /* Basiswerte */
@@ -194,7 +194,7 @@ void PrintCharakter(unsigned What)
 	PrintAt(50, 3, "#14#"); GotoXY(61,3); PrintCard(Spieler.Zt, 2);
 	PrintAt(64, 3, "#15#"); GotoXY(75,3); PrintCard(Spieler.Ch, 2);
 
-	FillRectangle(25, 4, 38, 4, SystemSprite[45]);
+	FillRectangle(25, 4, 38, 4, &SystemSprite[45]);
 	PrintAt(50, 5,"#400#"); PrintLongCard(Spieler.EP, 6); /* Erfahrungspkt. */
 	Print("#401#"); PrintCard(Spieler.Grad, 2);
 	PrintAt(50, 6,"#402#"); PrintCard(Spieler.TP, 5);     /* Trefferpunkte */
@@ -202,26 +202,26 @@ void PrintCharakter(unsigned What)
 	PrintAt(68, 5,"#404#"); PrintCard(Spieler.Nahrung, 3); /* Nahrung */
 	PrintAt(68, 6,"#405#"); PrintCard(Spieler.Gold, 5);    /* Gold */
 
-	FillRectangle(25, 7, 38, 7, SystemSprite[45]);
+	FillRectangle(25, 7, 38, 7, &SystemSprite[45]);
 
-	SetSprite(25, 8, SystemSprite[43]);
+	SetSprite(25, 8, &SystemSprite[43]);
 	if (Spieler.rechteHand.KennNummer != 0) {
-		SetSprite(27, 8, SystemSprite[Spieler.rechteHand.Sprite]);
+		SetSprite(27, 8, &SystemSprite[Spieler.rechteHand.Sprite]);
 		GotoXY(57, 8); PrintGegenstand(Spieler.rechteHand);
 	}
-	SetSprite(25, 9, SystemSprite[44]);
+	SetSprite(25, 9, &SystemSprite[44]);
 	if (Spieler.linkeHand.KennNummer != 0) {
-		SetSprite(27, 9, SystemSprite[Spieler.linkeHand.Sprite]);
+		SetSprite(27, 9, &SystemSprite[Spieler.linkeHand.Sprite]);
 		GotoXY(57, 9); PrintGegenstand(Spieler.linkeHand);
 	}
-	SetSprite(25, 10, SystemSprite[41]);
+	SetSprite(25, 10, &SystemSprite[41]);
 	if (Spieler.Ruestung.KennNummer != 0) {
-		SetSprite(27, 10, SystemSprite[Spieler.Ruestung.Sprite]);
+		SetSprite(27, 10, &SystemSprite[Spieler.Ruestung.Sprite]);
 		GotoXY(57, 10); PrintGegenstand(Spieler.Ruestung);
 	}
-	SetSprite(25, 11, SystemSprite[42]);
+	SetSprite(25, 11, &SystemSprite[42]);
 	if (Spieler.Ring.KennNummer != 0) {
-		SetSprite(27, 11, SystemSprite[Spieler.Ring.Sprite]);
+		SetSprite(27, 11, &SystemSprite[Spieler.Ring.Sprite]);
 		GotoXY(57, 11); PrintGegenstand(Spieler.Ring);
 	}
 }
@@ -231,10 +231,10 @@ void PrintMenue(void)
 {
 	unsigned i;
 	for (i = 0; i <= 6; i++) {
-		SetSprite(2 * i + 25, 13, GegenSprite[128 + 4 * i]);
-		SetSprite(2 * i + 26, 13, GegenSprite[129 + 4 * i]);
-		SetSprite(2 * i + 25, 14, GegenSprite[130 + 4 * i]);
-		SetSprite(2 * i + 26, 14, GegenSprite[131 + 4 * i]);
+		SetSprite(2 * i + 25, 13, &GegenSprite[128 + 4 * i]);
+		SetSprite(2 * i + 26, 13, &GegenSprite[129 + 4 * i]);
+		SetSprite(2 * i + 25, 14, &GegenSprite[130 + 4 * i]);
+		SetSprite(2 * i + 26, 14, &GegenSprite[131 + 4 * i]);
 	}
 }
 
@@ -250,69 +250,64 @@ void PrintGegenstand(GegenstandTyp g)
 	switch (g.KennNummer) {
 	case GRing      : if (GErkannt & g.Flags) {
 				Print(g.Name); Print(" "); PrintCard(g.RingDauer, 1);
-			} else {
-				Print("#420#")
-			}
+			} else
+				Print("#420#");
 			break;
 	case GZauberstab: if (GErkannt & g.Flags) {
 				Print(g.Name); Print(" "); PrintCard(g.ZStabAbw, 1); Print("%");
-			} else {
+			} else
 				Print("#421#");
-			}
 			break;
 	case GPergament : if (GErkannt & g.Flags) {
-				Print(Name);
-				if (PergamentAnwendungen > 0) {
+				Print(g.Name);
+				if (g.PergamentAnwendungen > 0) {
 					Print(" ");
-					PrintCard(PergamentAnwendungen, 1);
+					PrintCard(g.PergamentAnwendungen, 1);
 				}
-			} else {
+			} else
 				Print("#422#");
-			}
 			break;
 	case GPhiole    : if (GErkannt & g.Flags) { 
-				Print(Name); 
-				if (PhioleAnwendungen > 0) {
+				Print(g.Name); 
+				if (g.PhioleAnwendungen > 0) {
 					Print(" ");
-					PrintCard(PhioleAnwendungen, 1);
+					PrintCard(g.PhioleAnwendungen, 1);
 				}
-			} else {
+			} else
 				Print("#423#");
-			}
 			break;
 	case GWaffe:
-	case GRuestung  : Print(Name);
-			if (KennNummer == GWaffe) x = WaffenAnwendungen;
-			else { x = RuestAnwendungen;
-			}
-			if ((x > 0 && GErkannt & Flags)) {
+	case GRuestung  : Print(g.Name);
+			if (g.KennNummer == GWaffe) x = g.WaffenAnwendungen;
+			else x = g.RuestAnwendungen;
+			if (x > 0 && GErkannt & g.Flags) {
 				Print(" "); PrintCard(x, 1);
 			}
 			break;
-	case GGold      : Print(Name);
-			if (GErkannt & Flags) {
+	case GGold      : Print(g.Name);
+			if (GErkannt & g.Flags) {
 				Print(" ");
-				PrintCard(Gold, 1);
+				PrintCard(g.Gold, 1);
 			}
 			break;
-	case GSchluessel: Print(Name);
+	case GSchluessel: Print(g.Name);
 			break;
-	case GNahrung   : Print(Name);
-			if (GErkannt & Flags) {
+	case GNahrung   : Print(g.Name);
+			if (GErkannt & g.Flags) {
 				Print(" ");
-				PrintCard(Nahrung, 1);
+				PrintCard(g.Nahrung, 1);
 			}
 			break;
-	case GLicht     : Print(Name);
-			if (GErkannt & Flags) {
+	case GLicht     : Print(g.Name);
+			if (GErkannt & g.Flags) {
 				Print(" ");
-				PrintCard(LichtDauer, 1);
+				PrintCard(g.LichtDauer, 1);
 			}
 			break;
 	default: /* Irgendein Gegenstand */
-		Print(Name);
-		if (GErkannt & Flags && DialogAnzahl > 0) {
-			Print(" "); PrintCard(DialogAnzahl, 1);
+		Print(g.Name);
+		if (GErkannt & g.Flags && g.DialogAnzahl > 0) {
+			Print(" "); PrintCard(g.DialogAnzahl, 1);
 		}
 	} /* switch */
 }
@@ -321,7 +316,7 @@ void PrintLevelName(char *s)
 {
 	unsigned i;
 	i = Length(s);
-	FillRectangle(1, 0, 23, 0, SystemSprite[9]);
+	FillRectangle(1, 0, 23, 0, &SystemSprite[9]);
 	TextMode = 1; PrintAt(12 - i / 2, 0, s); TextMode = 0;  
 }
 
@@ -331,7 +326,7 @@ void DisplayCharakter(SpielerTyp s)
 
 /* Hilfsprozeduren ********************************************************/
 
-unsigned max(unsigned a, b)
+unsigned max(unsigned a, unsigned b)
 {
 	if (a > b)
 		return a;
@@ -341,7 +336,7 @@ unsigned max(unsigned a, b)
 
 /* Spieler **************************************************************/
 
-unsigned W6(i : CARDINAL)
+unsigned W6(unsigned i)
 {
 	unsigned j, s;
 	s = 0;
@@ -358,14 +353,12 @@ int SchutzWurf(unsigned x)
 unsigned SetLightRange()
 {
 	unsigned s;
-{
-	if ((SLicht & Spieler.Status)) { /* magisches Licht */
+	if (SLicht & Spieler.Status) /* magisches Licht */
 		return Spieler.Sichtweite;
-	}
 	s = LevelSichtweite;
 	if (Spieler.rechteHand.KennNummer == GLicht)
 		s = max(Spieler.rechteHand.LichtWeite, s);
-	if (linkeHand.KennNummer == GLicht)
+	if (Spieler.linkeHand.KennNummer == GLicht)
 		s = max(Spieler.linkeHand.LichtWeite, s);
 	return s;
 }
@@ -377,11 +370,11 @@ void SetOneLight(int x, int y, int w, int on)
 
 	for (i = x-w; i <= x+w; i++)
 		for (j = y-w; j <= y+w; j++) {
-			NormalKoords(i, j, k, l);
+			NormalKoords(i, j, &k, &l);
 			if (on)
-				Level[k,l].Spezial |= LevelSichtbar;
+				Level[k][l].Spezial |= LevelSichtbar;
 			else
-				Level[k,l].Spezial &= ~LevelSichtbar;
+				Level[k][l].Spezial &= ~LevelSichtbar;
 		}
 }
 
@@ -436,7 +429,6 @@ unsigned FindMonster(unsigned mx, unsigned my)
 		if (Monster[i].x == mx && Monster[i].y == my)
 			if (Editor || (Monster[i].Status > 0 && Monster[i].Status < 1000))
 				return i;
-	}
 	return 0;
 }
 
@@ -445,7 +437,7 @@ void DeleteMonster(unsigned mx, unsigned my)
 	unsigned i, sx, sy;
 	i = FindMonster(mx, my);
 	if (i != 0) {
-		if (LevelSichtUmrechnung(mx, my , sx, sy)) {
+		if (LevelSichtUmrechnung(mx, my , &sx, &sy)) {
 			SichtBereich[sx][sy].Spezial &= ~LevelMonster;
 			if (!ScreenReserved)
 				SetNewSprite(sx, sy);
@@ -479,7 +471,7 @@ void DeleteGegenstand(unsigned gx, unsigned gy)
 		}
 		AnzahlGegen--;
 		last = FindGegenstand(gx, gy) == 0;
-		if (LevelSichtUmrechnung(gx, gy , sx, sy)) {
+		if (LevelSichtUmrechnung(gx, gy , &sx, &sy)) {
 			if (last)
 				SichtBereich[sx][sy].Spezial &= ~LevelGegenstand;
 			if (!ScreenReserved)
@@ -504,7 +496,7 @@ void DeleteParameter(unsigned px, unsigned py)
 	unsigned i, sx, sy;
 	i = FindParameter(px, py);
 	if (i != 0) {
-		if (LevelSichtUmrechnung(px, py , sx, sy))
+		if (LevelSichtUmrechnung(px, py , &sx, &sy))
 			SichtBereich[sx][sy].Spezial &= ~LevelParameter;
 		Level[px][py].Spezial &= ~LevelParameter;
 		while (i < AnzahlParameter) {
@@ -525,7 +517,7 @@ void NewMonster(unsigned mx, unsigned my, MonsterTyp *ref_m)
 		Monster[AnzahlMonster].x = mx;
 		Monster[AnzahlMonster].y = my;
 		Level[mx][my].Spezial |= LevelMonster;
-		if (LevelSichtUmrechnung(mx, my, sx, sy)) {
+		if (LevelSichtUmrechnung(mx, my, &sx, &sy)) {
 			SichtBereich[sx][sy].Spezial |= LevelMonster;
 			if (!ScreenReserved)
 				SetNewSprite(sx, sy);
@@ -543,8 +535,8 @@ void NewGegenstand(unsigned gx, unsigned gy, GegenstandTyp *ref_g)
 		Gegenstand[AnzahlGegen] = g;
 		Gegenstand[AnzahlGegen].x = gx;
 		Gegenstand[AnzahlGegen].y = gy;
-		Level[gx,gy].Spezial |= LevelGegenstand;
-		if (LevelSichtUmrechnung(gx, gy, sx, sy)) {
+		Level[gx][gy].Spezial |= LevelGegenstand;
+		if (LevelSichtUmrechnung(gx, gy, &sx, &sy)) {
 			SichtBereich[sx][sy].Spezial |= LevelGegenstand;
 			if (!ScreenReserved)
 				SetNewSprite(sx, sy);
@@ -553,7 +545,7 @@ void NewGegenstand(unsigned gx, unsigned gy, GegenstandTyp *ref_g)
 #undef g
 }
 
-void NewParameter(unsigned px, unsigned py, ParameterTyp *p)
+void NewParameter(unsigned px, unsigned py, ParameterTyp *ref_p)
 {
 #define p (*ref_p)
 	unsigned sx, sy;
@@ -563,7 +555,7 @@ void NewParameter(unsigned px, unsigned py, ParameterTyp *p)
 		Parameter[AnzahlParameter].x = px;
 		Parameter[AnzahlParameter].y = py;
 		Level[px][py].Spezial |= LevelParameter;
-		if (LevelSichtUmrechnung(px, py, sx, sy))
+		if (LevelSichtUmrechnung(px, py, &sx, &sy))
 			SichtBereich[sx][sy].Spezial |= LevelParameter;
 	}
 #undef p
@@ -577,11 +569,11 @@ void Erfahrung(unsigned Punkte)
 
 	int FrageSteigern()
 	{
-		unsigned d, ja; int yes;
+		unsigned /*d,*/ ja; int yes;
 		NewScreen(14, 9, 14, 7, "");
-		d = AddObject(2, 2, 10, 1, "#450#", 0);
+		/*d =*/ AddObject(2, 2, 10, 1, "#450#", 0);
 		ja = AddObject(2, 4, 4, 1, "#451#", BigText|Outlined|Exit);
-		d = AddObject(8, 4, 4, 1, "#452#", BigText|Outlined|Exit);
+		/*d =*/ AddObject(8, 4, 4, 1, "#452#", BigText|Outlined|Exit);
 		DrawScreen(); yes = HandleScreen() == ja; RestoreScreen();
 		return yes;
 	}
@@ -596,7 +588,7 @@ void Erfahrung(unsigned Punkte)
 			ChangeBasiswert(g, p);
 			t = Zufall(Spieler.Ko) / 2 + 4; /* Trefferpunkte */
 			Spieler.TPMax += t; Spieler.TP += t;
-			BeginOutput;
+			BeginOutput();
 			Print("#453#"); PrintCard(Spieler.Grad, 1);
 			Print("#454#"); PrintCard(t, 1); Print(", ");
 			switch (g) {
@@ -608,7 +600,7 @@ void Erfahrung(unsigned Punkte)
 			case 5 : Print("#15#"); break;
 			}
 			Print("#455#"); PrintCard(p, 1);
-			EndOutput;
+			EndOutput();
 		} else
 			Spieler.Lernen++; /* neue Lernmöglichkeit */
 		PrintCharakter(1);
@@ -637,16 +629,17 @@ void TrefferPunkte(unsigned Punkte, int Plus)
 }
 
 
-int NimmGegenstand(unsigned px, unsigned py, int Einmal, GegenstandTyp *r)
+int NimmGegenstand(unsigned px, unsigned py, int Einmal, GegenstandTyp *ref_r)
 {
-	unsigned Nummer, i; int loeschen, erkannt;
+#define r (*ref_r)
+	unsigned Nummer, i; int loeschen/*, erkannt*/;
 	loeschen = TRUE;
 	Nummer = FindGegenstand(px, py);
 	r = Gegenstand[Nummer];
 
 	if (GChance & r.Flags) {
 		r.Flags &= ~GChance; r.Flags |= GErkannt;
-		if ((GMagisch|GVerflucht) & r.Flags) {
+		if (((GMagisch|GVerflucht) & r.Flags) != 0)
 			if (!SchutzWurf(Spieler.In)) {
 				if ((SMagier & Spieler.Typ || SPriester & Spieler.Typ)) {
 					if (!SchutzWurf(Spieler.In))
@@ -654,7 +647,6 @@ int NimmGegenstand(unsigned px, unsigned py, int Einmal, GegenstandTyp *r)
 				} else
 					r.Flags &= ~GErkannt;
 			}
-		}
 	}
 
 	Gegenstand[Nummer] = r;
@@ -685,16 +677,17 @@ int NimmGegenstand(unsigned px, unsigned py, int Einmal, GegenstandTyp *r)
 		DeleteGegenstand(px, py);
 
 	return loeschen;
+#undef r
 }
 
 
-int LegeGegenstand(unsigned px, unsgned py, GegenstandTyp *r)
+int LegeGegenstand(unsigned px, unsigned py, GegenstandTyp r)
 {
-	unsigned i, sx, sy;
-	if (FeldBegehbar & Felder[Level[px,py].Feld].Spezial 
+	/*unsigned i, sx, sy;*/
+	if (FeldBegehbar & Felder[Level[px][py].Feld].Spezial 
 	 && AnzahlGegen < MaxGegen)
 	{
-		NewGegenstand(px, py, r);
+		NewGegenstand(px, py, &r);
 		return TRUE;
 	} else
 		return FALSE;
@@ -737,5 +730,10 @@ int LevelSichtUmrechnung(unsigned x, unsigned y, unsigned *ref_i, unsigned *ref_
 	} else return FALSE;
 #undef i
 #undef j
+}
+
+static void __attribute__ ((constructor)) at_init(void)
+{
+	ScreenReserved = Editor;
 }
 

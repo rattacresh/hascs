@@ -1281,7 +1281,7 @@ void Sound(CharPtr *ref_p)
 	n = GetNumber(&p);
 	mode = GetNumber(&p);
 	switch (mode) {
-	case 1: if (LoadSound(n, snd)); break;
+	case 1: if (LoadSound(n, &snd)); break;
 	case 2: LoopSoundN(n); break;
 	default:
 		PlaySoundN(n); break;
