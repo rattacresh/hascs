@@ -1,6 +1,7 @@
-#include "Image.h" /* Image module */
+/* Image module */
+#include "compat.h"
+#include "Image.h" 
 
-#include <stdio.h>
 #include "HASCSSystem.h"
 #include "HASCSDisk.h"
 #include "HASCSOutput.h"

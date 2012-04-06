@@ -1,4 +1,6 @@
-#include "HASCSMonster.h" /* HASCSMonster module */
+/* HASCSMonster module */
+#include "compat.h"
+#include "HASCSMonster.h"
 
 #include "HASCSSystem.h"
 #include "HASCSOutput.h"

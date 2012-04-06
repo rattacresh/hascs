@@ -1,6 +1,6 @@
-#include "HASCSOutput.h" /* HASCSOutput module */
-
+/* HASCSOutput module */
 #include "compat.h"
+#include "HASCSOutput.h" 
 
 #include "HASCSGraphics.h"
 #include "HASCSSystem.h"

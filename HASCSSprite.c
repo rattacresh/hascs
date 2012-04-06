@@ -1,4 +1,6 @@
-#include "HASCSSprite.h" /* HASCSSprite module */
+/* HASCSSprite module */
+#include "compat.h"
+#include "HASCSSprite.h"
 
 #include "HASCSSystem.h"
 #include "HASCSGraphics.h"

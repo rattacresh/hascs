@@ -1,4 +1,6 @@
-#include "HASCSGlobal.h" /* HASCSGlobal module */
+/* HASCSGlobal module */
+#include "compat.h"
+#include "HASCSGlobal.h"
 
 #include "HASCSOutput.h"
 #include "HASCSGraphics.h"

@@ -1,7 +1,6 @@
 #ifndef HASCSGRAPHICS_H
 #define HASCSGRAPHICS_H
 
-#include "compat.h"
 /*
    Grafik- und Textausgaben auf den HASCS II Bildschirm.
 

@@ -1,4 +1,6 @@
-#include "HASCSGraphics.h" /* HASCSGraphics module */
+/* HASCSGraphics module */
+#include "compat.h"
+#include "HASCSGraphics.h"
 
 #include "HASCSSystem.h"
 #include <arpa/inet.h> /* byte order htons() ntohs()*/

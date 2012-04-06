@@ -1,4 +1,6 @@
-#include "HASCSSpieler.h" /* HASCSSpieler module */
+/* HASCSSpieler module */
+#include "compat.h"
+#include "HASCSSpieler.h"
 
 #include "HASCSSystem.h"
 #include "HASCSGraphics.h"

@@ -1,4 +1,6 @@
-#include "HASCSCharakter.h" /* HASCSCharakter module */
+/* HASCSCharakter module */
+#include "compat.h"
+#include "HASCSCharakter.h"
 
 /* Erschaffung eines neuen Charakters */
 

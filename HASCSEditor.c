@@ -1,5 +1,7 @@
 /* HASCSEditor module */
 
+#include "compat.h"
+
 /* HASCS EDITOR III
 
    written by Alexander Kirchner
@@ -1222,10 +1224,11 @@ void InitEditor(void)
 	Assign(LevelImage, "HASCS_3.IMG");
 }
 
+int __argc; char **__argv;
 
 int main(int argc, char *argv[])
 {
-	extern int __argc; extern char **__argv; __argc = argc; __argv = argv;
+	__argc = argc; __argv = argv;
 
 	Editor = TRUE;
 	SoundAusgabe = TRUE;

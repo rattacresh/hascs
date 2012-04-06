@@ -1,8 +1,9 @@
-#include "Sound.h" /* Sound module */
-
-#include <stdio.h>
-#include "HASCSSystem.h"
+/* Sound module */
+#include "compat.h"
 #define Concat(x, y, z, a) (strcat(strcpy(x,z),y), memcpy(&ok,&ok,0))
+#include "Sound.h"
+
+#include "HASCSSystem.h"
 
 /* Hardware Register für DMA Sound */
 #define sndmactl (*(volatile unsigned char *)0xFF8901) /* Sound-DMA-Control Register */

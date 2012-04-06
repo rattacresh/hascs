@@ -1,8 +1,6 @@
 #ifndef HASCSOUTPUT_H
 #define HASCSOUTPUT_H
 
-#include "compat.h"
-
 /*
 
    Textausgabe für HASCS II

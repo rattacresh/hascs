@@ -1,6 +1,7 @@
-#include "HASCSDisk.h" /* HASCSDisk module */
+/* HASCSDisk module */
+#include "compat.h"
+#include "HASCSDisk.h"
 
-#include <stdio.h>
 /* HASCS Importe */
 #include "HASCSGlobal.h"
 #include "HASCSGraphics.h"

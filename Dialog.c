@@ -1,4 +1,6 @@
-#include "Dialog.h" /* Dialog module */
+/* Dialog module */
+#include "compat.h"
+#include "Dialog.h"
 /*
    Version 0.1   06.03.93
            0.2   19.03.93 FindLabel
@@ -70,7 +72,9 @@ typedef unsigned *CardPtr;
 typedef String80Type *StringPtr;
 /*typedef unsigned CharSet[(1 << CHAR_BIT) / sizeof (unsigned)];*/
 typedef char *CharSet;
+#ifndef SOUND_H
 typedef char *CharPtr;
+#endif
 
 typedef void (*ActionProc)(CharPtr *);
 typedef struct {

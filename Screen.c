@@ -1,4 +1,6 @@
-#include "Screen.h" /* Screen module */
+/* Screen module */
+#include "compat.h"
+#include "Screen.h"
 
 #include "HASCSGraphics.h"
 #include "HASCSOutput.h"

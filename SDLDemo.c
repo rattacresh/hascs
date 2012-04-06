@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include "compat.h"
+
 #include "HASCSSystem.h"
 #include "HASCSGraphics.h"
 
@@ -86,10 +88,11 @@ void TestFileFunc() {
 	LoadAndRun("ls -l einDummyFile", "");
 }
 
+int __argc; char **__argv;
 
 int main(int argc, char *argv[])
 {
-	extern int __argc; extern char **__argv; __argc = argc; __argv = argv;
+	__argc = argc; __argv = argv;
 
 	printf("Test: InitWorkstation...\n");
 	InitWorkstation("HASCSSystem-Test");

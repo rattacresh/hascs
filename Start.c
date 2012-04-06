@@ -1,4 +1,6 @@
-#include "Start.h" /* Start module */
+/* Start module */
+#include "compat.h"
+#include "Start.h"
 
 #include "HASCSSystem.h"
 #include "HASCSGame.h"

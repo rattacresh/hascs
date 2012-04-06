@@ -1,12 +1,15 @@
 /* HASCSIII module */
 
+#include "compat.h"
+
 #include "HASCSSystem.h"
 #include "Start.h"
 
+int __argc; char **__argv;
+
 int main(int argc, char *argv[])
 {
-	extern int __argc; extern char **__argv; __argc = argc; __argv = argv;
-
+	__argc = argc; __argv = argv;
 	InitWorkstation(" HASCS III ");
 	if (ReadConfig())
 		StartGame();

@@ -1,17 +1,38 @@
 /* HASCSSystem module */
-
 #include <SDL/SDL.h>
 #include <limits.h>
 #include <time.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <glob.h>
+#include <sys/stat.h>
+#include <errno.h>
+
+#include "compat.h"
 #include "HASCSSystem.h"
+
 #include "HASCSGraphics.h"
+
+#define StrEqual(p,q) (!strcmp(p,q))
+void SplitPath(char *n,char *p,char *f)
+{
+	char *x = strrchr(n, '/');
+	if (!x) {
+		strcpy(f, n);
+		strcpy(p, ".");
+	} else {
+		strcpy(f,x+1);
+		strncpy(p,n,x-n);
+		p[x-n] = '\0';
+	}
+}
+#define Concat(x, y, z, a) (strcat(strcpy(z,x),y), memmove(&ok,&ok,0))
+#define Assign(x,y,a) (strcpy(y,x), memmove(&ok,&ok,0))
 
 int ScreenWidth, ScreenHeight; //, ScreenPlanes;
 
 char WName[60];
-//WElementSet type;
+static int type;
 unsigned win;
 		
 SDL_Rect desk, work, curr, full, save;
@@ -25,14 +46,12 @@ unsigned NewXMin = 40, NewYMin = 25, NewXMax = 0, NewYMax = 0;
     
 unsigned AnzCache = 0, CacheCounter = 0;
     
-SDL_Surface *ScreenMFDB, *BufferMFDB, *PicMFDB;
-int CompatBufferMFDB_set = 0;
-int CompatPicMFDB_set = 0;
-unsigned char *MonoScreen, *MonoBuffer, *MonoPic;
-unsigned int MonoBuffer_w, MonoBuffer_h;
-unsigned int MonoPic_w, MonoPic_h;
+SDL_Surface *ScreenMFDBAdr, *BufferMFDBAdr, *PicMFDBAdr;
 
 //SearchRec DTABuffer;
+struct stat StatBuf;
+glob_t *GlobBufAdr;
+int GlobCounter;
 char *LastFileName = "";
 
 unsigned char *BufferAdr = NULL;
@@ -73,10 +92,9 @@ int RcIntersect(SDL_Rect *ref_p1, SDL_Rect *ref_p2)
 
  /* Programmverwaltung ***********************************************/
 
-int __argc;
-char **__argv;
 void InitWorkstation(char *WinName)
 {
+	extern int __argc; extern char **__argv;
 	static char cwd[128], cmd[128] = {};
 	extern char *program_invocation_name;
 
@@ -84,7 +102,7 @@ void InitWorkstation(char *WinName)
 	Command = strncpy(cmd, __argc > 1 ? __argv[1] : "", sizeof cmd - 1);
 	ActPath = getcwd(cwd, sizeof cwd);
 
-	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0) {
+	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0) {
 		fprintf(stderr, "SDL konnte nicht initialisiert werden: %s\n", SDL_GetError());
 		exit(1);
 	}
@@ -93,14 +111,15 @@ void InitWorkstation(char *WinName)
 	ScreenWidth = 640; // paramptr->rasterWidth + 1;
 	ScreenHeight = 400; // paramptr->rasterHeight + 1;
 	
-	ScreenMFDB = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_HWSURFACE);
-	if (ScreenMFDB == NULL) {
+	ScreenMFDBAdr = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_HWSURFACE);
+	if (ScreenMFDBAdr == NULL) {
 		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung %ix%i öffnen: %s\n", ScreenWidth, ScreenHeight, SDL_GetError());
 		exit(1);
 	}
 	
 	SDL_WM_SetCaption(WinName, WinName);    
-
+	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
+		SDL_DEFAULT_REPEAT_INTERVAL);
 #if 0
 
 	SDL_Color colors[256];
@@ -118,6 +137,10 @@ void InitWorkstation(char *WinName)
  */
 void ExitWorkstation(int result)
 {
+	if (PicMFDBAdr)
+		SDL_FreeSurface(BufferMFDBAdr);
+	if (BufferMFDBAdr)
+		SDL_FreeSurface(BufferMFDBAdr);
 	atexit(SDL_Quit);
 	exit(result);
 }
@@ -141,6 +164,7 @@ void *Allocate(unsigned long Bytes)
  */
 void *GetBuffer(unsigned long Bytes)
 {    
+	printf("\n");
 	printf("GetBuffer: Bytes = %lu\n", Bytes);
 
 	if (Bytes >= BufferLen) {
@@ -170,6 +194,7 @@ unsigned GetCache(unsigned id)
 {
 	unsigned i;
     
+	printf("\n");
 	printf("GetCache: id = %u\n", id);
     
 	for (i = 1; i <= AnzCache; i++)
@@ -193,7 +218,7 @@ unsigned GetCache(unsigned id)
 void FreeCache(unsigned n)
 {
 	unsigned i;
-	if (n == 0) { // alles löschen 
+	if (n == 0) { /* alles löschen */
 		for (i = 1; i <= AnzCache; i++)
 			free(Cache[i].CacheBuffer);
 		AnzCache = 0;
@@ -277,10 +302,28 @@ void Deallocate(void **ref_Ptr)
  */
 int LoadAndRun(char *Prg, char *Arg)
 {    
-	int result = system(Prg);
+	long result;
+	char path[128], file[128];
+	/*int i, l;*/
+	int ok;
+	/*SDL_Rect save;*/
+
+
+	if (StrEqual(Prg, "EDITOR.PRG") || StrEqual(Prg, "HASCSSPR.PRG")
+		|| StrEqual(Prg, "HASCSIII.PRG"))
+	{
+		SplitPath(Name, path, file);
+		Concat(path, Prg, file, ok);
+	} else
+		Assign(Prg, file, ok);
    
-	if (result < 0)
-		Error("Programmstart nicht möglich", 1);
+	result = system(Prg);
+
+	if (result < 0) {
+		/* FIXME overlap --rtc */
+		Concat("Programmstart nicht möglich: ",file, file, ok);
+		Error(file, 1);
+	}
     
 	return result;
 }
@@ -309,10 +352,10 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 	  destRect.h = height;
 
 	  int copy_err;
-	  if (direction == 4) {     // Pic    -> Buffer 
-		  copy_err = SDL_BlitSurface(PicMFDB, &sourceRect, BufferMFDB, &destRect);	  
-	  } else {                  // Buffer -> Buffer 
-		  copy_err = SDL_BlitSurface(BufferMFDB, &sourceRect, BufferMFDB, &destRect);	  
+	  if (direction == 4) {     /* Pic    -> Buffer */
+		  copy_err = SDL_BlitSurface(PicMFDBAdr, &sourceRect, BufferMFDBAdr, &destRect);	  
+	  } else {                  /* Buffer -> Buffer  */
+		  copy_err = SDL_BlitSurface(BufferMFDBAdr, &sourceRect, BufferMFDBAdr, &destRect);	  
 	  }
 	  
 	  if (copy_err)
@@ -325,10 +368,9 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
  */
 void SetPicture(unsigned width, unsigned height, void *Picture)
 {
-	PicMFDB = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, width/8, 0, 0, 0, 0);
-	MonoPic = Picture;
-	MonoPic_w = width;
-	MonoPic_h = height;
+	if (PicMFDBAdr)
+		SDL_FreeSurface(BufferMFDBAdr);
+	PicMFDBAdr = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, width/8, 0, 0, 0, 0);
 	printf("PicMFDB wurde gesetzt\n");
 }
 
@@ -340,10 +382,9 @@ void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
 	unsigned pitch = width/8;
 	printf("width %i height %i pitch %i\n", width, height, pitch);
-	BufferMFDB = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, pitch, 0, 0, 0, 0);
-	MonoBuffer = Buffer;
-	MonoBuffer_w = width;
-	MonoBuffer_h = height;
+	if (BufferMFDBAdr)
+		SDL_FreeSurface(BufferMFDBAdr);
+	BufferMFDBAdr = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, pitch, 0, 0, 0, 0);
 	printf("BufferMFDB wurde gesetzt\n");
 }
 
@@ -352,19 +393,23 @@ void SetBuffer(unsigned width, unsigned height, void *Buffer)
 
 int FileName(char *Pattern, char *FileName)
 {
-	/*
 	int result;
 	int ok;
-	if (StrEqual(LastFileName, Pattern))
-		SearchNext(result);
-	else {
-		SearchFirst(Pattern, 0, result);
+	if (StrEqual(LastFileName, Pattern)) {
+		result = 0;
+		if (GlobCounter < GlobBufAdr->gl_pathc - 1)
+			GlobCounter++;
+		else
+			result = -1;
+	} else {
+		if (GlobBufAdr)
+			globfree(GlobBufAdr);
+		result = glob(Pattern, 0, NULL, GlobBufAdr);
+		GlobCounter = 0;
 		Assign(Pattern, LastFileName, ok);
 	}
-	//Assign(DTABuffer.name, FileName, ok);
+	Assign(GlobBufAdr->gl_pathv[GlobCounter], FileName, ok);
 	return result >= 0;
-	*/
-	return 0;
 }
 
 /**
@@ -373,30 +418,36 @@ int FileName(char *Pattern, char *FileName)
  */
 unsigned long FileLength(char *Filename)
 {
-	int fhandle = open(Filename, O_RDONLY);
-	if (fhandle == -1)
+	int result;
+
+	result = stat(Filename, &StatBuf);
+
+	FileError = result < 0;
+	if (FileError) /* nicht gefunden */
 		return 0;
-	int endpos = lseek(fhandle, 0, SEEK_END);
-	if (close(fhandle))
-		Error("FileLength: Fehler beim Schließen einer Datei!", 1);
-	return endpos;		
+	else
+		return StatBuf.st_size;
 }
 
 int OpenFile(char *Name)
 {
-	return open(Name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+	int Handle;
+	
+	Handle = open(Name, 0);
+	FileError = Handle < 0;
+	return Handle;
 }
 
 void CloseFile(int Handle)
 {
-	FileError = close(Handle);
+	FileError = close(Handle) < 0;
 	//	if (FileError)
 	//	Error("FileLength: Fehler beim Schließen einer Datei!", 1);	
 }
 
 void DeleteFile(char *Name)
 {
-	FileError = remove(Name);
+	FileError = remove(Name) < 0;
 }
 
 /**
@@ -406,38 +457,44 @@ void DeleteFile(char *Name)
  */
 int CreateFile(char *Name)
 {
-	int fhandle = open(Name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-	if (fhandle<0) {
-		FileError = 1;
-		return fhandle;
+	int Handle;
+	char path[128], file[128];
+	Handle = creat(Name, 0666);
+	if (Handle < 0 && errno == ENOENT) { /* Path not found */
+		SplitPath(Name, path, file);
+		path[LENGTH(path)-1] = '\0';
+		if (mkdir(path, 0777) < 0) {
+		}
+		Handle = creat(Name, 0666);
 	}
-	if (close(fhandle)<0) {
-		FileError = 1;
-		Error("FileLength: Fehler beim Schließen einer Datei!", 1);
-	}
-	return fhandle;
+	FileError = Handle < 0;
+	return Handle;
 }
 
 void ReadFile(int Handle, unsigned long Bytes, void *Ptr)
 {
-	size_t ReadBytes = read(Handle, Ptr, Bytes);
-	FileError = Bytes != ReadBytes;
+	unsigned long Count;
+	Count = read(Handle, Ptr, Bytes);
+	FileError = Bytes != Count;
 }
 
 void WriteFile(int Handle, unsigned long Bytes, void *Ptr)
 {
-	size_t WroteBytes = write(Handle, Ptr, Bytes);
-	FileError = Bytes != WroteBytes;
+	unsigned long Count;
+	Count = write(Handle, Ptr, Bytes);
+	FileError = Bytes != Count;
 }
 
 void FileSeek(int Handle, unsigned long pos)
 {
-	FileError = lseek(Handle, pos, 0);
+	unsigned long ret;
+	ret = lseek(Handle, pos, SEEK_SET);
+	FileError = ret != pos;
 }
 
 void RenameFile(char *s, char *d)
 {
-	FileError = rename(s, d);
+	rename(s, d);
 }
 
 /**
@@ -448,34 +505,28 @@ void RenameFile(char *s, char *d)
  */
 int SelectFile(char *msg, char *path, char *file)
 {
-	/*
 	int ok;
-	int result;
+	/*int result;*/
 	char pathandfile[128];
     
 
-	  Assign(path, EasyGEM1.SelectMask, ok);
-	  Assign(file, pathandfile, ok);
-	  GrafMouse(arrow, NIL);
-	  EasyGEM1.SelectFile(msg, pathandfile, ok);
-	  GrafMouse(bee, NIL);
-	  if (!ok) return FALSE;
-	  SplitPath(pathandfile, ActPath, file);
-	  SetDefaultPath(ActPath, result);
-	*/
+	/*Assign(path, EasyGEM1.SelectMask, ok);*/
+	Assign(file, pathandfile, ok);
+	/*GrafMouse(arrow, NIL);
+	EasyGEM1.SelectFile(msg, pathandfile, ok);
+	GrafMouse(bee, NIL);*/
+	printf("Select [%s] [%s]: ", path, pathandfile);
+	fgets(pathandfile, sizeof pathandfile, stdin);
+	ok = 1;
+
+	if (!ok) return FALSE;
+	SplitPath(pathandfile, ActPath, file);
+	/*result = */chdir(ActPath);
 	return 1;
 }
 
 
 /* Eingaberoutinen **************************************************/
-
-void RedrawWindow(void* frame)
-{
-	// Ich zeichne einfach das gesamte Fenster neu und
-	// ignoriere den Frame:
-	SDL_BlitSurface(BufferMFDB, NULL, ScreenMFDB, NULL);
-	SDL_Flip(ScreenMFDB);
-}
 
 void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, int WarteZeit)
 {
@@ -483,45 +534,460 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 #define yy (*ref_y)
 #define ch (*ref_ch)
 #define b (*ref_b)
-	RedrawWindow(NULL);
 
-	SDL_Event event;
-	do {
-		int wait_err = SDL_WaitEvent(&event);
-		if (wait_err == 0)
-			printf("Fehler beim Warten auf Events!\n");
-	} while ((event.type == SDL_ACTIVEEVENT) || (event.type == SDL_MOUSEMOTION));
+#define keyboard (1<<SDL_KEYDOWN)
+#define mouseButton ((1<<SDL_MOUSEBUTTONDOWN)|(1<<SDL_MOUSEBUTTONDOWN))
+#define message ((1<<SDL_VIDEORESIZE)|(1<<SDL_VIDEOEXPOSE)\
+		|(1<<SDL_QUIT)|(1<<SDL_SYSWMEVENT)|(1<<SDL_ACTIVEEVENT))
+#define timer (1<<SDL_USEREVENT)
+#define msBut1 SDL_BUTTON_LEFT
+#define msBut2 SDL_BUTTON_RIGHT
+#define lookForEntry SDL_MOUSEMOTION
 
+	typedef BITSET EventSet;
+	typedef struct {
+		unsigned x, y;
+	} Point;
+	EventSet flags, events;
+	unsigned mouse;
+	SDL_Event msg;
+	SDL_Rect rect;
+	Point mLoc;
+	unsigned mButtons;
+	SDLMod keyState;
+	SDL_keysym key;
+	unsigned doneClicks;
+	int ok;
+	unsigned long time;
 	
-	switch (event.type) {
-	case SDL_MOUSEBUTTONDOWN:
-		printf("Mouse button %d pressed at (%d,%d)\n", event.button.button, event.button.x, event.button.y);		
-		xx = event.button.x;
-		yy = event.button.y;
-		switch (event.button.button) {
-		case SDL_BUTTON_LEFT: 
-			b = MausLinks;
-			break;
-		case SDL_BUTTON_RIGHT: 
-			b = MausRechts;
-			break;
-		default:
-			b = MausRechts;
+	void RedrawWindow(SDL_Rect frame)
+	{
+		SDL_Rect r, s;
+		/*UpdateWindow(TRUE);*/
+		r.x = r.y = 0;
+		r.w = ScreenMFDBAdr->w;
+		r.h = ScreenMFDBAdr->h;
+		if (RcIntersect(&frame, &r)) {
+			/*GrafMouse(mouseOff, NIL);*/
+			/* Pufferkoordinaten */
+			s.x = r.x - work.x + XOff;
+			s.y = r.y - work.y + YOff;
+			s.w = r.w; s.h = r.h;
+			SDL_BlitSurface(BufferMFDBAdr, &s, ScreenMFDBAdr, &r);
+			SDL_UpdateRect(ScreenMFDBAdr, r.x, r.y, r.w, r.h);
+#if 0
+			// Ich zeichne einfach das gesamte Fenster neu und
+			// ignoriere den Frame:
+			SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
+			SDL_Flip(ScreenMFDBAdr);
+#endif
+			/*GrafMouse(mouseOn, NIL);*/
 		}
-                break;
-        case SDL_KEYDOWN:
-		printf("The %s key was pressed (code %i)!\n",
-		       SDL_GetKeyName(event.key.keysym.sym), event.key.keysym.sym);		
-		ch = event.key.keysym.sym;
-		break;
-        case SDL_QUIT:
-		ExitWorkstation(0);
-		exit(0);
-		break;
+		/*UpdateWindow(FALSE);*/
 	}
 
-	if (WarteZeit > 0)
-		usleep(WarteZeit);
+	void SetSlider(void)
+	{
+#if 0
+		int pos, size, oldpos, oldsize;
+		size = 1000 * (long)work.w / 640;
+		pos = 0;
+		if (work.w < 640)
+			pos = 1000 * (long)XOff / (640 - work.w);
+		oldpos = WindowSliderValue(win, horPosition);
+		oldsize = WindowSliderValue(win, horSize);
+		if (oldpos != pos)
+			SetWindowSlider(win, horPosition, pos);
+		if (oldsize != size)
+			SetWindowSlider(win, horSize, size);
+		size = 1000 * (long)work.h / 400;
+		pos = 0;
+		if (work.h < 400)
+			pos = 1000 * (long)YOff / (400 - work.h);
+		oldpos = WindowSliderValue(win, vertPosition);
+		oldsize = WindowSliderValue(win, vertSize);
+		if (oldpos != pos)
+			SetWindowSlider(win, vertPosition, pos);
+		if (oldsize != size)
+			SetWindowSlider(win, vertSize, size);
+#endif
+	}
+
+	void VollBild(void)
+	{
+		if (type == 0) { /* Fenster wieder normal */
+			ScreenMFDBAdr = SDL_SetVideoMode(0, 0, 0, 
+				ScreenMFDBAdr->flags & ~SDL_FULLSCREEN);
+			type = 1;
+		} else {
+			save.w = ScreenMFDBAdr->w;
+			save.h = ScreenMFDBAdr->h;
+			type = 0;
+			ScreenMFDBAdr = SDL_SetVideoMode(0, 0, 0,
+				ScreenMFDBAdr->flags | SDL_FULLSCREEN);
+			XOff = 0; YOff = 0;
+		}
+		work.x = 0;
+		work.y = 0;
+		work.w = ScreenMFDBAdr->w;
+		work.h = ScreenMFDBAdr->h;
+		RedrawWindow(work);
+	}
+
+	void Ende(void)
+	{
+		/*int dummy;*/
+		/*Error("HASCS III wirklich beenden?", 0);*/
+		ExitWorkstation(0);
+		exit(0);
+	}
+
+	void Correct(int x, int y, int w, int h)
+	{
+		w = Min(w, 640);
+		h = Min(h, 400);
+		x = Min(x, 640-w); x = Max(0, x); /* XOff */
+		y = Min(y, 400-h); y = Max(0, y); /* YOff */
+	}
+
+	void Button(void)
+	{
+		ok = mLoc.x >= work.x && mLoc.y >= work.y
+			&& mLoc.x < work.x + work.w && mLoc.y < work.y + work.h;
+		if (ok) {
+			xx = mLoc.x - work.x + XOff;
+			yy = mLoc.y - work.y + YOff;
+			if (msBut1 & mButtons) b |= (1<<0);
+			if (msBut2 & mButtons) b |= (1<<1);
+		}
+	}
+
+	void Keyboard(void)
+	{
+		int Redraw;
+		Redraw = FALSE;
+		switch (key.sym) {
+		case SDLK_LEFT : XOff -= 16; Redraw = TRUE; break;
+		case SDLK_RIGHT : XOff += 16; Redraw = TRUE; break;
+		case SDLK_UP : YOff -= 16; Redraw = TRUE; break;
+		case SDLK_DOWN : YOff += 16; Redraw = TRUE; break;
+		case SDLK_q : if (key.mod & KMOD_CTRL) { /* Control Q */
+				Ende();  key.sym = '\0';
+			}
+			break;
+		case SDLK_f : if (key.mod & KMOD_CTRL) { /* Control F */
+				VollBild(); key.sym = '\0';
+			}
+			break;
+		case SDLK_l : if (key.mod & KMOD_CTRL) { /* Control L */
+				FreeCache(0); key.sym = '\0';
+			}
+		default:
+			break;
+		}
+		if (Redraw) {
+			Correct(XOff, YOff, work.w, work.h);
+			RedrawWindow(work);
+			SetSlider();
+		}
+		ch = key.sym;
+		if (ch >= '1' && ch <= '9' && timer & flags)
+			ch = '\0'; /* Richtungstasten löschen */
+		ok = ch != '\0';
+	}
+	void Message(void)
+	{
+#if 0
+		void SelectMenu(int item)
+		{
+			unsigned exit;
+			void *DialogAdr;
+			Rectangle startrec;
+
+			startrec.x = 0; startrec.y = 0; startrec.w = 0; startrec.h = 0;
+			switch (item) {
+			case  7: DialogAdr = ResourceAddr(treeRsrc, 1);
+				DoSimpleBox(DialogAdr, startrec, exit);
+				 break;
+			case 19: Ende(); break;
+			case 17: FreeCache(0); break;
+			case 16: VollBild(); break;
+			}
+		}
+
+		void ArrowWindow(ArrowedMode a)
+		{
+			switch (a) {
+			case pageUp      : YOff -= work.h; break;
+			case pageDown    : YOff += work.h; break;
+			case rowUp       : YOff -= 16; break;
+			case rowDown     : YOff += 16; break;
+			case pageLeft    : XOff -= work.w; break;
+			case pageRight   : XOff += work.w; break;
+			case columnLeft  : XOff -= 16; break;
+			case columnRight : XOff += 16; break;
+			}
+			Correct(XOff, YOff, work.w, work.h);
+			RedrawWindow(work);
+		}
+#endif
+
+		switch (msg.type) {
+			SDL_Rect rdrwFrame;
+		case SDL_VIDEOEXPOSE :
+			rdrwFrame.x = 0;
+			rdrwFrame.y = 0;
+			rdrwFrame.w = ScreenMFDBAdr->w;
+			rdrwFrame.h = ScreenMFDBAdr->h;
+			RedrawWindow(rdrwFrame);
+			break;
+		case SDL_ACTIVEEVENT :
+			/*SetTopWindow(win);*/
+			break;
+		case SDL_VIDEORESIZE :
+#if 0
+			work = CalcWindow(calcWork, type, msg.moveFrame);
+			Correct(XOff, YOff, work.w, work.h);
+			curr = CalcWindow(calcBorder, type, work);
+			SetWindowSize(win, curr);
+			break;
+#endif
+		case SDL_QUIT :
+			Ende();
+			break;
+#if 0
+		case windFulled :
+			curr = WindowSize(win, borderSize);
+			full = WindowSize(win, fullSize);
+			if (full.w == curr.w && full.h == curr.h)
+				full = WindowSize(win, previousSize)
+			work = CalcWindow(calcWork, type, full);
+			Correct(XOff, YOff, work.w, work.h);
+			curr = CalcWindow(calcBorder, type, work);
+			SetWindowSize(win, curr);
+			break;
+		case windArrowed :
+			ArrowWindow(msg.arrwMode);
+			break;
+		case windHSlid :
+			XOff = (long)msg.horPos * (640 - work.w) / 1000;
+			RedrawWindow(work);
+			break;
+		case windVSlid :
+			YOff = (long)msg.vertPos * (400 - work.h) / 1000;
+			RedrawWindow(work);
+			break;
+		case menuSelected :
+			NormalTitle(MenuAdr, msg.selTitle, TRUE);
+			SelectMenu(msg.selItem);
+			break;
+#endif
+		}
+		if (type != 0) SetSlider();
+	}
+
+	int SDL_WaitEventTimeout(SDL_Event *event, int timeout)
+	{
+		Uint32 expiration = 0;
+		if (timeout > 0)
+			expiration = SDL_GetTicks() + timeout;
+
+		for (;;) {
+			SDL_PumpEvents();
+			switch (SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_ALLEVENTS)) {
+			case -1:
+				/* fixed from SDL 2 beta to make it
+				 * distinguishable from timeout*/
+				return -1;
+			case 1:
+				return 1;
+			case 0:
+				if (!timeout 
+				 || (timeout > 0 
+				  && SDL_GetTicks() >= expiration))
+					return 0;
+				SDL_Delay(10);
+			}
+		}
+	}
+	void MultiEvent(EventSet flags, unsigned mouse, unsigned buttons,
+		unsigned clicks, unsigned mm1flags, SDL_Rect *rect1,
+		unsigned mm2flags, SDL_Rect *rect2, 
+		SDL_Event *msg, unsigned long time,
+		Point *mLoc, unsigned *mButtons,
+		SDLMod *keyState, SDL_keysym *key, unsigned *doneClicks,
+		EventSet *events)
+	{
+		int buttonevent = (1<<SDL_MOUSEBUTTONUP)
+			|(1<<SDL_MOUSEBUTTONDOWN);
+		static struct {
+			Point mLoc;
+			unsigned mButtons;
+			SDLMod keyState;
+			SDL_keysym key;
+		} Save;
+
+		int Motion(unsigned flags,
+			unsigned mm1flags, SDL_Rect *rect1,
+			unsigned mm2flags, SDL_Rect *rect2,
+			Point *oldmLoc,
+			Point *newmLoc)
+		{
+			int Inside(Point *p, SDL_Rect *r)	
+			{
+				return p->x >= r->x
+					&& p->y >= r->y
+					&& p->x < r->x + r->w
+					&& p->y < r->y + r->h;
+			}
+
+			return flags & (1<<SDL_MOUSEMOTION)
+				&& ((mm1flags & (1<<SDL_MOUSEMOTION)
+					&& Inside(oldmLoc, rect1)
+					   != Inside(newmLoc, rect1))
+				 || (mm2flags & (1<<SDL_MOUSEMOTION)
+					&& Inside(oldmLoc, rect2)
+					   != Inside(newmLoc, rect2)));
+		}
+
+		*events = 0;
+		*doneClicks = -1 
+			+ ((Save.mButtons & mouse) == mouse >> 8);
+
+		while (!(flags & (SDL_MOUSEBUTTONUP|SDL_MOUSEBUTTONDOWN))
+		    || *doneClicks < clicks)
+		{
+			switch (SDL_WaitEventTimeout(msg,
+					flags & timer ? time : -1))
+			{
+				Point oldmLoc;
+			case -1: /* Error */
+				printf("Fehler beim Warten auf Events!\n");
+				continue;
+			case 1: /* SDL Event */
+				switch (msg->type) {
+				case SDL_KEYDOWN:
+					printf("The %s key was pressed (code %i)!\n",
+					       SDL_GetKeyName(msg->key.keysym.sym), msg->key.keysym.sym);		
+					Save.keyState = msg->key.keysym.mod;
+					Save.key = msg->key.keysym;
+					if (flags & ~(1<<SDL_KEYDOWN))
+						continue;
+
+					*events |= (1<<SDL_KEYDOWN);
+					break;
+				case SDL_MOUSEBUTTONUP:
+					buttonevent = (1<<SDL_MOUSEBUTTONUP);
+					Save.mButtons
+						&= ~(1<<msg->button.button);
+					goto CountClicks;
+				case SDL_MOUSEBUTTONDOWN:
+					printf("Mouse button %d pressed at (%d,%d)\n", msg->button.button, msg->button.x, msg->button.y);		
+					buttonevent = (1<<SDL_MOUSEBUTTONUP);
+					Save.mButtons
+						|= (1<<msg->button.button);
+				CountClicks:
+					*doneClicks += (Save.mButtons & mouse)
+								== mouse >> 8;
+
+					Save.mLoc.x = msg->button.x;
+					Save.mLoc.y = msg->button.y;
+
+					goto TestMotion;
+				case SDL_MOUSEMOTION:
+					Save.mLoc.x = msg->motion.x;
+					Save.mLoc.y = msg->motion.y;
+				TestMotion:
+					oldmLoc = Save.mLoc;
+					if (!Motion(flags,
+							mm1flags, rect1,
+							mm2flags, rect2,
+							&oldmLoc, &Save.mLoc))
+						continue;
+
+					*events |= (1<<SDL_MOUSEMOTION);
+					break;
+				case SDL_VIDEORESIZE:
+				case SDL_VIDEOEXPOSE:
+				case SDL_QUIT:
+				case SDL_SYSWMEVENT:
+				case SDL_ACTIVEEVENT:
+					if (flags & ~(1<<msg->type))
+						continue;
+
+					*events |= (1<<msg->type);
+					break;
+				default:
+					continue;
+				}
+			case 0: /* Timeout */
+				if (flags & ~(1<<SDL_USEREVENT))
+					continue;
+
+				*events |= (1<<SDL_USEREVENT);
+			}
+			break;
+		}
+		*mLoc = Save.mLoc;
+		*mButtons = Save.mButtons;
+		*keyState = Save.keyState;
+		*key = Save.key;
+
+		if (*doneClicks == clicks)
+			*events |= buttonevent & flags;
+
+		return;
+	}
+
+	ok = FALSE; b = 0; ch = '\0';
+	if (NewXMin < 40) { /* Teilbereich aktualisieren */
+		rect.x = (int)NewXMin * 16 - XOff + work.x;
+		rect.y = (int)NewYMin * 16 - YOff + work.y;
+		rect.w = ((int)(NewXMax - NewXMin) + 1) * 16;
+		rect.h = ((int)(NewYMax - NewYMin) + 1) * 16;
+		RedrawWindow(rect);
+		NewXMin = 40; NewYMin = 25; NewXMax = 0; NewYMax = 0;
+	}
+	mouse = 1; /* zuerst auf loslassen warten */
+	if (WarteZeit < 0) {
+		/*GrafMouse(arrow, NIL);*/
+		time = mousetime; /* Wartezeit bis losgelassen */
+		flags = keyboard |mouseButton | message | timer;
+	} else {
+		time = ABS(WarteZeit);
+		flags = keyboard | message | timer;
+	}
+	do {
+		MultiEvent(flags, mouse, msBut1|msBut2, 0,
+			lookForEntry, &rect, lookForEntry, &rect,
+			&msg, time,
+			&mLoc, &mButtons,
+			&keyState, &key, &doneClicks,
+			&events);
+		if (message & events) Message();
+		if (mouseButton & events) {
+			if (mouse == msBut1) { /* Maus losgelassen */
+				losgelassen = TRUE;
+				mouse = msBut1 | (msBut1 << 8); /* auf Klick warten */
+				mousetime = 1;
+			} else { /* Maus gedrückt */
+				Button();
+				if (losgelassen)
+					mousetime = 1000;
+				else
+					mousetime = 1;
+				losgelassen = FALSE;
+			}
+		}
+		if (keyboard & events) Keyboard();
+		if (timer & events) {
+			mouse = msBut1 | (msBut1 << 8); /* auf gedrückte Maus warten */
+			ok = WarteZeit >= 0;
+			flags = keyboard | mouseButton | message;
+		}
+	} while (!ok);
+	/*GrafMouse(bee, NIL);*/
+
 #undef xx
 #undef yy
 #undef ch
@@ -534,6 +1000,9 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
  */
 void WaitKey(void)
 {
+	unsigned x, y; BITSET s; char ch;
+	WaitInput(&x, &y, &s, &ch, -1);
+#if 0
 	RedrawWindow(NULL);
 
 	SDL_Event event;
@@ -544,6 +1013,7 @@ void WaitKey(void)
 			exit(0);
 		}
 	}       
+#endif
 }
 
 /**
@@ -553,9 +1023,13 @@ void WaitKey(void)
  */
 void WaitTime(unsigned t)
 {
+	unsigned mx, my; BITSET mb; char mch;
+	WaitInput(&mx, &my, &mb, &mch, t); /* Redraw! */
+#if 0
 	RedrawWindow(NULL);
 	if (t > 0)
 		usleep(t);
+#endif
 }
 
 
@@ -566,6 +1040,7 @@ unsigned long GetTime()
 
 unsigned Zufall(unsigned n)
 {
+	if (n == 0) return 0;
 	return rand();
 }
 
