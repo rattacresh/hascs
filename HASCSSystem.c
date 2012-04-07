@@ -17,14 +17,14 @@
 #define StrEqual(p,q) (!strcmp(p,q))
 void SplitPath(char *n,char *p,char *f)
 {
-	char *x = strrchr(n, '/');
+	char *x = strrchr(n, DIRSEPCHR);
 	if (!x) {
 		strcpy(f, n);
-		strcpy(p, ".");
+		strcpy(p, "./");
 	} else {
 		strcpy(f,x+1);
-		strncpy(p,n,x-n);
-		p[x-n] = '\0';
+		strncpy(p,n,x-n+1);
+		p[x-n+1] = '\0';
 	}
 }
 void XConcat(char *s, char *p, char *r, int *ok)
@@ -116,7 +116,7 @@ void InitWorkstation(char *WinName)
 
 	Name = program_invocation_name;
 	Command = strncpy(cmd, __argc > 1 ? __argv[1] : "", sizeof cmd - 1);
-	ActPath = getcwd(cwd, sizeof cwd);
+	ActPath = strcat(getcwd(cwd, sizeof cwd), "/");
 
 	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0) {
 		fprintf(stderr, "SDL konnte nicht initialisiert werden: %s\n", SDL_GetError());
@@ -1169,8 +1169,10 @@ void Error(char *s, int Mode)
 	int xdefault;
 	int ok;
 
-	if (Mode >= 0 && !ShowError)
+	if (Mode >= 0 && !ShowError) {
+		printf("Unterdrückter Fehler: <%s>\n", s);
 		return; /* keine Fehlermeldung */
+	}
 	
 	Assign(s, q, ok);
 
