@@ -100,4 +100,6 @@ typedef char ModeBuf[4000];
 #define GetCookie(x, y) (y = 2)
 #define EnterSupervisorMode(x) ((void)0)
 #define LeaveSupervisorMode(x) ((void)0)
+#define DIRSEPCHR '/'
+#define DIRSEPSTR "/"
 #endif

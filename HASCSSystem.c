@@ -26,8 +26,22 @@ void SplitPath(char *n,char *p,char *f)
 		p[x-n] = '\0';
 	}
 }
-#define Concat(x, y, z, a) (strcat(strcpy(z,x),y), memmove(&ok,&ok,0))
-#define Assign(x,y,a) (strcpy(y,x), memmove(&ok,&ok,0))
+inline void XConcat(char *s, char *p, char *r, int *ok)
+{
+	char buf_s[HIGH(buf_s)], buf_p[HIGH(buf_p)];
+	strcpy(buf_s,s);s=buf_s;strcpy(buf_p,p);p=buf_p;
+
+	strcat(strcpy(r, s), p);
+	*ok = 1;
+}
+inline void XAssign(char *s, char *p, int *ok)
+{
+	char buf_s[HIGH(buf_s)];strcpy(buf_s,s);s=buf_s;
+	strcpy(p,s);
+	*ok = 1;
+}
+#define Concat(x, y, z, a) XConcat(x, y, z, &a)
+#define Assign(x,y,a) XAssign(x, y, &a)
 
 int ScreenWidth, ScreenHeight; //, ScreenPlanes;
 
@@ -1018,7 +1032,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		printf("\n");
 		return;
 	}
-	printf("WaitInput()");
+	printf("WaitInput()\n");
 
 	ok = FALSE; b = 0; ch = '\0';
 	if (NewXMin < 40) { /* Teilbereich aktualisieren */

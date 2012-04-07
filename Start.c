@@ -30,11 +30,11 @@ int ReadConfig()
 	do {
 		if (Length(Command) == 0)
 			Assign(Command, "HASCS.CFG");
-		Assign(DiaPath, "DIALOG\\");
-		Assign(MapPath, "MAP\\");
-		Assign(PlaPath, "SAVE\\");
-		Assign(PrgPath, "SYSTEM\\");
-		Assign(SoundPath, "SOUND\\");
+		Assign(DiaPath, "DIALOG"DIRSEPSTR);
+		Assign(MapPath, "MAP"DIRSEPSTR);
+		Assign(PlaPath, "SAVE"DIRSEPSTR);
+		Assign(PrgPath, "SYSTEM"DIRSEPSTR);
+		Assign(SoundPath, "SOUND"DIRSEPSTR);
 		Assign(TextEditor, "EDITOR.PRG");
 		Assign(IniFile,  "HASCS.INI");
 		if (LoadDialog(ConfigDialog, FALSE)) {

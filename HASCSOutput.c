@@ -413,7 +413,11 @@ unsigned Length(char *s)
 
 void Assign(char *s, char *p)
 {
+#if 1
+	char buf_p[HIGH(buf_p)]; strcpy(buf_p,p);p=buf_p;
+#endif
 	unsigned i;
+
 	for (i = 0; i <= HIGH(s); i++) {
 		if (i > HIGH(p)) {
 			s[i] = '\0';
@@ -427,11 +431,11 @@ void Assign(char *s, char *p)
 
 void Concat(char *s, char *p, char *r)
 {
-	unsigned i, j;
 #if 1
 	char buf_r[HIGH(buf_r)], buf_p[HIGH(buf_p)];
 	strcpy(buf_r,r);r=buf_r;strcpy(buf_p,p);p=buf_p;
 #endif
+	unsigned i, j;
 	Assign(s, p);
 	i = Length(s);
 	for (j = 0; j <= HIGH(r); j++) {
@@ -448,16 +452,27 @@ void Concat(char *s, char *p, char *r)
 
 void Split(char *p, char *r, char *s, unsigned i)
 {
+#if 1
+	char buf_s[HIGH(buf_s)];strcpy(buf_s,s);s=buf_s;
+#endif
 	unsigned j;
 	for (j = 0; j <= HIGH(p); j++)
-		if (j < i && j <= HIGH(s))
+		if (j < i && j <= HIGH(s)) {
 			p[j] = s[j];
-		else
+#if 1
+			if (p[j] == '\0')
+				break;
+#endif
+		} else
 			p[j] = '\0';
 	for (j = 0; j <= HIGH(r); j++)
-		if (j + i <= HIGH(s)) 
+		if (j + i <= HIGH(s))  {
 			r[j] = s[j+i];
-		else
+#if 1
+			if (r[j] == '\0')
+				break;
+#endif
+		} else
 			r[j] = '\0';
 }
 
