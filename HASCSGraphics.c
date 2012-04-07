@@ -1,9 +1,9 @@
 /* HASCSGraphics module */
 #include "compat.h"
+#include <arpa/inet.h> /* byte order htons() ntohs()*/
 #include "HASCSGraphics.h"
 
 #include "HASCSSystem.h"
-#include <arpa/inet.h> /* byte order htons() ntohs()*/
 
 
 #define Black ((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7) \
@@ -34,6 +34,7 @@ static void SetMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
 #undef Sprite
 }
 
+#if 0
 /* Setzt ein 16 x 16 Sprite auf Monochrombildschirm(Oder Modus) */
 static void OrMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
 {
@@ -50,6 +51,7 @@ static void OrMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
 	if (NewYMax < y) NewYMax = y;
 #undef Sprite
 }
+#endif
 
 static void SetMonoChar(unsigned x,unsigned y, char ch)
 {
