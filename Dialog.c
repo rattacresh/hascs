@@ -1,5 +1,6 @@
 /* Dialog module */
 #include "compat.h"
+#include <arpa/inet.h> /* byte order htons() ntohs()*/
 #include "Dialog.h"
 /*
    Version 0.1   06.03.93
@@ -160,6 +161,7 @@ static CommandType XCommand[] = {
 
 static OperatorType Operator[] = {
 	/* Operatoren */
+	{"DUMMY", 0},
 	{":=", 1},
 	{"+", 2},
 	{"-", 3},
@@ -178,8 +180,9 @@ static OperatorType Operator[] = {
 
 
 static VariableType Variable[] = {
-	/* Variablen */
+	{"DUMMY", NULL, 0, NumberToken},
 	
+	/* Variablen */
 	{"SPIELER.TP", &Spieler.TP, 0, NumberToken},
 	{"SPIELER.GOLD", &Spieler.Gold, 0, NumberToken},
 	{"SPIELER.NAHRUNG", &Spieler.Nahrung, 0, NumberToken},
@@ -467,6 +470,9 @@ static int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 				s[i++] = *p++;
 		}
 		s[i] = '\0';
+#if 0
+		printf("Token %d <%s>\n", t, s);
+#endif
 		return t;
 #undef p
 	}
@@ -516,7 +522,7 @@ static int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 		if (*p == '#') { /* Kommando */
 			p++;
 			t = GetToken(&p, s);
-			while (t != 0)
+			while (t != 0) {
 				switch (t) {
 				case OperatorToken :
 					n = FindOperator(s);
@@ -534,6 +540,7 @@ static int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 				case KlammerAufToken:
 				case KlammerZuToken:
 					Out(t);
+					break;
 				case NumberToken:
 					n = StringToCard(s);
 					if (n < 256) {
@@ -546,6 +553,7 @@ static int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 						label = FALSE;
 						NewLabel(n, q);
 					}
+					break;
 				case StringToken:
 					n = LENGTH(s);
 					Out(t); Out(n);
@@ -554,6 +562,7 @@ static int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 							OutC(s[i]);
 				}
 				t = GetToken(&p, s);
+			}
 			ende = LastLine(&p);
 			if (!ende) Out(ZeilenEndeToken); /* LF */
 		} else if (*p !=  '*') { /* Ausgabezeile */
@@ -1557,12 +1566,12 @@ static void MakeFileName(int c, unsigned n, char *s)
 static void CodeDialog(unsigned long n, unsigned long l, void *b)
 {
 	unsigned long i;
-	BITSET *p = b;
+	uint16_t *p = b;
 
 	for (i = 1; i <= l / 2; i++) {
 		n = (n * 153 + 97) % 16777216;
-		*p = *p ^ (n % 65536); /* EXOR */
-		p += 2;
+		*p = htons(ntohs(*p) ^ (n % 65536)); /* EXOR */
+		p++;
 	}
 }
 
