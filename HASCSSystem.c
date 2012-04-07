@@ -343,7 +343,6 @@ int LoadAndRun(char *Prg, char *Arg)
 	result = system(Prg);
 
 	if (result < 0) {
-		/* FIXME overlap --rtc */
 		Concat("Programmstart nicht möglich: ",file, file, ok);
 		Error(file, 1);
 	}
