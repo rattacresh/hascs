@@ -428,6 +428,10 @@ void Assign(char *s, char *p)
 void Concat(char *s, char *p, char *r)
 {
 	unsigned i, j;
+#if 1
+	char buf_r[HIGH(buf_r)], buf_p[HIGH(buf_p)];
+	strcpy(buf_r,r);r=buf_r;strcpy(buf_p,p);p=buf_p;
+#endif
 	Assign(s, p);
 	i = Length(s);
 	for (j = 0; j <= HIGH(r); j++) {
