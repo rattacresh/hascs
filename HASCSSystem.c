@@ -130,6 +130,12 @@ void InitWorkstation(char *WinName)
 	
 	SDL_Rect  dst = {0,0,640,400};
 #endif
+#if 1
+	// Ich zeichne einfach das gesamte Fenster neu und
+	// ignoriere den Frame:
+	SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
+	SDL_Flip(ScreenMFDBAdr);
+#endif
 }
 
 /**
@@ -574,13 +580,8 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			s.y = r.y - work.y + YOff;
 			s.w = r.w; s.h = r.h;
 			SDL_BlitSurface(BufferMFDBAdr, &s, ScreenMFDBAdr, &r);
+			printf("Update %d %d %d %d", r.x, r.y, r.w, r.h);
 			SDL_UpdateRect(ScreenMFDBAdr, r.x, r.y, r.w, r.h);
-#if 0
-			// Ich zeichne einfach das gesamte Fenster neu und
-			// ignoriere den Frame:
-			SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
-			SDL_Flip(ScreenMFDBAdr);
-#endif
 			/*GrafMouse(mouseOn, NIL);*/
 		}
 		/*UpdateWindow(FALSE);*/
@@ -642,12 +643,20 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		exit(0);
 	}
 
-	void Correct(int x, int y, int w, int h)
+	void Correct(int *ref_x, int *ref_y, Uint16 *ref_w, Uint16 *ref_h)
 	{
+#define x (*ref_x)
+#define y (*ref_y)
+#define w (*ref_w)
+#define h (*ref_h)
 		w = Min(w, 640);
 		h = Min(h, 400);
 		x = Min(x, 640-w); x = Max(0, x); /* XOff */
 		y = Min(y, 400-h); y = Max(0, y); /* YOff */
+#undef x
+#undef y
+#undef w
+#undef h
 	}
 
 	void Button(void)
@@ -686,7 +695,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			break;
 		}
 		if (Redraw) {
-			Correct(XOff, YOff, work.w, work.h);
+			Correct(&XOff, &YOff, &work.w, &work.h);
 			RedrawWindow(work);
 			SetSlider();
 		}
@@ -851,19 +860,19 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		}
 
 		*events = 0;
-		*doneClicks = -1 
-			+ ((Save.mButtons & mouse) == mouse >> 8);
+		*doneClicks = ((Save.mButtons & mouse) == mouse >> 8);
+		printf("MultiEvent() %d %d %d %d\n", *doneClicks, Save.mButtons, mouse, clicks);
+
 
 		while (!(flags & (SDL_MOUSEBUTTONUP|SDL_MOUSEBUTTONDOWN))
-		    || *doneClicks < clicks)
+		    || *doneClicks <= clicks)
 		{
+			printf("calling SDL_WaitEventTimeout %d %d %d %d\n",
+				flags, timer, flags&timer, (int)time);
 			switch (SDL_WaitEventTimeout(msg,
 					flags & timer ? time : -1))
 			{
 				Point oldmLoc;
-			case -1: /* Error */
-				printf("Fehler beim Warten auf Events!\n");
-				continue;
 			case 1: /* SDL Event */
 				switch (msg->type) {
 				case SDL_KEYDOWN:
@@ -871,7 +880,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 					       SDL_GetKeyName(msg->key.keysym.sym), msg->key.keysym.sym);		
 					Save.keyState = msg->key.keysym.mod;
 					Save.key = msg->key.keysym;
-					if (flags & ~(1<<SDL_KEYDOWN))
+					if (~flags & (1<<SDL_KEYDOWN))
 						continue;
 
 					*events |= (1<<SDL_KEYDOWN);
@@ -912,16 +921,23 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 				case SDL_QUIT:
 				case SDL_SYSWMEVENT:
 				case SDL_ACTIVEEVENT:
-					if (flags & ~(1<<msg->type))
+					if (~flags & (1<<msg->type))
 						continue;
 
 					*events |= (1<<msg->type);
 					break;
 				default:
+					printf("uncatched event type %d\n", 
+						msg->type);
 					continue;
 				}
+				break;
+			case -1: /* Error */
+				printf("Fehler beim Warten auf Events!\n");
+				continue;
 			case 0: /* Timeout */
-				if (flags & ~(1<<SDL_USEREVENT))
+				printf("Timeout\n");
+				if (~flags & (1<<SDL_USEREVENT))
 					continue;
 
 				*events |= (1<<SDL_USEREVENT);
@@ -933,11 +949,14 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		*keyState = Save.keyState;
 		*key = Save.key;
 
-		if (*doneClicks == clicks)
+		if (*doneClicks > 0)
+			(*doneClicks)--;
+		if (*doneClicks >= clicks)
 			*events |= buttonevent & flags;
 
 		return;
 	}
+	printf("WaitInput()");
 
 	ok = FALSE; b = 0; ch = '\0';
 	if (NewXMin < 40) { /* Teilbereich aktualisieren */
