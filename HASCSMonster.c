@@ -9,7 +9,7 @@
 #include "Dialog.h"
 
 
-int sign(int i)
+static int sign(int i)
 {
 	if (i < 0) return -1;
 	else if (i > 0) return 1;
@@ -18,7 +18,7 @@ int sign(int i)
 
 /* Monster auf einem Feld löschen ****************************************/
 
-void ClearMonster(unsigned x, unsigned y)
+static void ClearMonster(unsigned x, unsigned y)
 {
 	unsigned xs, ys, Sprite;
 	Level[x][y].Spezial &= ~LevelMonster;
@@ -40,7 +40,7 @@ void ClearMonster(unsigned x, unsigned y)
 
 /* Monster neu setzen ****************************************************/
 
-void MonsterParameter(MonsterTyp *ref_m)
+static void MonsterParameter(MonsterTyp *ref_m)
 {
 #define m (*ref_m)
 	ParameterTyp p; unsigned s;
@@ -74,7 +74,7 @@ void MonsterParameter(MonsterTyp *ref_m)
 #undef m
 }
 
-void ShowMonster(unsigned i)
+static void ShowMonster(unsigned i)
 {
 	unsigned xs, ys;
 	if (Monster[i].Status > 0 && Monster[i].Status < 1000) {

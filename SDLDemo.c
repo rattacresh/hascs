@@ -4,17 +4,22 @@
 #include "HASCSSystem.h"
 #include "HASCSGraphics.h"
 
-void TestPaint() {
+static void TestPaint()
+{
 	DOutlineBar(27, 10, 38, 11);
+#if 0
+	/* private Funktionen von HASCSGraphics, */
 	HorzLine(40, 200, 590);
 	VertLine(140, 140, 100);
+#endif
 	InvertFeld(8,12);
 	InvertFeld(10,12);
 	InvertFeld(12,12);
 	InvertFeld(14,12);
 }
 
-void TestAllocate() {
+static void TestAllocate()
+{
 	int GAmount = 10;
 	char *meinRAM = Allocate(GAmount + 1);
 	if (!meinRAM)
@@ -33,7 +38,8 @@ void TestAllocate() {
 		printf("FEHLER: meinRAM wurde nicht dealloziert!\n");
 }
 
-void TestWaitInput() {
+static void TestWaitInput()
+{
 	unsigned x;
 	unsigned y; 
 	BITSET s; 
@@ -45,13 +51,15 @@ void TestWaitInput() {
 	printf("HASCS-Taste: <%c> (ASCII dezimal %u)\n", ch, ch);
 }
 
-void TestError() {
+static void TestError()
+{
 	printf("ShowError: %i\n", ShowError);
 	printf("Folgende Dummy-Fehlermeldung soll nur bei ShowError==1 angezeigt werden:\n");
 	Error("***Dummy-Fehlermeldung*** (die zu keinem Programmabbruch führt, da mode 1)", 1);
 }
 
-void TestBuffer() {
+static void TestBuffer()
+{
 	char *myBuf = GetBuffer(100);
 	int i;
 	for (i=0; i<7; ++i) 
@@ -63,7 +71,7 @@ void TestBuffer() {
 	printf("(Wenn ein kleinerer Puffer geholt wird, dann wird der alte nicht gelöscht.)\n");
 }
 
-void TestCaches() {
+static void TestCaches() {
 	printf("Rückgabe NewCache(7, 1024): %u\n\n", NewCache(7, 1024));
 	printf("Rückgabe NewCache(0, 2666): %u\n\n", NewCache(0, 2666));
 	printf("Rückgabe GetCache(7): %u\n\n", GetCache(7));
@@ -73,7 +81,8 @@ void TestCaches() {
 	printf("Rückgabe GetCache(7): %u\n", GetCache(7));
 }
 
-void TestFileFunc() {
+static void TestFileFunc()
+{
 	printf("Größe HASCSMonster.c: %lu\n", FileLength("HASCSMonster.c"));
 	printf("Größe NOTAFILE:       %lu\n", FileLength("NOTAFILE"));
 	
@@ -129,7 +138,6 @@ int main(int argc, char *argv[])
 	printf("Test: File-Funktionen...\n");
 	TestFileFunc();
 	printf("OK\n\n");
-
 
 	ExitWorkstation(0);
 

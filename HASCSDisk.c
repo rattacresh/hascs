@@ -14,18 +14,18 @@
 
 typedef char *CharPtr;
 
-char LevelPars[100];
+static char LevelPars[100];
 
-String60Typ LastSprites;
+static String60Typ LastSprites;
 
-unsigned long ZufallsZahl;
-unsigned LevelVersion;
+static unsigned long ZufallsZahl;
+static unsigned LevelVersion;
 
-char *Buffer;
+static char *Buffer;
 
 /* Fehlermeldung *********************************************************/
 
-void Fehler(char msg[], char file[])
+static void Fehler(char msg[], char file[])
 {
 	char s[256];
 	Concat(s, msg, file);
@@ -35,26 +35,25 @@ void Fehler(char msg[], char file[])
 
 /* Kodierung *************************************************************/
 
-unsigned PseudoZufall(unsigned n)
+static unsigned PseudoZufall(unsigned n)
 {
 	ZufallsZahl = (ZufallsZahl * 153 + 97) % 16777216;
 	return ZufallsZahl % (long)n + 1;
 }
 
-void WriteBlock(int handle, unsigned anzahl, CharPtr a)
+static void WriteBlock(int handle, unsigned anzahl, CharPtr a)
 {
 	unsigned i;
 	unsigned long count, pruef, start;
 	if (anzahl == 0) return;
 	pruef = 0;
-	/* FIXME Order dependend --rtc*/
+	/* Unspecified order, but that's okay here --rtc */
 	ZufallsZahl = ((long)(Zufall(256)-1)*256+(long)(Zufall(256)-1))*256+
 		(long)(Zufall(256)-1);
 	start = ZufallsZahl; /* Startwert */
 	for (i = 0; i <= anzahl-1; i++) {
-		pruef = pruef * 3 + (unsigned long)*a % 65536;
-		Buffer[i] = (unsigned)*a + PseudoZufall(256) % 256;
-		a++;
+		pruef = (pruef * 3 + (unsigned long)*a) % 65536;
+		Buffer[i] = ((unsigned)*a++ + PseudoZufall(256)) % 256;
 	}
 	Buffer[anzahl]   = start / 65536;
 	Buffer[anzahl+1] = (start % 65536) / 256;
@@ -65,7 +64,7 @@ void WriteBlock(int handle, unsigned anzahl, CharPtr a)
 	WriteFile(handle, count, Buffer);
 }
 
-void ReadBlock(int handle, unsigned anzahl, CharPtr a)
+static void ReadBlock(int handle, unsigned anzahl, CharPtr a)
 {
 	unsigned i;
 	unsigned long count, pruef, test;
@@ -81,14 +80,163 @@ void ReadBlock(int handle, unsigned anzahl, CharPtr a)
 		(long)Buffer[anzahl+4];
 	for (i = 0; i <= anzahl-1; i++) {
 		*a = ((unsigned)Buffer[i] + 256 - PseudoZufall(256)) % 256;
-		pruef = pruef * 3 + (unsigned long)*a % 65536;
-		a++;
+		pruef = (pruef * 3 + (unsigned long)*a++) % 65536;
 	}
 	if (test != pruef && !Editor)
 		Error("Prüfsummenfehler!", -1);
 }
 
+/* Serialisierung ********************************************************/
+static void MakeParameter(ParameterTyp *p, CharPtr Buffer)
+{
+	Buffer[0] = p->x / 256;
+	Buffer[1] = p->x % 256;
+	Buffer[2] = p->y / 256;
+	Buffer[3] = p->y % 256;
+	Buffer[4] = p->Art / 256;
+	Buffer[5] = p->Art % 256;
+	Buffer[6] = p->xhoch / 256;
+	Buffer[7] = p->xhoch % 256;
+	Buffer[8] = p->yhoch / 256;
+	Buffer[9] = p->yhoch % 256;
+	Buffer[10] = p->Levelhoch / 256;
+	Buffer[11] = p->Levelhoch % 256;
+	Buffer[12] = p->xrunter / 256;
+	Buffer[13] = p->xrunter % 256;
+	Buffer[14] = p->yrunter / 256;
+	Buffer[15] = p->yrunter % 256;
+	Buffer[16] = p->Levelrunter / 256;
+	Buffer[17] = p->Levelrunter % 256;
+}
+static void MakeFeld(FeldTyp *f, CharPtr Buffer)
+{
+	Buffer[0] = f->Spezial / 256;
+	Buffer[1] = f->Spezial % 256;
+	strncpy(f->Name, Buffer + 2, sizeof f->Name);
+}
+static void MakeGegen(GegenstandTyp *g, CharPtr Buffer)
+{
+	Buffer[0] = g->x / 256;
+	Buffer[1] = g->x % 256;
+	Buffer[2] = g->y / 256;
+	Buffer[3] = g->y % 256;
+	strncpy(Buffer + 4, g->Name, sizeof g->Name);
+	Buffer[26] = g->Flags / 256;
+	Buffer[27] = g->Flags % 256;
+	Buffer[28] = g->Dialog / 256;
+	Buffer[29] = g->Dialog % 256;
+	Buffer[30] = g->Sprite / 256;
+	Buffer[31] = g->Sprite % 256;
+	Buffer[32] = g->Spezial / 256;
+	Buffer[33] = g->Spezial % 256;
+	Buffer[34] = g->KennNummer / 256;
+	Buffer[35] = g->KennNummer % 256;
+	Buffer[36] = g->Ring / 256;
+	Buffer[37] = g->Ring % 256;
+	Buffer[38] = g->RingWirkung / 256;
+	Buffer[39] = g->RingWirkung % 256;
+	Buffer[40] = g->RingDauer / 256;
+	Buffer[41] = g->RingDauer % 256;
+}
+static void MakeMonster(MonsterTyp *m, CharPtr Buffer)
+{
+	strncpy(Buffer, m->Name, sizeof m->Name);
+	Buffer[22] = m->Trefferwurf / 256;
+	Buffer[23] = m->Trefferwurf % 256;
+	Buffer[24] = m->Schaden / 256;
+	Buffer[25] = m->Schaden % 256;
+	Buffer[26] = m->Bonus / 256;
+	Buffer[27] = m->Bonus % 256;
+	Buffer[28] = m->x / 256;
+	Buffer[29] = m->x % 256;
+	Buffer[30] = m->y / 256;
+	Buffer[31] = m->y % 256;
+	Buffer[32] = m->Typ / 256;
+	Buffer[33] = m->Typ % 256;
+	Buffer[34] = m->Status / 256;
+	Buffer[35] = m->Status % 256;
+	Buffer[36] = m->TP / 256;
+	Buffer[37] = m->TP % 256;
+	Buffer[38] = m->Sprich / 256;
+	Buffer[39] = m->Sprich % 256;
+	Buffer[40] = m->Spezial / 256;
+	Buffer[41] = m->Spezial % 256;
+}
+static void AuswertParameter(ParameterTyp *p, CharPtr Buffer)
+{
+	p->x = Buffer[0]*256+Buffer[1];
+	p->y = Buffer[2]*256+Buffer[3];
+	p->Art = Buffer[4]*256+Buffer[5];
+	p->xhoch = Buffer[6]*256+Buffer[7];
+	p->yhoch = Buffer[8]*256+Buffer[9];
+	p->Levelhoch = Buffer[10]*256+Buffer[11];
+	p->xrunter = Buffer[12]*256+Buffer[13];
+	p->yrunter = Buffer[14]*256+Buffer[15];
+	p->Levelrunter = Buffer[16]*256+Buffer[17];
+}
+static void AuswertFeld(FeldTyp *f, CharPtr Buffer)
+{
+	f->Spezial = Buffer[0]*256+Buffer[1];
+	strncpy(f->Name, Buffer + 2, sizeof f->Name);
+}
+static void AuswertGegen(GegenstandTyp *g, CharPtr Buffer)
+{
+	g->x = Buffer[0]*256+Buffer[1];
+	g->y = Buffer[2]*256+Buffer[3];
+	strncpy(g->Name, Buffer + 4, sizeof g->Name);
+	g->Flags = Buffer[26]*256+Buffer[27];
+	g->Dialog = Buffer[28]*256+Buffer[29];
+	g->Sprite = Buffer[30]*256+Buffer[31];
+	g->Spezial = Buffer[32]*256+Buffer[33];
+	g->KennNummer = Buffer[34]*256+Buffer[35];
+	g->Ring = Buffer[36]*256+Buffer[37];
+	g->RingWirkung = Buffer[38]*256+Buffer[39];
+	g->RingDauer = Buffer[40]*256+Buffer[41];
+}
 
+static void AuswertMonster(MonsterTyp *m, CharPtr Buffer)
+{
+	strncpy(m->Name, Buffer, sizeof m->Name);
+	m->Trefferwurf = Buffer[22]*256+Buffer[23];
+	m->Schaden = Buffer[24]*256+Buffer[25];
+	m->Bonus = Buffer[26]*256+Buffer[27];
+	m->x = Buffer[28]*256+Buffer[29];
+	m->y = Buffer[30]*256+Buffer[31];
+	m->Typ = Buffer[32]*256+Buffer[33];
+	m->Status = Buffer[34]*256+Buffer[35];
+	m->TP = Buffer[36]*256+Buffer[37];
+	m->Sprich = Buffer[38]*256+Buffer[39];
+	m->Spezial = Buffer[40]*256+Buffer[41];
+}
+
+static void DoMonsterList(MonsterTyp Monster[], unsigned AnzahlMonster,
+	CharPtr Buffer, void (*Do)(MonsterTyp *, CharPtr))
+{
+	int i;
+	for (i = 0; i < AnzahlMonster; i++)
+		Do(&Monster[i], Buffer + i * 42);
+}
+static void DoParameterList(ParameterTyp Parameter[], unsigned AnzahlParameter, 
+	CharPtr Buffer, void (*Do)(ParameterTyp *, CharPtr))
+{
+	int i;
+	for (i = 0; i < AnzahlParameter; i++)
+		Do(&Parameter[i], Buffer + i * 18);
+}
+static void DoGegenList(GegenstandTyp Gegen[], unsigned AnzahlGegen,
+	CharPtr Buffer, void (*Do)(GegenstandTyp *, CharPtr))
+{
+	int i;
+	for (i = 0; i < AnzahlGegen; i++)
+		Do(&Gegen[i], Buffer + i * 42);
+}
+static void DoFeldList(FeldTyp Feld[], unsigned AnzahlFeld,
+	CharPtr Buffer, void (*Do)(FeldTyp *, CharPtr))
+{
+	int i;
+	for (i = 0; i < AnzahlFeld; i++)
+		Do(&Feld[i], Buffer + i * 24);
+}
 /* Felder ****************************************************************/
 
 void LoadOrSaveDat(int Load, char *FileName)
@@ -96,32 +244,32 @@ void LoadOrSaveDat(int Load, char *FileName)
 	int h;
 	String60Typ s;
 
-	/*
-	char FelderPack[(21+2)*MaxSprites],
-	     MonsterPack[(21+9*2+2)*MaxSprites],
-	     GegenPack[(2*2+21+2+2*2+2+3*2)*MaxSprites];
-	     
-	     FIXME machine dependent --rtc
-	     */
-
 	Buffer = GetBuffer(BufferSize);
 	Concat(s, PrgPath, FileName);
 	if (Load) {
 		h = OpenFile(s);
 		if (FileError)
 			Fehler("Felderdaten Lesefehler: ", s); return;
-		ReadBlock(h, sizeof Felder, (CharPtr)&Felder);
+		ReadBlock(h, 24*MaxSprites, Buffer);
+		DoFeldList(Felder, MaxSprites, Buffer, AuswertFeld);
 		if (Editor) {
-			ReadBlock(h, sizeof MonsterKlasse, (CharPtr)&MonsterKlasse);
-			ReadBlock(h, sizeof GegenKlasse, (CharPtr)&GegenKlasse);
+			ReadBlock(h, 42*MaxSprites, Buffer);
+			DoMonsterList(MonsterKlasse, MaxSprites,
+				Buffer,	AuswertMonster);
+			ReadBlock(h, 42*MaxSprites, Buffer);
+			DoGegenList(GegenKlasse, MaxSprites,
+				Buffer,AuswertGegen);
 		}
 	} else {
 		h = CreateFile(s);
 		if (FileError)
 			Fehler("Felderdaten Schreibfehler: ", s); return;
-		WriteBlock(h, sizeof Felder, (CharPtr)&Felder);
-		WriteBlock(h, sizeof MonsterKlasse, (CharPtr)&MonsterKlasse);
-		WriteBlock(h, sizeof GegenKlasse, (CharPtr)&GegenKlasse);
+		DoFeldList(Felder, MaxSprites, Buffer, MakeFeld);
+		WriteBlock(h, 24*MaxSprites, Buffer);
+		DoMonsterList(MonsterKlasse, MaxSprites, Buffer, MakeMonster);
+		WriteBlock(h, 42*MaxSprites, Buffer);
+		DoGegenList(GegenKlasse, MaxSprites, Buffer, MakeGegen);
+		WriteBlock(h, 42*MaxSprites, Buffer);
 	}
 	CloseFile(h);
 }
@@ -131,7 +279,33 @@ void LoadOrSaveSprites(int Load, char *FileName)
 	int h;
 	unsigned long Count;
 	String60Typ s;
-	/* FIXME machinhe dependent */
+	char SpriteArrayPars[2*(sizeof (SpriteArrayType) / sizeof (BITSET))
+		* MaxSprites];
+	
+	void MakeSpriteArrayPars(SpriteArrayType s)
+	{
+		int i, j, k;
+		for (i = k = 0; i < MaxSprites; i++)
+			for (j = 0; 
+			     j < sizeof (SpriteArrayType) / sizeof (BITSET);
+			     j++, k+=2)
+				s[i][j] = SpriteArrayPars[k]*256
+					+ SpriteArrayPars[k+1];
+	}
+
+	void AuswertSpriteArrayPars(SpriteArrayType s)
+	{
+		int i, j, k;
+		for (i = k = 0; i < MaxSprites; i++)
+			for (j = 0;
+			     j < sizeof (SpriteArrayType) / sizeof (BITSET);
+			     j++, k+=2)
+			{
+				SpriteArrayPars[k] = s[i][j] / 256;
+				SpriteArrayPars[k+1] = s[i][j] % 256;
+			}
+	}
+
 	Assign(LastSprites, FileName);
 	Concat(s, PrgPath, FileName);
 	if (Load) {
@@ -139,21 +313,29 @@ void LoadOrSaveSprites(int Load, char *FileName)
 		if (FileError) {
 			Fehler("Muster Lesefehler: ", s); return;
 		}
-		Count = MaxSprites * sizeof (SpriteType);
-		ReadFile(h, Count, &FelderSprite);
-		ReadFile(h, Count, &MonsterSprite);
-		ReadFile(h, Count, &SystemSprite);
-		ReadFile(h, Count, &GegenSprite);
+		Count = sizeof SpriteArrayPars;
+		ReadFile(h, Count, SpriteArrayPars);
+		AuswertSpriteArrayPars(FelderSprite);
+		ReadFile(h, Count, SpriteArrayPars);
+		AuswertSpriteArrayPars(FelderSprite);
+		ReadFile(h, Count, SpriteArrayPars);
+		AuswertSpriteArrayPars(FelderSprite);
+		ReadFile(h, Count, SpriteArrayPars);
+		AuswertSpriteArrayPars(FelderSprite);
 	} else {
 		h = CreateFile(s);
 		if (FileError) {
 			Fehler("Muster Schreibfehler: ", s); return;
 		}
-		Count = MaxSprites * sizeof (SpriteType);
-		WriteFile(h, Count, &FelderSprite);
-		WriteFile(h, Count, &MonsterSprite);
-		WriteFile(h, Count, &SystemSprite);
-		WriteFile(h, Count, &GegenSprite);
+		Count = sizeof SpriteArrayPars;
+		MakeSpriteArrayPars(FelderSprite);
+		WriteFile(h, Count, SpriteArrayPars);
+		MakeSpriteArrayPars(MonsterSprite);
+		WriteFile(h, Count, SpriteArrayPars);
+		MakeSpriteArrayPars(SystemSprite);
+		WriteFile(h, Count, SpriteArrayPars);
+		MakeSpriteArrayPars(GegenSprite);
+		WriteFile(h, Count, SpriteArrayPars);
 	}
 	CloseFile(h);
 }
@@ -165,9 +347,19 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 {
 	unsigned long Count;
 	unsigned shortlength, i;
+	char ShortBuffer[2];
 	/*String60Typ s;*/
 	int h;
 
+	void MakeShort(void)
+	{
+		ShortBuffer[0] = shortlength / 256;
+		ShortBuffer[1] = shortlength % 256;
+	}
+	void AuswertShort(void)
+	{
+		shortlength = ShortBuffer[0] * 256 + ShortBuffer[1];
+	}
 	void MakeLevelPars(void)
 	{
 		unsigned x;
@@ -205,13 +397,12 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 					anzahl++;
 				else {
 					if (anzahl < 3)
-						for (i = 1; i <= anzahl; i++) {
-							Buffer[counter] = old; counter++;
-						}
+						for (i = 1; i <= anzahl; i++)
+							Buffer[counter++] = old;
 					else {
-						Buffer[counter] = 255; counter++;
-						Buffer[counter] = anzahl; counter++;
-						Buffer[counter] = old; counter++;
+						Buffer[counter++] = 255;
+						Buffer[counter++] = anzahl;
+						Buffer[counter++] = old;
 					}
 					anzahl = 1;
 					old = Level[x][y].Feld;
@@ -331,24 +522,29 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 	
 		h = OpenFile(Name);
 		if (FileError) return;
-		/* FIXME machine dependent --rtc */
 		Count = sizeof LevelPars;
 		ReadBlock(h, Count, LevelPars);
 		AuswertLevelPars();
 
-		ReadFile(h, sizeof shortlength, &shortlength);
+		ReadFile(h, 2, ShortBuffer);
+		AuswertShort();
 		ReadFile(h, shortlength, Buffer);
 		AuswertBuffer(shortlength);
 
-		Count = sizeof (MonsterTyp) * AnzahlMonster;
-		ReadBlock(h, Count, (CharPtr)&Monster);
-		Count = sizeof (GegenstandTyp) * AnzahlGegen;
-		ReadBlock(h, Count, (CharPtr)&Gegenstand);
-		Count = sizeof (ParameterTyp) * AnzahlParameter;
-		ReadBlock(h, Count, (CharPtr)&Parameter);
+		Count = 42 * AnzahlMonster;
+		ReadBlock(h, Count, Buffer);
+		DoMonsterList(Monster, AnzahlMonster, Buffer, AuswertMonster);
+		Count = 42 * AnzahlGegen;
+		ReadBlock(h, Count, Buffer);
+		DoGegenList(Gegenstand, AnzahlGegen, Buffer, AuswertGegen);
+		Count = 18 * AnzahlParameter;
+		ReadBlock(h, Count, Buffer);
+		DoParameterList(Parameter, AnzahlParameter,
+				Buffer, AuswertParameter);
 
 		if (!Editor) { /* Karte laden */
-			ReadFile(h,  sizeof shortlength, &shortlength);
+			ReadFile(h,  2, ShortBuffer);
+			AuswertShort();
 			if (!FileError) {
 				ReadFile(h, shortlength, Buffer);
 				KarteLaden(shortlength);
@@ -375,25 +571,30 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 		h = CreateFile(Name);
 		if (FileError) return;
 
-		/* FIXME machine dependent --rtc */
 		Count = sizeof LevelPars;
 		MakeLevelPars();
 		WriteBlock(h, Count, LevelPars);
 
 		shortlength = MakeBuffer();
-		WriteFile(h, sizeof shortlength, &shortlength);
+		MakeShort();
+		WriteFile(h, 2, ShortBuffer);
 		WriteFile(h, shortlength, Buffer);
 
-		Count = sizeof (MonsterTyp) * AnzahlMonster;
-		WriteBlock(h, Count, (CharPtr)&Monster);
-		Count = sizeof (GegenstandTyp) * AnzahlGegen;
-		WriteBlock(h, Count, (CharPtr)&Gegenstand);
-		Count = sizeof (ParameterTyp) * AnzahlParameter;
-		WriteBlock(h, Count, (CharPtr)&Parameter);
+		DoMonsterList(Monster, AnzahlMonster, Buffer, MakeMonster);
+		Count = 42 * AnzahlMonster;
+		WriteBlock(h, Count, Buffer);
+		DoGegenList(Gegenstand, AnzahlGegen, Buffer, MakeGegen);
+		Count = 42 * AnzahlGegen;
+		WriteBlock(h, Count, Buffer);
+		DoParameterList(Parameter, AnzahlParameter, 
+				Buffer, MakeParameter);
+		Count = 18 * AnzahlParameter;
+		WriteBlock(h, Count, Buffer);
 		
 		if (!Editor) { /* Karte speichern */
 			shortlength = KarteSpeichern();
-			WriteFile(h, sizeof shortlength, &shortlength);
+			MakeShort();
+			WriteFile(h, 2, ShortBuffer);
 			WriteFile(h, shortlength, Buffer);
 		}
 	}
@@ -402,7 +603,7 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 }
 
 
-void Korrektur(char *s)
+static void Korrektur(char *s)
 {
 	unsigned i;
 	for (i = 0; i <= HIGH(s); i++) {
@@ -417,7 +618,7 @@ void Korrektur(char *s)
 	}
 }
 
-void MakeLevelName(String60Typ s, unsigned org, unsigned n)
+static void MakeLevelName(String60Typ s, unsigned org, unsigned n)
 {
 	unsigned i;
 	switch (org) {
@@ -458,7 +659,7 @@ void SaveLevel(unsigned n)
 		RenameFile(LName, backup);
 	} else {
 		MakeLevelName(LName, 0, n);
-		/*Spieler.OldLevels |= n; FIXME --rtc*/
+		Spieler.OldLevels[n/8] |= n%8;
 	}
 	LoadOrSaveLevel(FALSE, LName);
 	if (FileError) {
@@ -469,7 +670,7 @@ void SaveLevel(unsigned n)
 void LoadLevel(unsigned n)
 {
 	String60Typ s, LName;
-	if (n /*& Spieler.OldLevels FIXME --rtc */)
+	if (n%8 & Spieler.OldLevels[n/8])
 		MakeLevelName(LName, 0, n); /* saved Level */
 	else
 		MakeLevelName(LName, 1, n); /* original Level */
@@ -504,6 +705,148 @@ void LoadOrSavePlayer(int Load)
 {
 	int h; 
 	String60Typ s;
+	char SpielerPars[1292];
+
+	void MakeSpieler(void)
+	{
+		CharPtr SpielerPars2, SpielerPars3;
+		int i;
+		Assign(SpielerPars, Spieler.Name);
+		SpielerPars[22] = Spieler.x / 256;
+		SpielerPars[23] = Spieler.x % 256;
+		SpielerPars[26] = Spieler.TPMax / 256;
+		SpielerPars[27] = Spieler.TPMax % 256;
+		SpielerPars[28] = Spieler.TP / 256;
+		SpielerPars[29] = Spieler.TP % 256;
+		SpielerPars[30] = Spieler.Gold / 256;
+		SpielerPars[31] = Spieler.Gold % 256;
+		SpielerPars[32] = Spieler.Nahrung / 256;
+		SpielerPars[33] = Spieler.Nahrung % 256;
+		SpielerPars[34] = Spieler.Grad / 256;
+		SpielerPars[35] = Spieler.Grad % 256;
+		SpielerPars[36] = Spieler.St / 256;
+		SpielerPars[37] = Spieler.St % 256;
+		SpielerPars[38] = Spieler.Ko / 256;
+		SpielerPars[39] = Spieler.Ko % 256;
+		SpielerPars[40] = Spieler.Ge / 256;
+		SpielerPars[41] = Spieler.Ge % 256;
+		SpielerPars[42] = Spieler.In / 256;
+		SpielerPars[43] = Spieler.In % 256;
+		SpielerPars[44] = Spieler.Zt / 256;
+		SpielerPars[45] = Spieler.Zt % 256;
+		SpielerPars[46] = Spieler.Ch / 256;
+		SpielerPars[47] = Spieler.Ch % 256;
+		SpielerPars[48] = Spieler.Sprite / 256;
+		SpielerPars[49] = Spieler.Sprite % 256;
+		SpielerPars[50] = Spieler.Sichtweite / 256;
+		SpielerPars[51] = Spieler.Sichtweite % 256;
+		SpielerPars[52] = Spieler.AnzGegenstaende / 256;
+		SpielerPars[53] = Spieler.AnzGegenstaende % 256;
+		SpielerPars[54] = Spieler.LevelNumber / 256;
+		SpielerPars[55] = Spieler.LevelNumber % 256;
+		SpielerPars[56] = Spieler.Lernen / 256;
+		SpielerPars[57] = Spieler.Lernen % 256;
+
+		SpielerPars[58] = Spieler.Status / 256;
+		SpielerPars[59] = Spieler.Status % 256;
+		SpielerPars[60] = Spieler.Permanent / 256;
+		SpielerPars[61] = Spieler.Permanent % 256;
+		SpielerPars[62] = Spieler.Typ / 256;
+		SpielerPars[63] = Spieler.Typ % 256;
+
+		SpielerPars[64] = 0;
+		SpielerPars[65] = (Spieler.EP / 65536) % 256;
+		SpielerPars[66] = Spieler.EP / 256;
+		SpielerPars[67] = Spieler.EP % 256;
+		SpielerPars[68] = 0;
+		SpielerPars[69] = (Spieler.EPnext / 65536) % 256;
+		SpielerPars[70] = Spieler.EPnext / 256;
+		SpielerPars[71] = Spieler.EPnext % 256;
+		SpielerPars[72] = 0;
+		SpielerPars[73] = (Spieler.Moves / 65536) % 256;
+		SpielerPars[74] = Spieler.Moves / 256;
+		SpielerPars[75] = Spieler.Moves % 256;
+
+		MakeMonster(&Spieler.ReitTier, SpielerPars + 76);
+
+		MakeGegen(&Spieler.rechteHand, SpielerPars + 118);
+
+		MakeGegen(&Spieler.linkeHand, SpielerPars + 160);
+		MakeGegen(&Spieler.Ruestung, SpielerPars + 202);
+		MakeGegen(&Spieler.Ring, SpielerPars + 244);
+
+		for (i = 1; i <= MaxRuck; i++)
+			MakeGegen(&Spieler.Rucksack[i], 
+				SpielerPars + 286 + (i - 1) * 42);
+
+		SpielerPars2 = SpielerPars + 286 + MaxRuck * 42;
+		for (i = 1; i <= MaxFlags; i++) {
+			SpielerPars2[(i-1)*2] = Spieler.Flags[i] / 256;
+			SpielerPars2[(i-1)*2+1] = Spieler.Flags[i] % 256;
+		}
+
+		SpielerPars3 = SpielerPars2 + MaxFlags * 2;
+
+		memcpy(SpielerPars3, Spieler.OldLevels, 
+			sizeof Spieler.OldLevels / 8);
+	}
+	void AuswertSpieler(void)
+	{
+		CharPtr SpielerPars2, SpielerPars3;
+		int i;
+		Assign(Spieler.Name, SpielerPars);
+		Spieler.x = SpielerPars[22]*256+SpielerPars[23];
+		Spieler.y = SpielerPars[24]*256+SpielerPars[25];
+		Spieler.TPMax = SpielerPars[26]*256+SpielerPars[27];
+		Spieler.TP = SpielerPars[28]*256+SpielerPars[29];
+		Spieler.Gold =  SpielerPars[30]*256+SpielerPars[31];
+		Spieler.Nahrung = SpielerPars[32]*256+SpielerPars[33];
+		Spieler.Grad = SpielerPars[34]*256+SpielerPars[35];
+		Spieler.St = SpielerPars[36]*256+SpielerPars[37];
+		Spieler.Ko = SpielerPars[38]*256+SpielerPars[39];
+		Spieler.Ge = SpielerPars[40]*256+SpielerPars[41];
+		Spieler.In = SpielerPars[42]*256+SpielerPars[43];
+		Spieler.Zt = SpielerPars[44]*256+SpielerPars[45];
+		Spieler.Ch = SpielerPars[46]*256+SpielerPars[47];
+		Spieler.Sprite = SpielerPars[48]*256+SpielerPars[49];
+		Spieler.Sichtweite = SpielerPars[50]*256+SpielerPars[51];
+		Spieler.AnzGegenstaende = SpielerPars[52]*256+SpielerPars[53];
+		Spieler.LevelNumber = SpielerPars[54]*256+SpielerPars[55];
+		Spieler.Lernen = SpielerPars[56]*256+SpielerPars[57];
+
+		Spieler.Status = SpielerPars[58]*256+SpielerPars[59];
+		Spieler.Permanent = SpielerPars[60]*256+SpielerPars[61];
+		Spieler.Typ = SpielerPars[62]*256+SpielerPars[63];
+
+		Spieler.EP = SpielerPars[65]*65536
+			+ SpielerPars[66]*256+SpielerPars[67];
+		Spieler.EPnext = SpielerPars[69]*65536
+			+ SpielerPars[70]*256+SpielerPars[71];
+		Spieler.Moves = SpielerPars[73]*65536
+			+ SpielerPars[74]*256+SpielerPars[75];
+		AuswertMonster(&Spieler.ReitTier, SpielerPars + 76);
+
+		AuswertGegen(&Spieler.rechteHand, SpielerPars + 118);
+
+		AuswertGegen(&Spieler.linkeHand, SpielerPars + 160);
+		AuswertGegen(&Spieler.Ruestung, SpielerPars + 202);
+		AuswertGegen(&Spieler.Ring, SpielerPars + 244);
+
+		for (i = 1; i <= MaxRuck; i++)
+			AuswertGegen(&Spieler.Rucksack[i], 
+				SpielerPars + 286 + (i - 1) * 42);
+
+		SpielerPars2 = SpielerPars + 286 + MaxRuck * 42;
+		for (i = 1; i <= MaxFlags; i++)
+			Spieler.Flags[i] = SpielerPars2[(i-1)*2]*256
+				+SpielerPars2[(i-1)*2+1];
+
+		SpielerPars3 = SpielerPars2 + MaxFlags * 2;
+
+		memcpy(Spieler.OldLevels, SpielerPars3, 
+			sizeof Spieler.OldLevels / 8);
+	}
+
 	Buffer = GetBuffer(BufferSize);
 	Assign(s, Spieler.Name);
 	Korrektur(s);
@@ -515,15 +858,15 @@ void LoadOrSavePlayer(int Load)
 		if (FileError) {
 			Concat(s, "Spieler Lesefehler: ", s); Error(s, 0); return;
 		}
-		/* FIXME machine dependent */
-		ReadBlock(h, sizeof Spieler, (CharPtr)&Spieler);
+		ReadBlock(h, 1292, SpielerPars);
+		AuswertSpieler();
 	} else {
 		h = CreateFile(s);
 		if (FileError) {
 			Concat(s, "Spieler Schreibfehler: ", s); Error(s, 0);
 		}
-		/* FIXME machine dependent */
-		WriteBlock(h, sizeof Spieler, (CharPtr)&Spieler);
+		MakeSpieler();
+		WriteBlock(h, 1292, SpielerPars);
 	}
 	CloseFile(h);
 }
@@ -542,13 +885,13 @@ void LoadOldPlayer(void)
 		Spieler.Rucksack[i].KennNummer = 0;
 	for (i = 1; i <= MaxFlags; i++)
 		Spieler.Flags[i] = 0;
-	/*Spieler.OldLevels = 0; FIXME --rtc */
+	memset(Spieler.OldLevels, 0, sizeof Spieler.OldLevels);
 }
 
 
 /* Leveldatei *************************************************/
 
-void Skip(CharPtr *ref_p, char c)
+static void Skip(CharPtr *ref_p, char c)
 {
 #define p (*ref_p)
 	while (*p != c && *p >= ' ') p++;
@@ -556,7 +899,7 @@ void Skip(CharPtr *ref_p, char c)
 #undef p
 }
 
-void GetLine(CharPtr *ref_p, char *s)
+static void GetLine(CharPtr *ref_p, char *s)
 {
 #define p (*ref_p)
 	unsigned i;
@@ -568,7 +911,7 @@ void GetLine(CharPtr *ref_p, char *s)
 #undef p
 }
 
-unsigned GetCard(CharPtr *ref_p)
+static unsigned GetCard(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned v;
@@ -592,7 +935,7 @@ static int NextLine(CharPtr *ref_p)
 #undef p
 }
 
-void SetString(CharPtr *ref_p, char *s)
+static void SetString(CharPtr *ref_p, char *s)
 {
 #define p (*ref_p)
 	unsigned i;
@@ -603,7 +946,7 @@ void SetString(CharPtr *ref_p, char *s)
 #undef p
 }
 
-void SetCard(CharPtr *ref_p, unsigned c, unsigned l)
+static void SetCard(CharPtr *ref_p, unsigned c, unsigned l)
 {
 #define p (*ref_p)
 	String20Typ s;
@@ -613,7 +956,7 @@ void SetCard(CharPtr *ref_p, unsigned c, unsigned l)
 #undef p
 }
 
-void SetLF(CharPtr *ref_p)
+static void SetLF(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	*p++ = 13;

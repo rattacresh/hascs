@@ -13,12 +13,12 @@
 #include "Screen.h"
 #include "Sound.h"
 
-unsigned Rueckgabe;
+static unsigned Rueckgabe;
 
 
-int SpielerFrei(unsigned x, unsigned y);
+static int SpielerFrei(unsigned x, unsigned y);
 
-void Minus(unsigned *ref_x, unsigned y)
+static void Minus(unsigned *ref_x, unsigned y)
 {
 #define x (*ref_x)
 	if (y > x)
@@ -29,7 +29,7 @@ void Minus(unsigned *ref_x, unsigned y)
 #undef x
 }
 
-int DiskScreen()
+static int DiskScreen()
 {
 	unsigned sound, load, save, quit, print, /*cancel,*/ x;
 	NewScreen(8, 4, 24, 16, " HASCS III ");
@@ -125,8 +125,8 @@ int RuestungAnlegen(GegenstandTyp *ref_r)
 		OutputText("#710#"); /* Zwei Rüstungen? */
 		return FALSE;
 	}
-}
 #undef r
+}
 
 void RuestungAblegen(GegenstandTyp *ref_r)
 {
@@ -135,7 +135,7 @@ void RuestungAblegen(GegenstandTyp *ref_r)
 #undef r
 }
 
-int GetButton(unsigned *ref_x, unsigned *ref_y)
+static int GetButton(unsigned *ref_x, unsigned *ref_y)
 {
 #define x (*ref_x)
 #define y (*ref_y)
@@ -167,7 +167,7 @@ int GetButton(unsigned *ref_x, unsigned *ref_y)
 #undef y
 }
 
-int Near(unsigned x, unsigned y)
+static int Near(unsigned x, unsigned y)
 {
 	unsigned xs, ys;
 	if (LevelSichtUmrechnung(x, y, &xs, &ys))
@@ -176,13 +176,13 @@ int Near(unsigned x, unsigned y)
 	else return FALSE;
 }
  
-int NearSicht(unsigned xs, unsigned ys)
+static int NearSicht(unsigned xs, unsigned ys)
 {
 	return xs >= MaxSichtweite-1 && xs <= MaxSichtweite+1
 	    && ys >= MaxSichtweite-1 && ys <= MaxSichtweite+1;
 }
 
-void *DisplayRucksack(unsigned *ref_n, BITSET *ref_mb)
+static void *DisplayRucksack(unsigned *ref_n, BITSET *ref_mb)
 {
 #define n (*ref_n)
 #define mb (*ref_mb)
@@ -219,7 +219,7 @@ void *DisplayRucksack(unsigned *ref_n, BITSET *ref_mb)
 #undef mb
 }
 
-void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *ref_Waffe)
+static void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *ref_Waffe)
 {
 #define Waffe (*ref_Waffe)
 	unsigned Schaden, i,/*t ,*/ Trefferwurf, Punkte;
@@ -277,7 +277,7 @@ void Angriff(unsigned zx, unsigned zy, unsigned WM, GegenstandTyp *ref_Waffe)
 #undef Waffe
 }
 
-void NahAngriff(unsigned zx, unsigned zy)
+static void NahAngriff(unsigned zx, unsigned zy)
 {
 	int rWaffe, lWaffe;
 	unsigned Bonus;
@@ -307,7 +307,7 @@ void NahAngriff(unsigned zx, unsigned zy)
 		Angriff(zx, zy, 1 - Bonus, &Spieler.linkeHand);
 }
 
-void LeiterBenutz(int Hoch)
+static void LeiterBenutz(int Hoch)
 {
 	int Leiter; ParameterTyp r; unsigned i/*, j*/;
 	Leiter = FALSE;
@@ -355,7 +355,7 @@ void LeiterBenutz(int Hoch)
 		OutputText("#523#");
 }
 
-void TuerOeffnen(unsigned px, unsigned py)
+static void TuerOeffnen(unsigned px, unsigned py)
 {
 	unsigned i = FindParameter(px, py);
 	if (Parameter[i].Art == FTuerZu) {
@@ -367,7 +367,7 @@ void TuerOeffnen(unsigned px, unsigned py)
 		OutputText("#561#"); /* geht nicht */
 }
 
-void Besteigen(void)
+static void Besteigen(void)
 {
 	unsigned tx, ty/*, l*/, i/*, j*/; int ok;
 	BeginOutput(); Print("#530#"); /* Wohin auf-/absteigen? */
@@ -430,7 +430,7 @@ void Besteigen(void)
 	EndOutput();
 }
 
-void Wegwerfen(unsigned n)
+static void Wegwerfen(unsigned n)
 {
 	while (n < MaxRuck) {
 		Spieler.Rucksack[n] = Spieler.Rucksack[n+1];
@@ -439,7 +439,7 @@ void Wegwerfen(unsigned n)
 	Spieler.Rucksack[MaxRuck].KennNummer = 0;
 }
 
-unsigned RucksackFrei(void)
+static unsigned RucksackFrei(void)
 {
 	unsigned i;
 	for (i = 1; i <= MaxRuck; i++)
@@ -448,7 +448,7 @@ unsigned RucksackFrei(void)
 	return 0;
 }
 
-void Ausruhen(void)
+static void Ausruhen(void)
 {
 	unsigned hunger;
 	if (Spieler.TP >= Spieler.TPMax)
@@ -463,7 +463,7 @@ void Ausruhen(void)
 		OutputText("#591#");
 }
 
-void Benutze(GegenstandTyp *ref_r)
+static void Benutze(GegenstandTyp *ref_r)
 {
 	void Fernkampf(GegenstandTyp *ref_r)
 	{
@@ -713,7 +713,7 @@ void Benutze(GegenstandTyp *ref_r)
 }
 
 
-void LegeAb(GegenstandTyp *ref_r)
+static void LegeAb(GegenstandTyp *ref_r)
 {
 #define r (*ref_r)
 	unsigned x, y; int abgelegt;
@@ -762,7 +762,7 @@ void LegeAb(GegenstandTyp *ref_r)
 
 /**********************************************************************/
 
-void InfoGegenstand(unsigned gx, unsigned gy)
+static void InfoGegenstand(unsigned gx, unsigned gy)
 {
 	unsigned i;
 
@@ -773,7 +773,7 @@ void InfoGegenstand(unsigned gx, unsigned gy)
 	EndOutput();
 }
 
-void  InfoFeld(unsigned x, unsigned y)
+static void InfoFeld(unsigned x, unsigned y)
 {
 	unsigned i;
 
@@ -835,7 +835,7 @@ void  InfoFeld(unsigned x, unsigned y)
 	EndOutput();
 }
 
-void InfoMonster(unsigned mx, unsigned my)
+static void InfoMonster(unsigned mx, unsigned my)
 {
 	unsigned i;
 	i = FindMonster(mx, my);
@@ -855,7 +855,7 @@ void InfoMonster(unsigned mx, unsigned my)
 
 /**********************************************************************/
 
-void Nimm(unsigned number)
+static void Nimm(unsigned number)
 {
 	int rfrei, lfrei; GegenstandTyp r;
 
@@ -892,7 +892,7 @@ void Nimm(unsigned number)
 	}
 }
 
-void DoRucksack(void)
+static void DoRucksack(void)
 {
 	unsigned  x,y,i; BITSET b; /*void *g;*/
 	/*g =*/ DisplayRucksack(&i, &b);
@@ -917,7 +917,7 @@ void DoRucksack(void)
 		}
 }
 
-void DoGegenstand(unsigned x, unsigned y)
+static void DoGegenstand(unsigned x, unsigned y)
 {
 	GegenstandTyp g;
 	int aufgenommen;
@@ -936,7 +936,7 @@ void DoGegenstand(unsigned x, unsigned y)
 		OutputText("#335#"); /* Rucksack voll! */
 }
 
-void Karte()
+static void Karte()
 {
 	unsigned d;
 	if (LevelNoMap & ~LevelFlags) {
@@ -947,7 +947,7 @@ void Karte()
 
 /**********************************************************************/
 
-int SpielerFrei(unsigned x, unsigned y)
+static int SpielerFrei(unsigned x, unsigned y)
 {
 	BITSET Spezial; /*unsigned i;*/
 	Spezial = Felder[Level[x][y].Feld].Spezial;
@@ -964,7 +964,7 @@ int SpielerFrei(unsigned x, unsigned y)
 	return FALSE;
 }
 
-int IsMonster(unsigned x, unsigned y)
+static int IsMonster(unsigned x, unsigned y)
 {
 	unsigned i;
 	if (LevelMonster & Level[x][y].Spezial) {
@@ -974,13 +974,13 @@ int IsMonster(unsigned x, unsigned y)
 	return FALSE;
 }
 
-int IsGegenstand(unsigned x, unsigned y)
+static int IsGegenstand(unsigned x, unsigned y)
 {
 	return LevelGegenstand & Level[x][y].Spezial
 		&& FeldBegehbar & Felder[Level[x][y].Feld].Spezial;
 }
 
-int IsTuer(unsigned x, unsigned y)
+static int IsTuer(unsigned x, unsigned y)
 {
 	unsigned i;
 	if (LevelParameter & Level[x][y].Spezial) {

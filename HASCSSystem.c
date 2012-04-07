@@ -13,6 +13,7 @@
 
 #include "HASCSGraphics.h"
 
+#if 1 /* hidden compat stuff */
 #define StrEqual(p,q) (!strcmp(p,q))
 void SplitPath(char *n,char *p,char *f)
 {
@@ -26,7 +27,7 @@ void SplitPath(char *n,char *p,char *f)
 		p[x-n] = '\0';
 	}
 }
-inline void XConcat(char *s, char *p, char *r, int *ok)
+void XConcat(char *s, char *p, char *r, int *ok)
 {
 	char buf_s[HIGH(buf_s)], buf_p[HIGH(buf_p)];
 	strcpy(buf_s,s);s=buf_s;strcpy(buf_p,p);p=buf_p;
@@ -34,7 +35,7 @@ inline void XConcat(char *s, char *p, char *r, int *ok)
 	strcat(strcpy(r, s), p);
 	*ok = 1;
 }
-inline void XAssign(char *s, char *p, int *ok)
+void XAssign(char *s, char *p, int *ok)
 {
 	char buf_s[HIGH(buf_s)];strcpy(buf_s,s);s=buf_s;
 	strcpy(p,s);
@@ -42,17 +43,18 @@ inline void XAssign(char *s, char *p, int *ok)
 }
 #define Concat(x, y, z, a) XConcat(x, y, z, &a)
 #define Assign(x,y,a) XAssign(x, y, &a)
+#endif
 
-int ScreenWidth, ScreenHeight; //, ScreenPlanes;
+static int ScreenWidth, ScreenHeight; //, ScreenPlanes;
 
-char WName[60];
+/*static char WName[60];*/
 static int type;
-unsigned win;
+/*static unsigned win;*/
 		
-SDL_Rect desk, work, curr, full, save;
-int XOff, YOff;
+static SDL_Rect /*desk,*/ work, /*curr, full,*/ save;
+static int XOff, YOff;
 		
-//void *MenuAdr;
+//static void *MenuAdr;
 
 int ShowError = TRUE;
 int FileError = FALSE;
@@ -60,19 +62,19 @@ unsigned NewXMin = 40, NewYMin = 25, NewXMax = 0, NewYMax = 0;
     
 unsigned AnzCache = 0, CacheCounter = 0;
     
-SDL_Surface *ScreenMFDBAdr, *BufferMFDBAdr, *PicMFDBAdr;
+static SDL_Surface *ScreenMFDBAdr, *BufferMFDBAdr, *PicMFDBAdr;
 
-//SearchRec DTABuffer;
-struct stat StatBuf;
-glob_t *GlobBufAdr;
-int GlobCounter;
-char *LastFileName = "";
+//static SearchRec DTABuffer;
+static struct stat StatBuf;
+static glob_t *GlobBufAdr;
+static int GlobCounter;
+static char *LastFileName = "";
 
-unsigned char *BufferAdr = NULL;
-unsigned long BufferLen = 0;
+static unsigned char *BufferAdr = NULL;
+static unsigned long BufferLen = 0;
 
-unsigned long mousetime = 1;
-int losgelassen = TRUE;
+static unsigned long mousetime = 1;
+static int losgelassen = TRUE;
 
 /* Min max */
 
@@ -86,7 +88,7 @@ static int Min(int a, int b)
 	if (a < b) return a; else return b;
 }
 
-int RcIntersect(SDL_Rect *ref_p1, SDL_Rect *ref_p2)
+static int RcIntersect(SDL_Rect *ref_p1, SDL_Rect *ref_p2)
 {
 #define p1 (*ref_p1)
 #define p2 (*ref_p2)
@@ -355,9 +357,6 @@ int LoadAndRun(char *Prg, char *Arg)
 /**
  * Kopiert einen rechteckigen Bereich auf dem Bildschirmpuffer oder
  * zwischen Pic-Buffer und Bildschirmpuffer.
- *
- * TODO: Scheint noch nicht richtig zu funktionieren. Es wird zwar ein
- * Bildbereich kopiert, aber nicht der, der angegeben wurde.
  */
 void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 {
@@ -1166,33 +1165,30 @@ void SetzeZufall(unsigned long n)
  */
 void Error(char *s, int Mode)
 {
+	char q[256];
+	int xdefault;
+	int ok;
+
 	if (Mode >= 0 && !ShowError)
-		return; // keine Fehlermeldung, da ShowError == FALSE
+		return; /* keine Fehlermeldung */
 	
-	printf("HASCS-Fehlermeldung: %s\n", s);
-	printf("Buttons: ");
+	Assign(s, q, ok);
+
+	Concat("[3][", q, q, ok);
+	xdefault = 1;
 	switch (Mode) {
-	case -1 : printf("[ ENDE ]\n"); break;
-	case  0 : printf("[ ENDE | WEITER ]\n"); break;
-	case  1 : printf("[ WEITER ]\n"); break;
-	case  2 : printf("[ ABBRUCH | WEITER ]\n"); break;
-	case -3 : printf("[ ABBRUCH ]\n"); break;
+	case -1 : Concat(q, "][ ENDE ]", q, ok); break;
+	case 0 : Concat(q, "][ ENDE | WEITER ]", q, ok); xdefault = 2; break;
+	case 1 : Concat(q, "][ WEITER ]", q, ok); break;
+	case 2 : Concat(q, "][ ABBRUCH | WEITER ]", q, ok); xdefault = 2; break;
+	case 3 : Concat(q, "][ ABBRUCH ]", q, ok); break;
 	}
 
-	// User-Abfrage im Alert-Fenster:
-	/*
-	  default = 1;
-	  switch (Mode) {
-	  case -1 : Concat(q, "][ ENDE ]", q, ok); break;
-	  case 0 : Concat(q, "][ ENDE | WEITER ]", q, ok); default = 2; break;
-	  case 1 : Concat(q, "][ WEITER ]", q, ok); break;
-	  case 2 : Concat(q, "][ ABBRUCH | WEITER ]", q, ok); default = 2; break;
-	  case 3 : Concat(q, "][ ABBRUCH ]", q, ok); break;
-	  }
-	  FormAlert(default, q, ErrorResult);
-	*/
+	printf("%s [%d] ", q, xdefault);
+	char result[10];
+	fgets(result, sizeof result, stdin);
 
-	ErrorResult = 1; // Der User "hat den ersten Knopf im Alert-Fenster gedrückt"
+	ErrorResult = atoi(result);
 
 	if (ErrorResult == 1 && Mode <= 0)
 		ExitWorkstation(1);

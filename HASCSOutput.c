@@ -16,19 +16,19 @@
 typedef char TextString[TextSpalten];
 typedef const char *CharSet;
 
-void (*CharOut)(char);
-void (*StringOut)(char *);
+static void (*CharOut)(char);
+static void (*StringOut)(char *);
 
-unsigned cx, cy; /* Cursorposition */
+static unsigned cx, cy; /* Cursorposition */
 
-TextString TextFenster[TextZeilen+1]; /* letzte = "" */
-int TextFensterAusgabe;
+static TextString TextFenster[TextZeilen+1]; /* letzte = "" */
+static int TextFensterAusgabe;
 
-char out[256], hilf[256];
+static char out[256], hilf[256];
 
-CharSet Cut;
+static CharSet Cut;
 
-void BWOut(char c)
+static void BWOut(char c)
 {
 	unsigned /*pos, i,*/ n;
 	if (TextMode == 0) {
@@ -63,7 +63,7 @@ void BWOut(char c)
 	}
 }
 
-void BWStringOut(char *s)
+static void BWStringOut(char *s)
 {
 	unsigned i;
 	for (i = 0; i <= HIGH(s); i++) {
@@ -101,20 +101,20 @@ void GetXY(unsigned *ref_x, unsigned *ref_y)
 }
 
 
-void PrintColors(int Chars, int Background)
+static void PrintColors(int Chars, int Background)
 /* Zeichen- und Hintergrundfarbe setzen */
 {
 }
 
 
-void CursorAn(void)
+static void CursorAn(void)
 /* Cursor anschalten */
 {
 	CharOut('_'); CharOut('\010');
 }
 
 
-void CursorAus(void)
+static void CursorAus(void)
 /* Cursor abschalten */
 {
 	CharOut(' '); CharOut('\010');

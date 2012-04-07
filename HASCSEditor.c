@@ -51,24 +51,24 @@
 
 
 
-unsigned User;
-unsigned XOff, YOff, Modus;
-unsigned SpriteNummer, Hintergrund, LevelNummer,
+static unsigned User;
+static unsigned XOff, YOff, Modus;
+static unsigned SpriteNummer, Hintergrund, LevelNummer,
 	Groesse, Anzahl, GZufall;
-int LevelChanged, FelderChanged;
+static int LevelChanged, FelderChanged;
 
-unsigned CopyBuffer[24][24];
-unsigned CopyWidth, CopyHeight;
+static unsigned CopyBuffer[24][24];
+static unsigned CopyWidth, CopyHeight;
 
-unsigned DialogNummer;
+static unsigned DialogNummer;
 
-char SampleFile[21];
-SoundType Sample;
+static char SampleFile[21];
+static SoundType Sample;
 
-char LevelDatei[21], LevelImage[21];
+static char LevelDatei[21], LevelImage[21];
 
 
-void LoescheLevel(unsigned f, int All);
+static void LoescheLevel(unsigned f, int All);
 
 
 static unsigned Min(unsigned x, unsigned y)
@@ -125,7 +125,7 @@ static void XPrintMenue(void)
 	PrintMenueEntry(33, 12, "ENDE");
 }
 
-void PrintSprites()
+static void PrintSprites()
 {
 	unsigned x;
 	for (x = 0; x <= MaxSprites-1; x++)
@@ -137,7 +137,7 @@ void PrintSprites()
 			SetSprite(x % 15 + 25, x / 15 + 14, &SystemSprite[x]);
 }
 
-void PrintFeld(unsigned i, unsigned j)
+static void PrintFeld(unsigned i, unsigned j)
 {
 	unsigned x, y, n;
 
@@ -157,7 +157,7 @@ void PrintFeld(unsigned i, unsigned j)
 		InvertFeld(x, y);
 }
 
-void PrintLevelPart(void)
+static void PrintLevelPart(void)
 {
 	unsigned x, y, i, j;
 	
@@ -167,7 +167,7 @@ void PrintLevelPart(void)
 			PrintFeld(x, y);
 }
 
-void PrintInfo(unsigned x, unsigned y)
+static void PrintInfo(unsigned x, unsigned y)
 {
 	if (LevelChanged)
 		PrintAt(0, 24, "*");
@@ -205,7 +205,7 @@ static void MakeScreen(unsigned x, unsigned y)
 	PrintInfo(x, y);
 }
 
-int Wirklich(char *msg)
+static int Wirklich(char *msg)
 {
 	unsigned /*d,*/ ab; int ende;
 	if (LevelChanged || FelderChanged) {
@@ -228,7 +228,7 @@ int Wirklich(char *msg)
 
 /************************************************************************/
 
-unsigned FeldAuswahl(void)
+static unsigned FeldAuswahl(void)
 {
 	unsigned mx, my, x, y, i;
 	BITSET mb;
@@ -246,7 +246,7 @@ unsigned FeldAuswahl(void)
 		return 0;
 }
 
-unsigned Nachbar(unsigned x, unsigned y, unsigned f)
+static unsigned Nachbar(unsigned x, unsigned y, unsigned f)
 {
 	unsigned i, j, n;
 	n = 0;
@@ -258,7 +258,7 @@ unsigned Nachbar(unsigned x, unsigned y, unsigned f)
 	return n;
 }
 
-void Insel(unsigned x, unsigned y, unsigned f, 
+static void Insel(unsigned x, unsigned y, unsigned f, 
 	unsigned o, unsigned c, unsigned a)
 {
 	unsigned i, j, n;
@@ -281,7 +281,7 @@ void Insel(unsigned x, unsigned y, unsigned f,
 				Level[i][j].Feld = f;
 }
 
-int FindFeld(unsigned *ref_i, unsigned *ref_j, unsigned *ref_f, unsigned *ref_o)
+static int FindFeld(unsigned *ref_i, unsigned *ref_j, unsigned *ref_f, unsigned *ref_o)
 {
 #define i (*ref_i)
 #define j (*ref_j)
@@ -317,7 +317,7 @@ int FindFeld(unsigned *ref_i, unsigned *ref_j, unsigned *ref_f, unsigned *ref_o)
 #undef o
 }
 
-void FeldAendern(unsigned f, unsigned o)
+static void FeldAendern(unsigned f, unsigned o)
 {
 	unsigned x, y;
 
@@ -327,7 +327,7 @@ void FeldAendern(unsigned f, unsigned o)
 				Level[x][y].Feld = o;
 }
 
-void Generator(void)
+static void Generator(void)
 {
 	unsigned fa, ll, zu, af, nf, an, ok, ab, gr, x, y, /*i,*/ Auswahl;
 	int found;
@@ -390,7 +390,7 @@ void Generator(void)
 
 /************************************************************************/
 
-void InputMonster(unsigned x, unsigned y, unsigned neu, unsigned *ref_t)
+static void InputMonster(unsigned x, unsigned y, unsigned neu, unsigned *ref_t)
 {
 #define t (*ref_t)
 	MonsterTyp m; unsigned i, a, s, n/*, d*/;
@@ -467,7 +467,7 @@ void InputMonster(unsigned x, unsigned y, unsigned neu, unsigned *ref_t)
 #undef t
 }
 
-void InputGegenstand(unsigned x, unsigned y, unsigned neu, unsigned *ref_s)
+static void InputGegenstand(unsigned x, unsigned y, unsigned neu, unsigned *ref_s)
 {
 #define s (*ref_s)
 	GegenstandTyp g; unsigned i, /*d,*/ na, fl, ab;
@@ -534,7 +534,7 @@ void InputGegenstand(unsigned x, unsigned y, unsigned neu, unsigned *ref_s)
 }
 
 
-void InputParameter(unsigned x, unsigned y, int new, unsigned *ref_a)
+static void InputParameter(unsigned x, unsigned y, int new, unsigned *ref_a)
 {
 #define a (*ref_a)
 	ParameterTyp p; unsigned i, f, /*d,*/ ab, ar;
@@ -587,7 +587,7 @@ void InputParameter(unsigned x, unsigned y, int new, unsigned *ref_a)
 #undef a
 }
 
-void InputFeld(unsigned n)
+static void InputFeld(unsigned n)
 {
 	unsigned ab, na, /*d,*/ sp, i;
 
@@ -621,7 +621,7 @@ void InputFeld(unsigned n)
 	MakeScreen(XOff, YOff);
 }
 
-void InputLevelFeld(unsigned x, unsigned y, int new, unsigned *ref_f)
+static void InputLevelFeld(unsigned x, unsigned y, int new, unsigned *ref_f)
 {
 #define f (*ref_f)
 	if (new) {
@@ -638,7 +638,7 @@ void InputLevelFeld(unsigned x, unsigned y, int new, unsigned *ref_f)
 #undef f
 }
 
-void FillBlock(unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsigned n)
+static void FillBlock(unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsigned n)
 {
 	unsigned i, j, x, y;
 
@@ -650,7 +650,7 @@ void FillBlock(unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsigned n)
 
 /************************************************************************/
 
-void LoescheLevel(unsigned f, int All)
+static void LoescheLevel(unsigned f, int All)
 {
 	unsigned x, y;
 	LevelTyp l;
@@ -678,7 +678,7 @@ void LoescheLevel(unsigned f, int All)
 	}
 }
 
-void ScrollLevelPart(unsigned dir, unsigned delta)
+static void ScrollLevelPart(unsigned dir, unsigned delta)
 {
 	unsigned dx, dy;
 
@@ -696,7 +696,7 @@ void ScrollLevelPart(unsigned dir, unsigned delta)
 	PrintLevelPart();
 }
 
-void LevelLaden(int Links)
+static void LevelLaden(int Links)
 {
 	unsigned nr, l, as, ok, /*ab,*/ t, i, d;
 
@@ -740,7 +740,7 @@ void LevelLaden(int Links)
 	MakeScreen(XOff, YOff);
 }
 
-void LevelSpeichern(int Links)
+static void LevelSpeichern(int Links)
 {
 	unsigned nr, l, as, ok, ab, bi, d;
 	NewScreen(14, 7, 17, 9, " LEVEL SPEICHERN ");
@@ -772,7 +772,7 @@ void LevelSpeichern(int Links)
 	MakeScreen(XOff, YOff);
 }
 
-void EingabeParameter(void)
+static void EingabeParameter(void)
 {
 	unsigned ok, i, na, ab, us, fl, d;
 	char MusterDatei[61];
@@ -851,7 +851,7 @@ void EingabeParameter(void)
 	MakeScreen(XOff, YOff);
 }
 
-void LevelAnzeigen(BITSET b)
+static void LevelAnzeigen(BITSET b)
 {
 	unsigned x, y;
 
@@ -869,7 +869,7 @@ void LevelAnzeigen(BITSET b)
 	MakeScreen(XOff, YOff);
 }
 
-void FelderSpeichern(void)
+static void FelderSpeichern(void)
 {
 	char s[21];
 	unsigned /*d,*/ ab;
@@ -888,7 +888,7 @@ void FelderSpeichern(void)
 	MakeScreen(XOff, YOff);
 }
 
-void DialogBearbeiten(void)
+static void DialogBearbeiten(void)
 {
 	unsigned nr, al, co, de, te, ab, h, i, begin, ende;
 
@@ -921,7 +921,7 @@ void DialogBearbeiten(void)
 	MakeScreen(XOff, YOff);
 }
 
-void SoundBearbeiten()
+static void SoundBearbeiten()
 {
 	unsigned h, /*d,*/ la, sp, of, ab;
 	/*int b;*/
@@ -952,7 +952,7 @@ void SoundBearbeiten()
 	MakeScreen(XOff, YOff);
 }
 
-void XYEingabe(void)
+static void XYEingabe(void)
 {
 	unsigned /*d,*/ ab, /*h,*/ x, y;
 
@@ -972,7 +972,7 @@ void XYEingabe(void)
 
 /************************************************************************/
 
-int BlockDefine(char *t, unsigned *ref_x1, unsigned *ref_y1, 
+static int BlockDefine(char *t, unsigned *ref_x1, unsigned *ref_y1, 
 		unsigned *ref_x2, unsigned *ref_y2)
 {
 #define x1 (*ref_x1)
@@ -1001,7 +1001,7 @@ int BlockDefine(char *t, unsigned *ref_x1, unsigned *ref_y1,
 #undef y2
 }
 
-void BlockFuellen(void)
+static void BlockFuellen(void)
 {
 	unsigned i, j, x, y, x1, y1, x2, y2;
 
@@ -1016,7 +1016,7 @@ void BlockFuellen(void)
 	MakeScreen(XOff, YOff);
 }
 
-void BlockKopieren(void)
+static void BlockKopieren(void)
 {
 	unsigned i, j, x, y, x1, y1, x2, y2; /*BITSET b; char ch;*/
 
@@ -1032,7 +1032,7 @@ void BlockKopieren(void)
 	MakeScreen(XOff, YOff);
 }
 
-void BlockEinfuegen(void)
+static void BlockEinfuegen(void)
 {
 	unsigned i, j, x, y, x1, y1, x2, y2;
 	
@@ -1100,7 +1100,8 @@ static void DoEdit(void)
 					MakeScreen(XOff, YOff);
 					LevelChanged = FALSE;
 					FelderChanged = FALSE;
-					/*Spieler.OldLevels = 0; FIXME --rtc*/
+					memset(Spieler.OldLevels, 0,
+						sizeof Spieler.OldLevels);
 				}
 				break;
 			case 12: Ende = Wirklich("Wirklich Editor verlassen?"); break;
@@ -1178,7 +1179,7 @@ static void DoEdit(void)
 }
 
 
-unsigned CopyRight(void)
+static unsigned CopyRight(void)
 {
 	unsigned /*d,*/ b;
 
@@ -1193,7 +1194,7 @@ unsigned CopyRight(void)
 }
 
 
-void InitEditor(void)
+static void InitEditor(void)
 {
 	unsigned i;
 	
@@ -1218,7 +1219,7 @@ void InitEditor(void)
 		GegenKlasse[i].KennNummer = 0;
 	}
 
-	/*FIXME --rtc Spieler.OldLevels = CardSet{}; (* Original Levels laden */
+	memset(Spieler.OldLevels, 0, sizeof Spieler.OldLevels); /* Original Levels laden */
 
 	Assign(LevelDatei, "HASCS_3.LEV");
 	Assign(LevelImage, "HASCS_3.IMG");

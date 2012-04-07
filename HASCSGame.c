@@ -13,9 +13,9 @@
 #include "Dialog.h"
 #include "Sound.h"
 
-unsigned Rueckgabe, oldx, oldy, Weite;
-int dx[93], dy[93];
-unsigned AnzahlSteigungen;
+static unsigned Rueckgabe, oldx, oldy, Weite;
+static int dx[93], dy[93];
+static unsigned AnzahlSteigungen;
 
 
 void MakeSichtBereich(int Force)
@@ -96,7 +96,7 @@ void MakeSichtBereich(int Force)
 
 /* Spezialfelder **********************************************************/
 
-void Falle(ParameterTyp *ref_p)
+static void Falle(ParameterTyp *ref_p)
 {
 #define p (*ref_p)
 	unsigned i, s;
@@ -146,7 +146,7 @@ void Teleport(ParameterTyp *ref_p)
 #undef p
 }
 
-void Feldaenderung(ParameterTyp *ref_p)
+static void Feldaenderung(ParameterTyp *ref_p)
 {
 #define p (*ref_p)
 	unsigned /*xs, ys,*/ i, a;
@@ -165,7 +165,7 @@ void Feldaenderung(ParameterTyp *ref_p)
 #undef p
 }
 
-void Info(ParameterTyp *ref_p)
+static void Info(ParameterTyp *ref_p)
 {
 #define p (*ref_p)
 	if (p.automatisch > 0) { /* Automatischer Text */
@@ -188,7 +188,7 @@ void Info(ParameterTyp *ref_p)
 
 /**************************************************************************/
 
-void MakeTeleport(void)
+static void MakeTeleport(void)
 {
 	ParameterTyp p;
 	BeginOutput();
@@ -453,7 +453,7 @@ unsigned DoGame(void)
 
 }
 
-void FindeSteigungen(void)
+static void FindeSteigungen(void)
 {
 	int x, y;
 

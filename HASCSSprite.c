@@ -9,14 +9,14 @@
 #include "HASCSGlobal.h"
 
 				
-SpriteType aSprite;
-SpriteType SpriteBuffer[9];
-String60Typ SpriteName;
-String60Typ SpriteDatei[10];
-unsigned Index;
-int Changes;
+static SpriteType aSprite;
+static SpriteType SpriteBuffer[9];
+static String60Typ SpriteName;
+static String60Typ SpriteDatei[10];
+static unsigned Index;
+static int Changes;
 
-void PaintSprite(SpriteType Sprite)
+static void PaintSprite(SpriteType Sprite)
 /* malt Sprite vergrößert links oben */
 {
 	unsigned x,y/*,c*/;
@@ -28,7 +28,7 @@ void PaintSprite(SpriteType Sprite)
 				SetSprite(x, y, &SystemSprite[4]);
 }
 
-void PaintDemoSprites(void)
+static void PaintDemoSprites(void)
 /* malt 9 mal das aktuelle Sprite */
 {
 	unsigned x, y;
@@ -37,7 +37,7 @@ void PaintDemoSprites(void)
 			SetSprite(x+17, y+11, &aSprite);
 }
 
-void PaintBufferSprites(void)
+static void PaintBufferSprites(void)
 {
 	unsigned x, y;
 
@@ -46,7 +46,7 @@ void PaintBufferSprites(void)
 			SetSprite(x+22,y+11,&SpriteBuffer[3*x+y]);
 }
 
-void PrintAllSprites(SpriteArrayType *ref_s)
+static void PrintAllSprites(SpriteArrayType *ref_s)
 /* malt alle Sprites eines Feldes in die untersten 4 Zeilen */
 {
 #define s (*ref_s)
@@ -57,7 +57,7 @@ void PrintAllSprites(SpriteArrayType *ref_s)
 }
 
 
-void MakeScreen(unsigned SpriteArray)
+static void MakeScreen(unsigned SpriteArray)
 {
 /* Erzeugt Arbeitsbildschirm */
 
@@ -125,7 +125,7 @@ void MakeScreen(unsigned SpriteArray)
 
 /* Spritebearbeitung */
 
-void RollUp(SpriteType *ref_Sprite)
+static void RollUp(SpriteType *ref_Sprite)
 {
 #define Sprite (*ref_Sprite)
 	unsigned x, y;
@@ -143,7 +143,7 @@ void RollUp(SpriteType *ref_Sprite)
 }
 
 
-void RollDown(SpriteType *ref_Sprite)
+static void RollDown(SpriteType *ref_Sprite)
 {
 #define Sprite (*ref_Sprite)
 	unsigned x, y;
@@ -160,7 +160,7 @@ void RollDown(SpriteType *ref_Sprite)
 }
 
 
-void RollRight(SpriteType *ref_Sprite)
+static void RollRight(SpriteType *ref_Sprite)
 {
 #define Sprite (*ref_Sprite)
 	unsigned x, y;
@@ -177,7 +177,7 @@ void RollRight(SpriteType *ref_Sprite)
 }
 
 
-void RollLeft(SpriteType *ref_Sprite)
+static void RollLeft(SpriteType *ref_Sprite)
 {
 #define Sprite (*ref_Sprite)
 	unsigned x, y;
@@ -193,7 +193,7 @@ void RollLeft(SpriteType *ref_Sprite)
 #undef Sprite
 }
 
-void Horizontal(SpriteType *ref_Sprite)
+static void Horizontal(SpriteType *ref_Sprite)
 {
 #define Sprite (*ref_Sprite)
 	unsigned x, y, c1, c2;
@@ -207,7 +207,7 @@ void Horizontal(SpriteType *ref_Sprite)
 #undef Sprite
 }
 
-void Vertikal(SpriteType *ref_Sprite)
+static void Vertikal(SpriteType *ref_Sprite)
 {
 #define Sprite (*ref_Sprite)
 	unsigned x, y, c1, c2;
@@ -222,7 +222,7 @@ void Vertikal(SpriteType *ref_Sprite)
 #undef Sprite
 }
 
-void RotateRight(SpriteType *ref_Sprite)
+static void RotateRight(SpriteType *ref_Sprite)
 {
 #define Sprite (*ref_Sprite)
 	unsigned x, y; SpriteType h;
@@ -233,7 +233,7 @@ void RotateRight(SpriteType *ref_Sprite)
 #undef Sprite
 }
 
-void XFill(SpriteType *ref_Sprite, unsigned Farbe)
+static void XFill(SpriteType *ref_Sprite, unsigned Farbe)
 {
 #define Sprite (*ref_Sprite)
 	/* Füllt Sprite mit Farbe */
@@ -246,7 +246,7 @@ void XFill(SpriteType *ref_Sprite, unsigned Farbe)
 #undef Sprite
 }
 
-void ChangeColors(SpriteType *ref_Sprite, unsigned OldColor, unsigned NewColor)
+static void ChangeColors(SpriteType *ref_Sprite, unsigned OldColor, unsigned NewColor)
 {
 #define Sprite (*ref_Sprite)
 	/* Wechselt Farbe aus */

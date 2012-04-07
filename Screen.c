@@ -132,7 +132,7 @@ void DrawScreen(void)
 
 /************************************************************************/
 
-unsigned FindObject(unsigned mx, unsigned my)
+static unsigned FindObject(unsigned mx, unsigned my)
 {
 	unsigned i;
 	if (mx < DScreen.x || my < DScreen.y) return 0;
@@ -143,7 +143,7 @@ unsigned FindObject(unsigned mx, unsigned my)
 	return 0;
 }
 
-unsigned FindFlags(unsigned start, BITSET f)
+static unsigned FindFlags(unsigned start, BITSET f)
 {
 	unsigned i;
 	for (i = start; i <= DScreen.n; i++)
@@ -152,7 +152,7 @@ unsigned FindFlags(unsigned start, BITSET f)
 	return 0;
 }
 
-void EditObject(unsigned e, char ch)
+static void EditObject(unsigned e, char ch)
 {
 	int ok;
 	if (ch >= ' ') {

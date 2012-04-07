@@ -21,11 +21,11 @@ typedef struct {
 
 typedef unsigned char *BytePtr;
 
-HeaderType *ImageHeader;
-unsigned LineBytes, WordAusgleich;
+static HeaderType *ImageHeader;
+static unsigned LineBytes, WordAusgleich;
 
 
-int Decompress(BytePtr source, BytePtr dest)
+static int Decompress(BytePtr source, BytePtr dest)
 {
 	unsigned long Count, repetitions, i;
 	BytePtr d, s;
@@ -123,7 +123,21 @@ int LoadImageN(unsigned n, unsigned *ref_w, unsigned *ref_h)
 	void *ImgBuffer, *Start;
 	char Name[128];
 	unsigned i, id;
-	
+	HeaderType ImgHeader;
+
+	void AuswertHeader(void)
+	{
+		char *Buffer = ImgBuffer;
+		ImgHeader.Version = Buffer[0] * 256 + Buffer[1];
+		ImgHeader.Length = Buffer[2] * 256 + Buffer[3];
+		ImgHeader.Planes = Buffer[4] * 256 + Buffer[5];
+		ImgHeader.PatternLength = Buffer[6] * 256 + Buffer[7];
+		ImgHeader.PixelWidth = Buffer[8] * 256 + Buffer[9];
+		ImgHeader.PixelHeight = Buffer[10] * 256 + Buffer[11];
+		ImgHeader.LineWidth = Buffer[12] * 256 + Buffer[13];
+		ImgHeader.Lines = Buffer[14] * 256 + Buffer[15];
+	}
+
 	id = n + 1024;
 	i = /*HASCSSystem.*/GetCache(id);
 	if (i != 0) {
@@ -144,7 +158,7 @@ int LoadImageN(unsigned n, unsigned *ref_w, unsigned *ref_h)
 	handle = /*HASCSSystem.*/OpenFile(Name);
 	ImgBuffer = /*HASCSSystem.*/GetBuffer(length);
 	/*HASCSSystem.*/ReadFile(handle, length, ImgBuffer);
-	ImageHeader = ImgBuffer;
+	ImageHeader = &ImgHeader;
 	if (/*HASCSSystem.*/FileError
 		|| ImageHeader->Version != 1
 		|| ImageHeader->Length < 8
@@ -235,6 +249,25 @@ int SaveImage(char *Name)
 		return j;
 #undef x
 	}
+	void MakeHeader(void)
+	{
+		z1[0] = ImgHeader.Version / 256;
+		z1[1] = ImgHeader.Version % 256;
+		z1[2] = ImgHeader.Length / 256;
+		z1[3] = ImgHeader.Length % 256;
+		z1[4] = ImgHeader.Planes / 256;
+		z1[5] = ImgHeader.Planes % 256;
+		z1[6] = ImgHeader.PatternLength / 256;
+		z1[7] = ImgHeader.PatternLength % 256;
+		z1[8] = ImgHeader.PixelWidth / 256;
+		z1[9] = ImgHeader.PixelWidth % 256;
+		z1[10] = ImgHeader.PixelHeight / 256;
+		z1[11] = ImgHeader.PixelHeight % 256;
+		z1[12] = ImgHeader.LineWidth / 256;
+		z1[13] = ImgHeader.LineWidth % 256;
+		z1[14] = ImgHeader.Lines / 256;
+		z1[15] = ImgHeader.Lines % 256;
+	}
 
 	int Ungleich(BildZeile *ref_x, BildZeile *ref_y)
 	{
@@ -260,8 +293,8 @@ int SaveImage(char *Name)
 	ImgHeader.LineWidth = (/*HASCSGlobal.*/LevelBreite+1) * 16;
 	ImgHeader.Lines = (/*HASCSGlobal.*/LevelHoehe+1) * 16;
 	
-	/* FIXME machine dependent --rtc */
-	/*HASCSSystem.*/WriteFile(fh, sizeof ImgHeader, &ImgHeader);
+	MakeHeader();
+	/*HASCSSystem.*/WriteFile(fh, 16, z1);
 	if (/*HASCSSystem.*/FileError) return FALSE;
 		
 	z = 0;

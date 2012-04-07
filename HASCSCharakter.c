@@ -133,7 +133,7 @@ int CreateCharakter(SpielerTyp *ref_Spieler)
 	Spieler.rechteHand.KennNummer = 0;
 	for (i = 1; i <= MaxFlags; i++)
 		Spieler.Flags[i] = 0;
-	/*OldLevels = 0; FIXME --rtc*/
+	memset(Spieler.OldLevels, 0, sizeof Spieler.OldLevels);
 	return TRUE;
 #undef Spieler
 }

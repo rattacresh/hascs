@@ -12,8 +12,8 @@
 #include "Screen.h"
 #include "Sound.h"
 
-unsigned Auswahl, SpriteAnzahl, d, s;
-int Ok, OnceMore;
+static unsigned Auswahl, /*SpriteAnzahl,*/ d, s;
+static int Ok/*, OnceMore*/;
 
 
 int ReadConfig()
@@ -55,7 +55,7 @@ int ReadConfig()
 }
 
 
-unsigned Anfangsmaske(void)
+static unsigned Anfangsmaske(void)
 {
 	unsigned /*d, */x, wahl;
 	NewScreen(8, 3, 24, 17, " HASCS III ");
@@ -79,7 +79,7 @@ unsigned Anfangsmaske(void)
 }
 
 
-void PlayTheGame(unsigned Wie)
+static void PlayTheGame(unsigned Wie)
 {
 	unsigned i;
 	int Ende;

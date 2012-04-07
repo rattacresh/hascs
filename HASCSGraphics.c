@@ -9,8 +9,8 @@
 #define Black ((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7) \
 	|(1<<8)|(1<<9)|(1<<10)|(1<<11)|(1<<12)|(1<<13)|(1<<14)|(1<<15))
 
-uint16_t Bildschirm[16000]; /* virtueller Bildschirm */
-uint16_t mask[4] = {
+static uint16_t Bildschirm[16000]; /* virtueller Bildschirm */
+static uint16_t mask[4] = {
 	(1<<15)|(1<<14)|(1<<13)|(1<<12),
 	(1<<11)|(1<<10)|(1<< 9)|(1<< 8),
 	(1<< 7)|(1<< 6)|(1<< 5)|(1<< 4),
@@ -18,7 +18,7 @@ uint16_t mask[4] = {
 };
 
 /* Setzt ein 16 x 16 Sprite auf Monochrombildschirm */
-void SetMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
+static void SetMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
 {
 #define Sprite (*ref_Sprite)
 	register unsigned i,j;
@@ -35,7 +35,7 @@ void SetMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
 }
 
 /* Setzt ein 16 x 16 Sprite auf Monochrombildschirm(Oder Modus) */
-void OrMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
+static void OrMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
 {
 #define Sprite (*ref_Sprite)
 	register unsigned i, j;
@@ -51,7 +51,7 @@ void OrMonoSprite(unsigned x,unsigned y, SpriteType *ref_Sprite)
 #undef Sprite
 }
 
-void SetMonoChar(unsigned x,unsigned y, char ch)
+static void SetMonoChar(unsigned x,unsigned y, char ch)
 {
 	register unsigned i,h;
 	uint16_t m;
@@ -73,7 +73,7 @@ void SetMonoChar(unsigned x,unsigned y, char ch)
 	if (NewYMax < y) NewYMax = y;
 }
 
-void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, SpriteType *ref_Sprite)
+static void SetMonoSpritePart(unsigned x,unsigned y,unsigned f, SpriteType *ref_Sprite)
 {
 #define Sprite (*ref_Sprite)
 	register unsigned i,j;
@@ -141,7 +141,7 @@ void InvertFeld(unsigned x, unsigned y)
 	if (NewYMax < y) NewYMax = y;
 }
 	
-void HorzLine(unsigned x, unsigned y, unsigned w)
+static void HorzLine(unsigned x, unsigned y, unsigned w)
 {
 	unsigned b;
 	b = 40 * y + x / 16;
@@ -157,7 +157,7 @@ void HorzLine(unsigned x, unsigned y, unsigned w)
 	}
 }
 
-void VertLine(unsigned x, unsigned y, unsigned h)
+static void VertLine(unsigned x, unsigned y, unsigned h)
 {
 	unsigned b, m;
 	b = 40 * y + x / 16;

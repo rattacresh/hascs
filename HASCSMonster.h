@@ -22,7 +22,7 @@ int MonsterSiehtSpieler(unsigned sx, unsigned sy);
 void MonsterBewegung(void);
 
 /* notwendig zum Erneuern des Sichtbereiches */
-void KeineMonsterBewegung (void);
+void KeineMonsterBewegung(void);
 
 
 #endif /* HASCSMONSTER_H */

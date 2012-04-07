@@ -174,8 +174,7 @@
 typedef char String20Typ[21]; /* allgemeine String Typen */
 typedef char String60Typ[61];
 
-// CardSet = SET OF CARDINAL[1..999]; /* Menge der alten Levels */
-typedef unsigned CardSet[1000]; /* Menge der alten Levels */
+typedef unsigned char CardSet[1000/CHAR_BIT]; /* Menge der alten Levels */
 
 typedef struct {
 	unsigned x, y;           /* Koordinaten */

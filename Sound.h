@@ -20,7 +20,7 @@ typedef char *CharPtr;
 
 typedef struct {
 	union {
-		CharPtr *Buffer; /* Zeiger auf Sample */
+		CharPtr Buffer; /* Zeiger auf Sample */
 		unsigned char b[4];
 	};
 	unsigned Length;

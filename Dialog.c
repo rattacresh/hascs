@@ -29,7 +29,6 @@
            4.00  20.09.94 Megamax Umstellung, Tokenisierung
 */
 
-#include <stdio.h>
 #include "HASCSGlobal.h"
 #include "HASCSGraphics.h"
 #include "HASCSOutput.h"
@@ -125,7 +124,7 @@ static String80Type DialogText[MaxZeilen + 1]; /* Texte für Hyperclick */
 
 static unsigned LocalVar[26];
     
-void Nothing(CharPtr *p), Goto(CharPtr *p), Input(CharPtr *p),
+static void Nothing(CharPtr *p), Goto(CharPtr *p), Input(CharPtr *p),
 	End(CharPtr *p), Label(CharPtr *p), Window(CharPtr *p),
 	If(CharPtr *p), Picture(CharPtr *p), Wait(CharPtr *p),
 	Select(CharPtr *p), XCopy(CharPtr *p), Aim(CharPtr *p),
@@ -303,16 +302,16 @@ static VariableType Variable[] = {
 
 /* Forward Deklarationen ************************************************/
 
-unsigned GetNumber(CharPtr *p);
+static unsigned GetNumber(CharPtr *p);
 
-void *GetItem(unsigned n, CharPtr *p, unsigned *r, char *s);
-unsigned EvalTerm(CharPtr *p, unsigned n);
-void EvalString(CharPtr *p, char *s);
-void NewLabel(unsigned l, CharPtr p);
+static void *GetItem(unsigned n, CharPtr *p, unsigned *r, char *s);
+static unsigned EvalTerm(CharPtr *p, unsigned n);
+static void EvalString(CharPtr *p, char *s);
+static void NewLabel(unsigned l, CharPtr p);
 
 /* Hilfprozeduren *******************************************************/
 
-void DialogFehler(char *s, char *q, unsigned c)
+static void DialogFehler(char *s, char *q, unsigned c)
 {
 	char err[256], num[256];
 	err[0] = '\0';
@@ -329,17 +328,17 @@ void DialogFehler(char *s, char *q, unsigned c)
 	Error(err, 3);
 }
 
-unsigned Max(unsigned x, unsigned y)
+static unsigned Max(unsigned x, unsigned y)
 {
 	if (x > y) return x; else return y;
 }
 
-unsigned Min(unsigned x, unsigned y)
+static unsigned Min(unsigned x, unsigned y)
 {
 	if (x < y) return x; else return y;
 }
 
-unsigned GetToken(CharPtr *ref_p, unsigned *ref_n, char *s)
+static unsigned GetToken(CharPtr *ref_p, unsigned *ref_n, char *s)
 {
 #define p (*ref_p)
 #define n (*ref_n)
@@ -388,7 +387,7 @@ unsigned GetToken(CharPtr *ref_p, unsigned *ref_n, char *s)
 #undef n
 }
 
-int NextLine(CharPtr *ref_p)
+static int NextLine(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned t, i;
@@ -404,7 +403,7 @@ int NextLine(CharPtr *ref_p)
 }
 
 
-int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
+static int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 {
 #define l (*ref_l)
 	unsigned t, n, i, Line;
@@ -580,7 +579,7 @@ int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 
 /************************************************************************/
 
-void *GetLabel(unsigned l)
+static void *GetLabel(unsigned l)
 {
 	unsigned i = 1;
 	while (i <= LabelAnzahl) {
@@ -591,7 +590,7 @@ void *GetLabel(unsigned l)
 	return NULL;
 }
 
-void NewLabel(unsigned l, CharPtr p)
+static void NewLabel(unsigned l, CharPtr p)
 {
 	if (LabelAnzahl < MaxLabel) {
 		LabelAnzahl++;
@@ -600,7 +599,7 @@ void NewLabel(unsigned l, CharPtr p)
 	}
 }
 
-int FindLabel(CharPtr *ref_p, unsigned l)
+static int FindLabel(CharPtr *ref_p, unsigned l)
 {
 #define p (*ref_p)
 	unsigned cmd, t; String80Type s;
@@ -623,7 +622,7 @@ int FindLabel(CharPtr *ref_p, unsigned l)
 
 /************************************************************************/
 
-void PrinterLine(char *s)
+static void PrinterLine(char *s)
 {
 	unsigned i;
 	if (!PrinterStatus())
@@ -642,7 +641,7 @@ void PrinterLine(char *s)
 
 /* Variablenbearbeitung *************************************************/
 
-unsigned GetVariable(CharPtr *ref_p, unsigned *ref_c, char *s)
+static unsigned GetVariable(CharPtr *ref_p, unsigned *ref_c, char *s)
 {
 #define p (*ref_p)
 #define c (*ref_c)
@@ -686,7 +685,7 @@ unsigned GetVariable(CharPtr *ref_p, unsigned *ref_c, char *s)
 #undef p
 }
 
-unsigned GetNumber(CharPtr *ref_p)
+static unsigned GetNumber(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned c, t;
@@ -704,7 +703,7 @@ unsigned GetNumber(CharPtr *ref_p)
 #undef p
 }
 
-unsigned GetArgument(CharPtr *ref_p)
+static unsigned GetArgument(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	String80Type s;
@@ -717,7 +716,7 @@ unsigned GetArgument(CharPtr *ref_p)
 #undef p
 }
 
-void GetString(CharPtr *ref_p, char *s)
+static void GetString(CharPtr *ref_p, char *s)
 {
 #define p (*ref_p)
 	unsigned c;
@@ -727,7 +726,7 @@ void GetString(CharPtr *ref_p, char *s)
 #undef p
 }
 
-void *GetAddress(CharPtr *ref_p, unsigned *ref_t, unsigned *ref_c, char *s)
+static void *GetAddress(CharPtr *ref_p, unsigned *ref_t, unsigned *ref_c, char *s)
 {
 #define p (*ref_p)
 #define t (*ref_t)
@@ -753,7 +752,7 @@ void *GetAddress(CharPtr *ref_p, unsigned *ref_t, unsigned *ref_c, char *s)
 #undef c
 }
 
-unsigned FindText(unsigned n)
+static unsigned FindText(unsigned n)
 {
 	unsigned i;
 
@@ -765,7 +764,7 @@ unsigned FindText(unsigned n)
 	return AnzahlTexte;
 }
 
-void *GetItem(unsigned n, CharPtr *ref_p, unsigned *ref_r, char *s)
+static void *GetItem(unsigned n, CharPtr *ref_p, unsigned *ref_r, char *s)
 {
 #define p (*ref_p)
 #define r (*ref_r)
@@ -866,7 +865,7 @@ void *GetItem(unsigned n, CharPtr *ref_p, unsigned *ref_r, char *s)
 
 /* Zahlausdruck auswerten ***********************************************/
 
-unsigned EvalTerm(CharPtr *ref_p, unsigned n)
+static unsigned EvalTerm(CharPtr *ref_p, unsigned n)
 {
 #define p (*ref_p)
 	unsigned v, op; String80Type h;
@@ -898,7 +897,7 @@ unsigned EvalTerm(CharPtr *ref_p, unsigned n)
 
 /* Zeichenkettenausdruck auswerten **************************************/
 
-void EvalString(CharPtr *ref_p, char *s)
+static void EvalString(CharPtr *ref_p, char *s)
 {
 #define p (*ref_p)
 	unsigned /*t,*/ op, c; String80Type h;
@@ -936,7 +935,7 @@ void EvalString(CharPtr *ref_p, char *s)
 
 /* Textzeile aus-/eingeben **********************************************/
 
-void OpenScreen(int MinW, int MinH)
+static void OpenScreen(int MinW, int MinH)
 {
 	unsigned i;
 	if  (w == 0 || h == 0) {/* Breite defaultmäßig ermitteln */
@@ -962,7 +961,7 @@ void OpenScreen(int MinW, int MinH)
 	OpenWindow = FALSE;
 }
 
-void Ausgabe(char *s)
+static void Ausgabe(char *s)
 {
 	unsigned i;
 	if (OpenWindow)
@@ -988,7 +987,7 @@ void Ausgabe(char *s)
 
 /* Kommandos  ***********************************************************/
 
-void Label(CharPtr *ref_p)
+static void Label(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned label;
@@ -998,7 +997,7 @@ void Label(CharPtr *ref_p)
 #undef p
 }
 
-void Goto(CharPtr *ref_p)
+static void Goto(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned label;
@@ -1008,7 +1007,7 @@ void Goto(CharPtr *ref_p)
 #undef p
 }
 
-void Gosub(CharPtr *ref_p)
+static void Gosub(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned label;
@@ -1025,7 +1024,7 @@ void Gosub(CharPtr *ref_p)
 #undef p
 }
 
-void Return(CharPtr *ref_p)
+static void Return(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	if (ReturnLevel > 0)
@@ -1037,14 +1036,14 @@ void Return(CharPtr *ref_p)
 #undef p
 }
 
-void End(CharPtr *ref_p)
+static void End(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	Continue = FALSE;
 #undef p
 }
 
-void Input(CharPtr *ref_p)
+static void Input(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned i, mx, my;
@@ -1096,7 +1095,7 @@ void Input(CharPtr *ref_p)
 #undef p
 }
 
-void Aim(CharPtr *ref_p)
+static void Aim(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned /*i,*/ x, y, qx, qy, mode, type;
@@ -1135,13 +1134,13 @@ void Aim(CharPtr *ref_p)
 }
 
 
-void Nothing(CharPtr *ref_p)
+static void Nothing(CharPtr *ref_p)
 {
 #define p (*ref_p)
 #undef p
 }
 
-void Window(CharPtr *ref_p)
+static void Window(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	if (!OpenWindow) {
@@ -1155,7 +1154,7 @@ void Window(CharPtr *ref_p)
 #undef p
 }
 
-void Output(CharPtr *ref_p)
+static void Output(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	String80Type s;
@@ -1172,7 +1171,7 @@ void Output(CharPtr *ref_p)
 #undef p
 }
 
-void Invert(CharPtr *ref_p)
+static void Invert(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned x, y;
@@ -1184,7 +1183,7 @@ void Invert(CharPtr *ref_p)
 #undef p
 }
 
-void Picture(CharPtr *ref_p)
+static void Picture(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned n;
@@ -1233,7 +1232,7 @@ void ShowPicture(unsigned n, int New)
 }
 
 
-void Let(CharPtr *ref_p, unsigned i)
+static void Let(CharPtr *ref_p, unsigned i)
 {
 #define p (*ref_p)
 	CardPtr var;
@@ -1255,7 +1254,7 @@ void Let(CharPtr *ref_p, unsigned i)
 }
 
 
-void If(CharPtr *ref_p)
+static void If(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned cmd, c, type;
@@ -1277,7 +1276,7 @@ void If(CharPtr *ref_p)
 }
 
 
-void Sound(CharPtr *ref_p)
+static void Sound(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned n, mode; SoundType snd; /*String80Type s;*/
@@ -1293,7 +1292,7 @@ void Sound(CharPtr *ref_p)
 #undef p
 }
 
-void Wait(CharPtr *ref_p)
+static void Wait(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned t;
@@ -1307,7 +1306,7 @@ void Wait(CharPtr *ref_p)
 #undef p
 }
 
-void Select(CharPtr *ref_p)
+static void Select(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned x, y, i;
@@ -1365,7 +1364,7 @@ void Select(CharPtr *ref_p)
 #undef p
 }
 
-void XCopy(CharPtr *ref_p)
+static void XCopy(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned i, x, y;
@@ -1403,7 +1402,7 @@ void XCopy(CharPtr *ref_p)
 #undef p
 }
 
-void Delete(CharPtr *ref_p)
+static void Delete(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned x, y, i;
@@ -1440,7 +1439,7 @@ void Delete(CharPtr *ref_p)
 }
 
 
-void XTeleport(CharPtr *ref_p)
+static void XTeleport(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	unsigned x, y, l;
@@ -1463,7 +1462,7 @@ void XTeleport(CharPtr *ref_p)
 #undef p
 }
 
-void Call(CharPtr *ref_p)
+static void Call(CharPtr *ref_p)
 {
 #define p (*ref_p)
 #undef p
@@ -1526,7 +1525,7 @@ void ExecuteDialog(void)
 
 /* Dialog laden *********************************************************/
 
-void MakeFileName(int c, unsigned n, char *s)
+static void MakeFileName(int c, unsigned n, char *s)
 {
 	unsigned i;
 
@@ -1555,7 +1554,7 @@ void MakeFileName(int c, unsigned n, char *s)
 	}
 }
 
-void CodeDialog(unsigned long n, unsigned long l, void *b)
+static void CodeDialog(unsigned long n, unsigned long l, void *b)
 {
 	unsigned long i;
 	BITSET *p = b;
@@ -1658,10 +1657,10 @@ void DoParameterDialog(unsigned n, ParameterTyp *ref_p)
 #undef p
 }
 
-
+#if 0
 /* Kommandos und Variablen initialisieren *******************************/
 
-void NewVariable(char *s, void *l, unsigned n, unsigned t)
+static void NewVariable(char *s, void *l, unsigned n, unsigned t)
 {
 	Assign(Variable[ZeilenPos].name, s);
 	Variable[ZeilenPos].loc = l;
@@ -1669,6 +1668,7 @@ void NewVariable(char *s, void *l, unsigned n, unsigned t)
 	Variable[ZeilenPos].type = t;
 	ZeilenPos++;
 }
+#endif
 
 /************************************************************************/
 

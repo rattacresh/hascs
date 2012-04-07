@@ -7,7 +7,7 @@
 #include "HASCSSystem.h"
 #include "Screen.h"
 
-int ScreenReserved;
+static int ScreenReserved;
 
 /* Bildschirm-Ausgaben ****************************************************/
 
@@ -328,7 +328,7 @@ void DisplayCharakter(SpielerTyp s)
 
 /* Hilfsprozeduren ********************************************************/
 
-unsigned max(unsigned a, unsigned b)
+static unsigned max(unsigned a, unsigned b)
 {
 	if (a > b)
 		return a;

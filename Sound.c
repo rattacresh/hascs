@@ -1,6 +1,8 @@
 /* Sound module */
 #include "compat.h"
-#define Concat(x, y, z, a) (strcat(strcpy(x,z),y), memcpy(&ok,&ok,0))
+extern void XConcat(char *s, char *p, char *r, int *ok);
+#define Concat(x, y, z, a) XConcat(x, y, z, &a)
+#include <arpa/inet.h> /* byte order htons() ntohs()*/
 #include "Sound.h"
 
 #include "HASCSSystem.h"
@@ -20,13 +22,13 @@
 
 #define conterm (*(volatile unsigned *)0x484)
 
-SoundType StaticSound;
+/*static SoundType StaticSound;*/
 /*char FileName[81];*/
-unsigned *IBuffer;
-int DoLoop;
-ModeBuf stack;
+static uint16_t *IBuffer;
+static int DoLoop;
+/*static ModeBuf stack;*/
 
-int DMASound()
+static int DMASound()
 {
 	unsigned long Value;
 	if (GetCookie("_SND", Value))
@@ -35,7 +37,7 @@ int DMASound()
 }
 
 
-int InBuffer(unsigned l, char *p, char *s)
+static int InBuffer(unsigned l, char *p, char *s)
 {
 	unsigned i;
 	for (i = 0; i <= HIGH(s); i++) {
@@ -46,7 +48,7 @@ int InBuffer(unsigned l, char *p, char *s)
 	return TRUE;
 }
 
-void ChangeVorz(CharPtr Buffer, unsigned long Length)
+static void ChangeVorz(CharPtr Buffer, unsigned long Length)
 {
 	unsigned long i;
 	for (i = 1; i <= Length; i++) {
@@ -55,7 +57,7 @@ void ChangeVorz(CharPtr Buffer, unsigned long Length)
 	}
 }
 
-unsigned GetFreq(unsigned f)
+static unsigned GetFreq(unsigned f)
 {
 	if (f < 9388) return 0;
 	else if (f < 18775) return 1;
@@ -75,9 +77,8 @@ int LoadSoundFile(char *f, unsigned id, SoundType s)
 		unsigned long HeaderLength;
 		unsigned i;
 
-		/* FIXME Machine dependent --rtc */
-		HeaderLength = (long)IBuffer[2]+(long)IBuffer[3];
-		s.Length = 65536*(long)IBuffer[4]+(long)IBuffer[5];
+		HeaderLength = (long)ntohs(IBuffer[2])+ntohs(IBuffer[3]);
+		s.Length = 65536*(long)ntohs(IBuffer[4])+ntohs(IBuffer[5]);
 		i = /*HASCSSystem.*/NewCache(id, s.Length);
 		s.Buffer = /*HASCSSystem.*/Cache[i].CacheBuffer;
 		/*HASCSSystem.*/FileSeek(h, HeaderLength + 8);
@@ -104,10 +105,9 @@ int LoadSoundFile(char *f, unsigned id, SoundType s)
 
 	int LoadHSN(unsigned Version)
 	{
-		/* FIXME Machine dependent --rtc */
 		unsigned i;
-		s.Length = 65536*(long)IBuffer[10]+(long)IBuffer[11];
-		s.Frequency = IBuffer[12] * 10;
+		s.Length = 65536*(long)ntohs(IBuffer[10])+ntohs(IBuffer[11]);
+		s.Frequency = ntohs(IBuffer[12]) * 10;
 		i = /*HASCSSystem.*/NewCache(id, s.Length);
 		s.Buffer = /*HASCSSystem.*/Cache[i].CacheBuffer;
 		/*HASCSSystem.*/Cache[i].CacheInfo1 = s.Frequency;
@@ -135,8 +135,8 @@ int LoadSoundFile(char *f, unsigned id, SoundType s)
 	if (/*HASCSSystem.*/FileError) return FALSE; /* File Not Found */
 	/*HASCSSystem.*/ReadFile(h, 128, &header);
 	/*HASCSSystem.*/FileSeek(h, 0);
-	IBuffer = (unsigned *)&header;
-	if (InBuffer(0, header, "~ü~ü")) ok = LoadSMP();
+	IBuffer = (uint16_t *)&header;
+	if (InBuffer(0, header, "\x7e\x81\x7e\x81")) ok = LoadSMP();
 	else if (InBuffer(8, header, "WAVEfmt")) ok = LoadWAV();
 	else if (InBuffer(0, header, "HSND1.0")) ok = LoadHSN(0);
 	else if (InBuffer(0, header, "HSND1.1")) ok = LoadHSN(1);
@@ -171,7 +171,7 @@ int LoadSound(unsigned n, SoundType *ref_s)
 }
 
 
-void PlaySoundDMA(SoundType *ref_s)
+static void PlaySoundDMA(SoundType *ref_s)
 {
 #define s (*ref_s)
 	union {
@@ -202,7 +202,7 @@ void PlaySoundDMA(SoundType *ref_s)
 }
 
 
-void PlaySoundInterrupt(SoundType *ref_s)
+static void PlaySoundInterrupt(SoundType *ref_s)
 {
 #define s (*ref_s)
 #if 0
