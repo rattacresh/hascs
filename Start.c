@@ -46,10 +46,9 @@ int ReadConfig()
 			MakeAbsolute(SoundPath);
 		}
 		LoadLevel(1);
-		if (FileError) {
+		if (FileError)
 			if (!SelectFile("Welches Abenteuer...", "*.CFG", Command))
 				return FALSE;
-		}
 	} while (FileError);
 	ShowError = TRUE;
 	return TRUE;
