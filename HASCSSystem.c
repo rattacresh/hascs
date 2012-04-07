@@ -527,6 +527,8 @@ int SelectFile(char *msg, char *path, char *file)
 	GrafMouse(bee, NIL);*/
 	printf("Select [%s] [%s]: ", path, pathandfile);
 	fgets(pathandfile, sizeof pathandfile, stdin);
+	if ((ok = strlen(pathandfile)) && pathandfile[ok-1] == '\n')
+		pathandfile[ok-1] = '\0';
 	ok = 1;
 
 	if (!ok) return FALSE;
