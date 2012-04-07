@@ -350,18 +350,16 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 {
 	SDL_Rect sourceRect, destRect;
 
-	sourceRect.x = sx;
-	sourceRect.y = sy;
-	sourceRect.w = width; 
-	sourceRect.h = height;
+	sourceRect.x = sx; sourceRect.y = sy;
+	sourceRect.w = width; sourceRect.h = height;
 
-	sourceRect.w += sourceRect.x-(sourceRect.x/8*8);
+	destRect.x = dx; destRect.y = dy;
+	destRect.w = width; destRect.h = height;
+
+	sourceRect.w = (sourceRect.w + (sourceRect.x-(sourceRect.x/8*8))+7)/8;
 	sourceRect.x /= 8;
-
-	destRect.x = dx; 
-	destRect.y = dy;
-	destRect.w = width; 
-	destRect.h = height;
+	destRect.w = (destRect.w + (destRect.x-(destRect.x/8*8))+7)/8;
+	destRect.x /= 8;
 
 	int copy_err;
 	if (direction == 4) {     /* Pic    -> Buffer */
@@ -575,12 +573,12 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 	void RedrawWindow(SDL_Rect frame)
 	{
 		SDL_Rect r, s;
-		static int xxx=128;
 		/*UpdateWindow(TRUE);*/
 		r.x = r.y = 0;
 		r.w = ScreenMFDBAdr->w;
 		r.h = ScreenMFDBAdr->h;
 #if 0
+		static int xxx=128;
 		frame.x=128;//xxx--;
 		frame.y=144;
 		frame.w=xxx++;//512;
@@ -715,8 +713,19 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		case SDLK_l : if (key.mod & KMOD_CTRL) { /* Control L */
 				FreeCache(0); key.sym = '\0';
 			}
+			break;
 		case SDLK_r : if (key.mod & KMOD_CTRL) { /* Control R */
 				Redraw = TRUE; key.sym = '\0';
+			}
+			break;
+		case SDLK_u : if (key.mod & KMOD_CTRL) { /* Control U */
+				Copy(0,128,144,512,64,128,128);
+				key.sym = '\0';
+			}
+			break;
+		case SDLK_i : if (key.mod & KMOD_CTRL) { /* Control I */
+				Copy(0,8*16,12*16,16,16,7*16,11*16);
+				key.sym = '\0';
 			}
 		default:
 			break;
