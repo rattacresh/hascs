@@ -120,6 +120,9 @@ void InitWorkstation(char *WinName)
 	SDL_WM_SetCaption(WinName, WinName);    
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
 		SDL_DEFAULT_REPEAT_INTERVAL);
+
+	type = 1;
+	work.x = 0; work.y = 0; work.w = 640; work.h = 400;
 #if 0
 
 	SDL_Color colors[256];
@@ -345,27 +348,30 @@ int LoadAndRun(char *Prg, char *Arg)
  */
 void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 {
-	  SDL_Rect sourceRect, destRect;
+	SDL_Rect sourceRect, destRect;
 
-	  sourceRect.x = sx; 
-	  sourceRect.y = sy;
-	  sourceRect.w = width; 
-	  sourceRect.h = height;
+	sourceRect.x = sx;
+	sourceRect.y = sy;
+	sourceRect.w = width; 
+	sourceRect.h = height;
 
-	  destRect.x = dx; 
-	  destRect.y = dy;
-	  destRect.w = width; 
-	  destRect.h = height;
+	sourceRect.w += sourceRect.x-(sourceRect.x/8*8);
+	sourceRect.x /= 8;
 
-	  int copy_err;
-	  if (direction == 4) {     /* Pic    -> Buffer */
-		  copy_err = SDL_BlitSurface(PicMFDBAdr, &sourceRect, BufferMFDBAdr, &destRect);	  
-	  } else {                  /* Buffer -> Buffer  */
-		  copy_err = SDL_BlitSurface(BufferMFDBAdr, &sourceRect, BufferMFDBAdr, &destRect);	  
-	  }
-	  
-	  if (copy_err)
-		  printf("Copy Error: %i\n", copy_err);
+	destRect.x = dx; 
+	destRect.y = dy;
+	destRect.w = width; 
+	destRect.h = height;
+
+	int copy_err;
+	if (direction == 4) {     /* Pic    -> Buffer */
+		copy_err = SDL_BlitSurface(PicMFDBAdr, &sourceRect, BufferMFDBAdr, &destRect);	  
+	} else {                  /* Buffer -> Buffer  */
+		copy_err = SDL_BlitSurface(BufferMFDBAdr, &sourceRect, BufferMFDBAdr, &destRect);	  
+	}
+	
+	if (copy_err)
+		printf("Copy Error: %i\n", copy_err);
 }
 
 /**
@@ -569,21 +575,35 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 	void RedrawWindow(SDL_Rect frame)
 	{
 		SDL_Rect r, s;
+		static int xxx=128;
 		/*UpdateWindow(TRUE);*/
 		r.x = r.y = 0;
 		r.w = ScreenMFDBAdr->w;
 		r.h = ScreenMFDBAdr->h;
+#if 0
+		frame.x=128;//xxx--;
+		frame.y=144;
+		frame.w=xxx++;//512;
+		frame.h=64;
+#endif
+		printf("Redraw(%d %d %d %d)", frame.x, frame.y,
+			frame.w, frame.h);
 		if (RcIntersect(&frame, &r)) {
 			/*GrafMouse(mouseOff, NIL);*/
 			/* Pufferkoordinaten */
 			s.x = r.x - work.x + XOff;
 			s.y = r.y - work.y + YOff;
 			s.w = r.w; s.h = r.h;
+			s.w += s.x-(s.x/8*8);
+			s.x /= 8;
+			printf(" => Blit %d %d %d %d ",	s.x,s.y,s.w,s.h);
 			SDL_BlitSurface(BufferMFDBAdr, &s, ScreenMFDBAdr, &r);
-			printf("Update %d %d %d %d", r.x, r.y, r.w, r.h);
+			//SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
+			printf("=> Update %d %d %d %d", r.x, r.y, r.w, r.h);
 			SDL_UpdateRect(ScreenMFDBAdr, r.x, r.y, r.w, r.h);
 			/*GrafMouse(mouseOn, NIL);*/
 		}
+		printf("\n");
 		/*UpdateWindow(FALSE);*/
 	}
 
@@ -619,6 +639,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		if (type == 0) { /* Fenster wieder normal */
 			ScreenMFDBAdr = SDL_SetVideoMode(0, 0, 0, 
 				ScreenMFDBAdr->flags & ~SDL_FULLSCREEN);
+			SDL_Flip(ScreenMFDBAdr);
 			type = 1;
 		} else {
 			save.w = ScreenMFDBAdr->w;
@@ -626,6 +647,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			type = 0;
 			ScreenMFDBAdr = SDL_SetVideoMode(0, 0, 0,
 				ScreenMFDBAdr->flags | SDL_FULLSCREEN);
+			SDL_Flip(ScreenMFDBAdr);
 			XOff = 0; YOff = 0;
 		}
 		work.x = 0;
@@ -649,10 +671,12 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 #define y (*ref_y)
 #define w (*ref_w)
 #define h (*ref_h)
+		printf("Correct(%d %d %d %d)", x, y, w, h);
 		w = Min(w, 640);
 		h = Min(h, 400);
 		x = Min(x, 640-w); x = Max(0, x); /* XOff */
 		y = Min(y, 400-h); y = Max(0, y); /* YOff */
+		printf(" = (%d %d %d %d)\n", x, y, w, h);
 #undef x
 #undef y
 #undef w
@@ -690,6 +714,9 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			break;
 		case SDLK_l : if (key.mod & KMOD_CTRL) { /* Control L */
 				FreeCache(0); key.sym = '\0';
+			}
+		case SDLK_r : if (key.mod & KMOD_CTRL) { /* Control R */
+				Redraw = TRUE; key.sym = '\0';
 			}
 		default:
 			break;
@@ -861,14 +888,17 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 
 		*events = 0;
 		*doneClicks = ((Save.mButtons & mouse) == mouse >> 8);
-		printf("MultiEvent() %d %d %d %d\n", *doneClicks, Save.mButtons, mouse, clicks);
-
+		printf("MultiEvent() %d %d %d %d work=%d %d %d %d\n", *doneClicks, Save.mButtons, mouse, clicks, work.x,work.y,work.w,work.h);
 
 		while (!(flags & (SDL_MOUSEBUTTONUP|SDL_MOUSEBUTTONDOWN))
 		    || *doneClicks <= clicks)
 		{
-			printf("calling SDL_WaitEventTimeout %d %d %d %d\n",
+#if 1
+			printf("calling SDL_WaitEventTimeout %d %d %d %d\r",
 				flags, timer, flags&timer, (int)time);
+			fflush(stdout);
+#endif
+
 			switch (SDL_WaitEventTimeout(msg,
 					flags & timer ? time : -1))
 			{
@@ -960,11 +990,21 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		*keyState = Save.keyState;
 		*key = Save.key;
 
+		if (*doneClicks > clicks)
+			*events |= buttonevent & flags;
 		if (*doneClicks > 0)
 			(*doneClicks)--;
-		if (*doneClicks >= clicks)
-			*events |= buttonevent & flags;
 
+		printf("Exit MultiEvent() because of");
+		if (*events & keyboard)
+			printf(" keyboard");
+		if (*events & mouseButton)
+			printf(" mouseButton");
+		if (*events & message)
+			printf(" message");
+		if (*events & timer)
+			printf(" timer");
+		printf("\n");
 		return;
 	}
 	printf("WaitInput()");
@@ -975,6 +1015,9 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		rect.y = (int)NewYMin * 16 - YOff + work.y;
 		rect.w = ((int)(NewXMax - NewXMin) + 1) * 16;
 		rect.h = ((int)(NewYMax - NewYMin) + 1) * 16;
+		printf("Update %d %d %d %d | %d %d %d %d\n",
+			NewXMin,NewYMin,NewXMax,NewYMax,
+			rect.x,rect.y,rect.w,rect.h);
 		RedrawWindow(rect);
 		NewXMin = 40; NewYMin = 25; NewXMax = 0; NewYMax = 0;
 	}
