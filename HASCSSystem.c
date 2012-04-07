@@ -878,6 +878,17 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 				case SDL_KEYDOWN:
 					printf("The %s key was pressed (code %i)!\n",
 					       SDL_GetKeyName(msg->key.keysym.sym), msg->key.keysym.sym);		
+					if (msg->key.keysym.sym == SDLK_RSHIFT
+					 || msg->key.keysym.sym == SDLK_LSHIFT
+					 || msg->key.keysym.sym == SDLK_RCTRL
+					 || msg->key.keysym.sym == SDLK_LCTRL
+					 || msg->key.keysym.sym == SDLK_RALT
+					 || msg->key.keysym.sym == SDLK_LALT
+					 || msg->key.keysym.sym == SDLK_RMETA
+					 || msg->key.keysym.sym == SDLK_LMETA
+					 || msg->key.keysym.sym == SDLK_LSUPER
+					 || msg->key.keysym.sym == SDLK_RSUPER)
+						continue;
 					Save.keyState = msg->key.keysym.mod;
 					Save.key = msg->key.keysym;
 					if (~flags & (1<<SDL_KEYDOWN))
