@@ -525,7 +525,7 @@ int SelectFile(char *msg, char *path, char *file)
 	/*GrafMouse(arrow, NIL);
 	EasyGEM1.SelectFile(msg, pathandfile, ok);
 	GrafMouse(bee, NIL);*/
-	printf("Select [%s] [%s]: ", path, pathandfile);
+	printf("Select [%s] [%s]: %s ", path, pathandfile, msg);
 	fgets(pathandfile, sizeof pathandfile, stdin);
 	if ((ok = strlen(pathandfile)) && pathandfile[ok-1] == '\n')
 		pathandfile[ok-1] = '\0';
