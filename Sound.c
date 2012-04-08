@@ -221,11 +221,12 @@ static void PlaySoundSDL(SoundType *ref_s)
 #define s (*ref_s)
 	if (!SoundAusgabe) return;
 
-
+#if 0
 	printf("PlaySoundSDL(Start = %p, Length = %ld, "
 		"ende = %p, Freq = %d, Loop = %d)\n", 
 		s.Buffer, s.Length,
 		s.Buffer + s.Length, s.Frequency, DoLoop);
+#endif
 	SDL_LockAudio();
 	SoundCB.loop = DoLoop;
 	SoundCB.mode = GetFreq(s.Frequency);
