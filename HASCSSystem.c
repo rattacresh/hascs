@@ -461,13 +461,13 @@ int FileName(char *Pattern, char *FileName)
 		Assign(Pattern, LastFileName, ok);
 	}
 	if (!result) {
-		/*char *sep;*/
+		char *sep;
 		if (GlobCounter >= DTABuffer.gl_pathc)
 			result = -1;
-		else /*if ((sep = strrchr(DTABuffer.gl_pathv[GlobCounter], 
+		else if ((sep = strrchr(DTABuffer.gl_pathv[GlobCounter], 
 					DIRSEPCHR)))
 			Assign(sep + 1, FileName, ok);
-		else */
+		else
 			Assign(DTABuffer.gl_pathv[GlobCounter], FileName, ok);
 	}
 	return result >= 0;
