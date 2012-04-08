@@ -70,7 +70,7 @@ static void MakeScreen(unsigned SpriteArray)
 		PrintAt(54,3,"   Rechts");  OutlineBar(27, 3, 32, 3);
 		PrintAt(54,5,"  Spiegeln"); OutlineBar(27, 5, 32, 5);
 		PrintAt(54,6,"  Rotieren"); OutlineBar(27, 6, 32, 6);
-		PrintAt(54,7,"   Füllen");  OutlineBar(27, 7, 32, 7);
+		PrintAt(54,7,"   F\x81llen");OutlineBar(27, 7, 32, 7);
 		PrintAt(54,8,"   Farbe");   OutlineBar(27, 8, 32, 8);
 
 		FillRectangle(34, SpriteArray+5, 39, SpriteArray+5, &SystemSprite[0]);
@@ -103,7 +103,7 @@ static void MakeScreen(unsigned SpriteArray)
 	void CopyRight(void)
 	{
 		PrintAt(15,22,"      HASCS III - Sprite Editor Version 1.00");
-		PrintAt(15,23,"     Copyright © 1987-1993 Alexander Kirchner");
+		PrintAt(15,23,"     Copyright \xbd 1987-1993 Alexander Kirchner");
 	}
 
 
@@ -387,6 +387,8 @@ static void DoEdit(void)
 	while (Weiter) {
 		WaitInput(&MausX, &MausY, &MausButton, &Taste, -1);
 		MausX = MausX / 16; MausY = MausY / 16;
+		printf("Ev: %d %d %d %d\n", MausX, MausY, MausLinks&MausButton,
+				MausRechts&MausButton);
 		if (MausX >= 27 && MausX <= 32 && MausY <= 8)
 			MenueWahl(0, MausY);
 		else if (MausX >= 34 && MausY <= 39 && MausY <= 8)

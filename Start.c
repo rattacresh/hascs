@@ -140,7 +140,7 @@ void StartGame()
 		OutputText("          HASCS III         ");
 		OutputText("         Version 1.43       ");
 		OutputText("                            ");
-		OutputText("    Copyright © 1987-1995   ");
+		OutputText("    Copyright \xbd 1987-1995   ");
 		OutputText("      Alexander Kirchner    ");
 		OutputText("                            ");
 		

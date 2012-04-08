@@ -147,7 +147,7 @@ static unsigned FindFlags(unsigned start, BITSET f)
 {
 	unsigned i;
 	for (i = start; i <= DScreen.n; i++)
-		if (DScreen.Obj[i].Flags * f != 0)
+		if ((DScreen.Obj[i].Flags & f) != 0)
 			return i;
 	return 0;
 }

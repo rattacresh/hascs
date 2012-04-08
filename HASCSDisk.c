@@ -279,30 +279,30 @@ void LoadOrSaveSprites(int Load, char *FileName)
 	int h;
 	unsigned long Count;
 	String60Typ s;
-	char SpriteArrayPars[2*(sizeof (SpriteArrayType) / sizeof (BITSET))
+	char SpriteArrayBuf[2*(sizeof (SpriteType) / sizeof (uint16_t))
 		* MaxSprites];
 	
-	void MakeSpriteArrayPars(SpriteArrayType s)
+	void MakeSpriteArrayBuf(SpriteArrayType s)
 	{
 		int i, j, k;
 		for (i = k = 0; i < MaxSprites; i++)
 			for (j = 0; 
-			     j < sizeof (SpriteArrayType) / sizeof (BITSET);
+			     j < sizeof (SpriteType) / sizeof (uint16_t);
 			     j++, k+=2)
-				s[i][j] = SpriteArrayPars[k]*256
-					+ SpriteArrayPars[k+1];
+				SpriteArrayBuf[k] = s[i][j] / 256;
+				SpriteArrayBuf[k+1] = s[i][j] % 256;
 	}
 
-	void AuswertSpriteArrayPars(SpriteArrayType s)
+	void AuswertSpriteArrayBuf(SpriteArrayType s)
 	{
 		int i, j, k;
 		for (i = k = 0; i < MaxSprites; i++)
 			for (j = 0;
-			     j < sizeof (SpriteArrayType) / sizeof (BITSET);
+			     j < sizeof (SpriteType) / sizeof (uint16_t);
 			     j++, k+=2)
 			{
-				SpriteArrayPars[k] = s[i][j] / 256;
-				SpriteArrayPars[k+1] = s[i][j] % 256;
+				s[i][j] = SpriteArrayBuf[k]*256
+					+ SpriteArrayBuf[k+1];
 			}
 	}
 
@@ -313,29 +313,30 @@ void LoadOrSaveSprites(int Load, char *FileName)
 		if (FileError) {
 			Fehler("Muster Lesefehler: ", s); return;
 		}
-		Count = sizeof SpriteArrayPars;
-		ReadFile(h, Count, SpriteArrayPars);
-		AuswertSpriteArrayPars(FelderSprite);
-		ReadFile(h, Count, SpriteArrayPars);
-		AuswertSpriteArrayPars(FelderSprite);
-		ReadFile(h, Count, SpriteArrayPars);
-		AuswertSpriteArrayPars(FelderSprite);
-		ReadFile(h, Count, SpriteArrayPars);
-		AuswertSpriteArrayPars(FelderSprite);
+		Count = sizeof SpriteArrayBuf;
+		printf("count=%d\n", Count);
+		ReadFile(h, Count, SpriteArrayBuf);
+		AuswertSpriteArrayBuf(FelderSprite);
+		ReadFile(h, Count, SpriteArrayBuf);
+		AuswertSpriteArrayBuf(MonsterSprite);
+		ReadFile(h, Count, SpriteArrayBuf);
+		AuswertSpriteArrayBuf(SystemSprite);
+		ReadFile(h, Count, SpriteArrayBuf);
+		AuswertSpriteArrayBuf(GegenSprite);
 	} else {
 		h = CreateFile(s);
 		if (FileError) {
 			Fehler("Muster Schreibfehler: ", s); return;
 		}
-		Count = sizeof SpriteArrayPars;
-		MakeSpriteArrayPars(FelderSprite);
-		WriteFile(h, Count, SpriteArrayPars);
-		MakeSpriteArrayPars(MonsterSprite);
-		WriteFile(h, Count, SpriteArrayPars);
-		MakeSpriteArrayPars(SystemSprite);
-		WriteFile(h, Count, SpriteArrayPars);
-		MakeSpriteArrayPars(GegenSprite);
-		WriteFile(h, Count, SpriteArrayPars);
+		Count = sizeof SpriteArrayBuf;
+		MakeSpriteArrayBuf(FelderSprite);
+		WriteFile(h, Count, SpriteArrayBuf);
+		MakeSpriteArrayBuf(MonsterSprite);
+		WriteFile(h, Count, SpriteArrayBuf);
+		MakeSpriteArrayBuf(SystemSprite);
+		WriteFile(h, Count, SpriteArrayBuf);
+		MakeSpriteArrayBuf(GegenSprite);
+		WriteFile(h, Count, SpriteArrayBuf);
 	}
 	CloseFile(h);
 }
@@ -636,7 +637,7 @@ static void MakeLevelName(String60Typ s, unsigned org, unsigned n)
 		break;
 	}
 	if (n == 0)
-		Concat(s, s, ".???");
+		Concat(s, s, "???");
 	else {
 		i = 0;
 		while (s[i] != '\0') i++;

@@ -45,11 +45,11 @@ static void BWOut(char c)
 			n = 80 + c - 'A';
 		else if (c == ' ')
 			n = 0;
-		else if (c == 'Ä' || c == 'ä')
+		else if (c == '\x8e' || c == '\x84')
 			n = 106;
-		else if (c == 'Ö' || c == 'ö')
+		else if (c == '\x99' || c == '\x94')
 			n = 107;
-		else if (c == 'Ü' || c == 'ü')
+		else if (c == '\x9a' || c == '\x81')
 			n = 108;
 		else if (c == '_')
 			n = 1;
@@ -514,9 +514,9 @@ char cap(char ch)
 {
 	if (ch >= 'a' && ch <= 'z')
 		return ch - 'a' + 'A';
-	else if (ch == 'ä') return 'Ä';
-	else if (ch == 'ü') return 'Ü';
-	else if (ch == 'ö') return 'Ö';
+	else if (ch == '\x84') return '\x8e';
+	else if (ch == '\x81') return '\x9a';
+	else if (ch == '\x94') return '\x99';
 	else return ch;
 }
 

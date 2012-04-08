@@ -64,11 +64,10 @@ unsigned AnzCache = 0, CacheCounter = 0;
     
 static SDL_Surface *ScreenMFDBAdr, *BufferMFDBAdr, *PicMFDBAdr;
 
-//static SearchRec DTABuffer;
 static struct stat StatBuf;
-static glob_t *GlobBufAdr;
+static glob_t DTABuffer;
 static int GlobCounter;
-static char *LastFileName = "";
+static char LastFileName[60] = "";
 
 static unsigned char *BufferAdr = NULL;
 static unsigned long BufferLen = 0;
@@ -418,19 +417,25 @@ int FileName(char *Pattern, char *FileName)
 	int result;
 	int ok;
 	if (StrEqual(LastFileName, Pattern)) {
+		GlobCounter++;
 		result = 0;
-		if (GlobCounter < GlobBufAdr->gl_pathc - 1)
-			GlobCounter++;
-		else
-			result = -1;
 	} else {
-		if (GlobBufAdr)
-			globfree(GlobBufAdr);
-		result = glob(Pattern, 0, NULL, GlobBufAdr);
+		if (DTABuffer.gl_pathv)
+			globfree(&DTABuffer);
+		result = glob(Pattern, 0, NULL, &DTABuffer);
 		GlobCounter = 0;
 		Assign(Pattern, LastFileName, ok);
 	}
-	Assign(GlobBufAdr->gl_pathv[GlobCounter], FileName, ok);
+	if (!result) {
+		char *sep;
+		if (GlobCounter >= DTABuffer.gl_pathc)
+			result = -1;
+		else if ((sep = strrchr(DTABuffer.gl_pathv[GlobCounter], 
+					DIRSEPCHR)))
+			Assign(sep + 1, FileName, ok);
+		else
+			Assign(DTABuffer.gl_pathv[GlobCounter], FileName, ok);
+	}
 	return result >= 0;
 }
 
@@ -469,6 +474,15 @@ void CloseFile(int Handle)
 
 void DeleteFile(char *Name)
 {
+	if (strchr(Name, '*') || strchr(Name, '?')) {
+		char file[61];
+		FileError = FileName(Name, file) == 0;
+		if (FileError) {
+			printf("Would remove %s\n", Name);
+			/*FileError = remove(Name) >= 0;*/
+		}
+		return;
+	}
 	FileError = remove(Name) < 0;
 }
 
@@ -560,14 +574,13 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 #define b (*ref_b)
 
 #define keyboard (1<<SDL_KEYDOWN)
-#define mouseButton ((1<<SDL_MOUSEBUTTONDOWN)|(1<<SDL_MOUSEBUTTONDOWN))
+#define mouseButton ((1<<SDL_MOUSEBUTTONUP)|(1<<SDL_MOUSEBUTTONDOWN))
 #define message ((1<<SDL_VIDEORESIZE)|(1<<SDL_VIDEOEXPOSE)\
 		|(1<<SDL_QUIT)|(1<<SDL_SYSWMEVENT)|(1<<SDL_ACTIVEEVENT))
 #define timer (1<<SDL_USEREVENT)
-#define msBut1 SDL_BUTTON_LEFT
-#define msBut2 SDL_BUTTON_RIGHT
+#define msBut1 (1<<SDL_BUTTON_LEFT)
+#define msBut2 (1<<SDL_BUTTON_RIGHT)
 #define lookForEntry SDL_MOUSEMOTION
-
 	typedef BITSET EventSet;
 	typedef struct {
 		unsigned x, y;
@@ -845,32 +858,8 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		if (type != 0) SetSlider();
 	}
 
-	int SDL_WaitEventTimeout(SDL_Event *event, int timeout)
-	{
-		Uint32 expiration = 0;
-		if (timeout > 0)
-			expiration = SDL_GetTicks() + timeout;
-
-		for (;;) {
-			SDL_PumpEvents();
-			switch (SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_ALLEVENTS)) {
-			case -1:
-				/* fixed from SDL 2 beta to make it
-				 * distinguishable from timeout*/
-				return -1;
-			case 1:
-				return 1;
-			case 0:
-				if (!timeout 
-				 || (timeout > 0 
-				  && SDL_GetTicks() >= expiration))
-					return 0;
-				SDL_Delay(10);
-			}
-		}
-	}
 	void MultiEvent(EventSet flags, unsigned mouse, unsigned buttons,
-		unsigned clicks, unsigned mm1flags, SDL_Rect *rect1,
+		unsigned state, unsigned mm1flags, SDL_Rect *rect1,
 		unsigned mm2flags, SDL_Rect *rect2, 
 		SDL_Event *msg, unsigned long time,
 		Point *mLoc, unsigned *mButtons,
@@ -879,12 +868,15 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 	{
 		int buttonevent = (1<<SDL_MOUSEBUTTONUP)
 			|(1<<SDL_MOUSEBUTTONDOWN);
+		Uint32 expiration = 0;
 		static struct {
 			Point mLoc;
 			unsigned mButtons;
 			SDLMod keyState;
 			SDL_keysym key;
 		} Save;
+
+		int independ;
 
 		int Motion(unsigned flags,
 			unsigned mm1flags, SDL_Rect *rect1,
@@ -909,21 +901,22 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 					   != Inside(newmLoc, rect2)));
 		}
 
+		independ = mouse & 0x100;
+		mouse &= ~independ;
 		*events = 0;
-		*doneClicks = ((Save.mButtons & mouse) == mouse >> 8);
-		printf("MultiEvent() %d %d %d %d work=%d %d %d %d\n", *doneClicks, Save.mButtons, mouse, clicks, work.x,work.y,work.w,work.h);
-
-		while (!(flags & (SDL_MOUSEBUTTONUP|SDL_MOUSEBUTTONDOWN))
-		    || *doneClicks <= clicks)
-		{
-#if 1
-			printf("calling SDL_WaitEventTimeout %d %d %d %d\r",
-				flags, timer, flags&timer, (int)time);
-			fflush(stdout);
+		*doneClicks = independ
+			? (Save.mButtons & buttons) != (state & buttons)
+			: (Save.mButtons & buttons) == (state & buttons);
+#if 0
+		printf("MultiEvent() %d %d|%d %d %d %d\n", *doneClicks, Save.mButtons, independ, mouse, buttons, state);
 #endif
+		if (flags & timer)
+			expiration = SDL_GetTicks() + time;
 
-			switch (SDL_WaitEventTimeout(msg,
-					flags & timer ? time : -1))
+		do {
+			SDL_PumpEvents();
+			switch (SDL_PeepEvents(msg, 1, SDL_GETEVENT, 
+					SDL_ALLEVENTS))
 			{
 				Point oldmLoc;
 			case 1: /* SDL Event */
@@ -956,12 +949,15 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 					goto CountClicks;
 				case SDL_MOUSEBUTTONDOWN:
 					printf("Mouse button %d pressed at (%d,%d)\n", msg->button.button, msg->button.x, msg->button.y);		
-					buttonevent = (1<<SDL_MOUSEBUTTONUP);
+					buttonevent = (1<<SDL_MOUSEBUTTONDOWN);
 					Save.mButtons
 						|= (1<<msg->button.button);
 				CountClicks:
-					*doneClicks += (Save.mButtons & mouse)
-								== mouse >> 8;
+					*doneClicks += independ
+						? (Save.mButtons & buttons)
+						   != (state & buttons)
+						: (Save.mButtons & buttons) 
+						   == (state & buttons);
 
 					Save.mLoc.x = msg->button.x;
 					Save.mLoc.y = msg->button.y;
@@ -1000,25 +996,46 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 				printf("Fehler beim Warten auf Events!\n");
 				continue;
 			case 0: /* Timeout */
-				printf("Timeout\n");
-				if (~flags & (1<<SDL_USEREVENT))
+				if (flags & timer
+				 && SDL_GetTicks() >= expiration)
+				{
+#if 0
+					printf("Timeout after %d\n",
+						flags & timer ? time : -1);
+#endif
+					*events |= (1<<SDL_USEREVENT);
+				} else if (!(flags & ((1<<SDL_MOUSEBUTTONUP)
+					|(1<<SDL_MOUSEBUTTONDOWN)))
+				    || *doneClicks < mouse)
+				{
+					SDL_Delay(10);
 					continue;
-
-				*events |= (1<<SDL_USEREVENT);
+				}
 			}
+
 			break;
-		}
+		} while (!(flags & ((1<<SDL_MOUSEBUTTONUP)
+				|(1<<SDL_MOUSEBUTTONDOWN)))
+		    || *doneClicks < mouse);
+
 		*mLoc = Save.mLoc;
 		*mButtons = Save.mButtons;
 		*keyState = Save.keyState;
 		*key = Save.key;
 
-		if (*doneClicks > clicks)
+		if (*doneClicks >= mouse)
 			*events |= buttonevent & flags;
-		if (*doneClicks > 0)
-			(*doneClicks)--;
-
-		printf("Exit MultiEvent() because of");
+#if 0
+		printf("Exit MultiEvent (");
+		if (flags & keyboard)
+			printf(" keyboard");
+		if (flags & mouseButton)
+			printf(" mouseButton");
+		if (flags & message)
+			printf(" message");
+		if (flags & timer)
+			printf(" timer");
+		printf(") because of (%d) ", *events);
 		if (*events & keyboard)
 			printf(" keyboard");
 		if (*events & mouseButton)
@@ -1028,9 +1045,12 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		if (*events & timer)
 			printf(" timer");
 		printf("\n");
+#endif
 		return;
 	}
-	printf("WaitInput()\n");
+#if 0
+	printf("WaitInput(WarteZeit=%d)\n", WarteZeit);
+#endif
 
 	ok = FALSE; b = 0; ch = '\0';
 	if (NewXMin < 40) { /* Teilbereich aktualisieren */
@@ -1048,7 +1068,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 	if (WarteZeit < 0) {
 		/*GrafMouse(arrow, NIL);*/
 		time = mousetime; /* Wartezeit bis losgelassen */
-		flags = keyboard |mouseButton | message | timer;
+		flags = keyboard | mouseButton | message | timer;
 	} else {
 		time = ABS(WarteZeit);
 		flags = keyboard | message | timer;
@@ -1062,9 +1082,9 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			&events);
 		if (message & events) Message();
 		if (mouseButton & events) {
-			if (mouse == msBut1) { /* Maus losgelassen */
+			if (mouse == 1) { /* Maus losgelassen */
 				losgelassen = TRUE;
-				mouse = msBut1 | (msBut1 << 8); /* auf Klick warten */
+				mouse = 257; /* auf Klick warten */
 				mousetime = 1;
 			} else { /* Maus gedrückt */
 				Button();
@@ -1077,12 +1097,18 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		}
 		if (keyboard & events) Keyboard();
 		if (timer & events) {
-			mouse = msBut1 | (msBut1 << 8); /* auf gedrückte Maus warten */
+			mouse = 257; /* auf gedrückte Maus warten */
 			ok = WarteZeit >= 0;
 			flags = keyboard | mouseButton | message;
 		}
 	} while (!ok);
 	/*GrafMouse(bee, NIL);*/
+
+#if 0
+	printf("WaitInput(WarteZeit=%d) returns (x=%d,y=%d,b=%d,ch=%d)\n",
+		WarteZeit, xx, yy, b, ch);
+#endif
+
 
 #undef xx
 #undef yy

@@ -99,14 +99,14 @@ static void XPrintMenue(void)
 	OutlineBar(25, 0, 39, 13);
 	PrintMenueEntry(25, 0, "Felder");
 	PrintMenueEntry(25, 1, "Monster");
-	PrintMenueEntry(25, 2, "Gegenstände");
+	PrintMenueEntry(25, 2, "Gegenst\x84nde");
 	PrintMenueEntry(25, 3, "Parameter");
 	for (i = 0; i <= 6; i++)
 		InvertFeld(25+i, Modus);
 
-	PrintMenueEntry(25, 5, "Block füllen");
+	PrintMenueEntry(25, 5, "Block f\x81llen");
 	PrintMenueEntry(25, 6, "... kopieren");
-	PrintMenueEntry(25, 7, "... einfügen");
+	PrintMenueEntry(25, 7, "... einf\x81gen");
 
 	PrintMenueEntry(25, 9, "Generator");
 
@@ -162,9 +162,10 @@ static void PrintLevelPart(void)
 	unsigned x, y, i, j;
 	
 	for (i = 0; i <= 23; i++)
-		for (j = 0; j <= 23; j++)
+		for (j = 0; j <= 23; j++) {
 			NormalKoords(i + XOff, j + YOff, &x, &y);
 			PrintFeld(x, y);
+		}
 }
 
 static void PrintInfo(unsigned x, unsigned y)
@@ -182,11 +183,11 @@ static void PrintInfo(unsigned x, unsigned y)
 	case 0: SetSprite(16, 24, &FelderSprite[SpriteNummer]);
 		PrintAt(36, 24, "    "); break;
 	case 1: SetSprite(16, 24, &MonsterSprite[SpriteNummer]);
-		PrintAt(36, 24, "„"); PrintCard(AnzahlMonster, 3); break;
+		PrintAt(36, 24, "\xe4"); PrintCard(AnzahlMonster, 3); break;
 	case 2: SetSprite(16, 24, &SystemSprite[SpriteNummer]);
-		PrintAt(36, 24, "„"); PrintCard(AnzahlGegen, 3); break;
+		PrintAt(36, 24, "\xe4"); PrintCard(AnzahlGegen, 3); break;
 	case 3: SetSprite(16, 24, &SystemSprite[SpriteNummer]);
-		PrintAt(36, 24, "„"); PrintCard(AnzahlParameter, 3); break;
+		PrintAt(36, 24, "\xe4"); PrintCard(AnzahlParameter, 3); break;
 	}
 
 	SetSprite(21, 24, &SystemSprite[8]);
@@ -342,15 +343,15 @@ static void Generator(void)
 		nf = AddObject(11, 2, 6, 1, "Feld: ", Exit|Outlined);
 		CardToString(SpriteNummer, 1, s);
 		/*d =*/ AddObject(18, 2, 1, 1, s, SpriteFill);
-		gr = AddObject(2, 4, 8, 1, "Größe: ", Editable);
+		gr = AddObject(2, 4, 8, 1, "Gr\x94\xe1""e: ", Editable);
 		SetInputCard(gr, Groesse);
 		an = AddObject(11, 4, 8, 1, "Nachbarn: ", Editable);
 		SetInputCard(an, Anzahl);
 		zu = AddObject(2, 6, 8, 1, "Zufall Koord.", Outlined|Selectable|Centered);
 		SetFlagSelected(zu, GZufall);
 
-		fa = AddObject(2, 8, 8, 1, "Feld Ändern", Outlined|Centered|Exit);
-		ll = AddObject(11, 8, 8, 1, "Level löschen", Outlined|Centered|Exit);
+		fa = AddObject(2, 8, 8, 1, "Feld \x8endern", Outlined|Centered|Exit);
+		ll = AddObject(11, 8, 8, 1, "Level l\x94schen", Outlined|Centered|Exit);
 		ok = AddObject(2, 10, 8, 1, "Generieren", Outlined|Centered|Exit);
 		ab = AddObject(11, 10, 8, 1, "Abbruch", Outlined|Centered|Exit);
 		DrawScreen();
@@ -418,7 +419,7 @@ static void InputMonster(unsigned x, unsigned y, unsigned neu, unsigned *ref_t)
 	s = AddObject(17, 2, 6, 1, "Magisch", Outlined|Selectable|Centered);
 	/*d =*/ AddObject(17, 3, 6, 1, "Schnell", Outlined|Selectable|Centered);
 	/*d =*/ AddObject(17, 4, 6, 1, "Fernkampf", Outlined|Selectable|Centered);
-	/*d =*/ AddObject(17, 5, 6, 1, "Tür öffnen", Outlined|Selectable|Centered);
+	/*d =*/ AddObject(17, 5, 6, 1, "T\x81r \x94""ffnen", Outlined|Selectable|Centered);
 	/*d =*/ AddObject(17, 6, 6, 1, "Fliegt", Outlined|Selectable|Centered);
 	/*d =*/ AddObject(17, 7, 6, 1, "Schwimmt", Outlined|Selectable|Centered);
 	/*d =*/ AddObject(17, 8, 6, 1, "Geist", Outlined|Selectable|Centered);
@@ -638,6 +639,7 @@ static void InputLevelFeld(unsigned x, unsigned y, int new, unsigned *ref_f)
 #undef f
 }
 
+#if 0
 static void FillBlock(unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsigned n)
 {
 	unsigned i, j, x, y;
@@ -646,6 +648,7 @@ static void FillBlock(unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsign
 		for (j = y1; j <= y2; j++)
 			Level[x][y].Feld = n;
 }
+#endif
 
 
 /************************************************************************/
@@ -1005,7 +1008,7 @@ static void BlockFuellen(void)
 {
 	unsigned i, j, x, y, x1, y1, x2, y2;
 
-	if (BlockDefine(" BLOCK FÜLLEN ", &x1, &y1, &x2, &y2)) {
+	if (BlockDefine(" BLOCK F\x9aLLEN ", &x1, &y1, &x2, &y2)) {
 		for (x = x1; x <= x2; x++)
 			for (y = y1; y <= y2; y++) {
 				NormalKoords(x + XOff, y + YOff, &i, &j);
@@ -1038,7 +1041,7 @@ static void BlockEinfuegen(void)
 	
 	if (CopyWidth == 0 || CopyHeight == 0)
 		return;
-	if (BlockDefine(" BLOCK EINFÜGEN ", &x1, &y1, &x2, &y2)) {
+	if (BlockDefine(" BLOCK EINF\x9aGEN ", &x1, &y1, &x2, &y2)) {
 		for (x = 0; x <= CopyWidth - 1; x++)
 			for (y = 0; y <= CopyHeight - 1; y++) {
 				NormalKoords(x1 + x + XOff, y1 + y + YOff, &i, &j);
@@ -1186,7 +1189,7 @@ static unsigned CopyRight(void)
 	NewScreen(7, 4, 25, 13, "");
 	/*d =*/ AddObject(2, 2, 20, 1, "HASCS III", Centered);
 	/*d =*/ AddObject(2, 4, 20, 1, "Editor Version 1.43", Centered);
-	/*d =*/ AddObject(2, 6, 20, 1, "Copyright © 1987-1995 Alexander Kirchner", 
+	/*d =*/ AddObject(2, 6, 20, 1, "Copyright \xbd 1987-1995 Alexander Kirchner", 
 			                          Centered);
 	b = AddObject(7, 9, 13, 1, "Benutzernummer: ", Editable);
 	DrawScreen(); /*d =*/ HandleScreen();

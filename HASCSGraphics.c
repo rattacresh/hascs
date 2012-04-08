@@ -59,13 +59,13 @@ static void SetMonoChar(unsigned x,unsigned y, char ch)
 	uint16_t m;
 
 	i = y * 640 + x/2;
-	m = x % 2 ? 0x00ff : 0xff00;
+	m = x % 2 ? 0xff00 : 0x00ff;
 	for (h = 0; h <= 15; h++) {
 		Bildschirm[i] = htons((ntohs(Bildschirm[i]) & m)
-			| (x % 2 ? (ch%2 ? GegenSprite[ch / 2][h] << 8
-					 : GegenSprite[ch / 2][h] & 0xff00)
-			         : (ch%2 ? GegenSprite[ch / 2][h] & 0x00ff
-					 : GegenSprite[ch / 2][h] >> 8)));
+			| (x % 2 ? (ch%2 ? GegenSprite[ch / 2][h] & 0x00ff
+					 : GegenSprite[ch / 2][h] >> 8)
+			         : (ch%2 ? GegenSprite[ch / 2][h] << 8
+					 : GegenSprite[ch / 2][h] & 0xff00)));
 		i += 40;
 	}
 	x = x / 2;

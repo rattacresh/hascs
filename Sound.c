@@ -174,16 +174,21 @@ int LoadSound(unsigned n, SoundType *ref_s)
 static void PlaySoundDMA(SoundType *ref_s)
 {
 #define s (*ref_s)
+#if 0
 	union {
 		unsigned long ptr;
 		char e[4];
 	} ende;
+#endif
 
 	if (!SoundAusgabe) return;
 
 	EnterSupervisorMode(stack); /* Supervisormode */
+#if 0
 	sndmactl = 0; /* Stop */
+#endif
 	if (s.Buffer != /*HASCSSystem.*/NULL) {
+#if 0
 		ende.ptr = (unsigned long)s.Buffer + s.Length;
 		sndbashi = s.b[2];
 		sndbasmi = s.b[1];
@@ -196,6 +201,7 @@ static void PlaySoundDMA(SoundType *ref_s)
 			sndmactl = 3; /* Let's go loop... */
 		else
 			sndmactl = 1; /* Let's go... */
+#endif
 	}
 	LeaveSupervisorMode(stack);
 #undef s

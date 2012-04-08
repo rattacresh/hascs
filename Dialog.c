@@ -40,7 +40,7 @@
 #include "Sound.h"
 
 
-#define MaxCommand (1 + sizeof Command / sizeof *Command) /* Kommandos */
+#define MaxCommand (1 + sizeof XCommand / sizeof *XCommand) /* Kommandos */
 #define MaxOperator (1 + sizeof Operator / sizeof *Operator) /* Operatoren */
 #define MaxVariable (1 + sizeof Variable / sizeof *Variable) /* Variablen */
 
@@ -160,8 +160,9 @@ static CommandType XCommand[] = {
 };
 
 static OperatorType Operator[] = {
+	{"", 0}, /* Dummy for start index 1 */
+
 	/* Operatoren */
-	{"DUMMY", 0},
 	{":=", 1},
 	{"+", 2},
 	{"-", 3},
@@ -180,7 +181,7 @@ static OperatorType Operator[] = {
 
 
 static VariableType Variable[] = {
-	{"DUMMY", NULL, 0, NumberToken},
+	{"DUMMY", NULL, 0, NumberToken}, /* Dummy for start index 1 */
 	
 	/* Variablen */
 	{"SPIELER.TP", &Spieler.TP, 0, NumberToken},
