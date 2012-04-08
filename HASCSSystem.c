@@ -162,7 +162,7 @@ void InitWorkstation(char *WinName)
 void ExitWorkstation(int result)
 {
 	if (PicMFDBAdr)
-		SDL_FreeSurface(BufferMFDBAdr);
+		SDL_FreeSurface(PicMFDBAdr);
 	if (BufferMFDBAdr)
 		SDL_FreeSurface(BufferMFDBAdr);
 	atexit(SDL_Quit);
@@ -360,6 +360,8 @@ int LoadAndRun(char *Prg, char *Arg)
 void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 {
 	SDL_Rect sourceRect, destRect;
+	printf("Copy(%d, %d, %d, %d, %d, %d, %d)\n", direction,
+			sx, sy, width, height, dx, dy);
 
 	sourceRect.x = sx; sourceRect.y = sy;
 	sourceRect.w = width; sourceRect.h = height;
@@ -389,9 +391,16 @@ void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
  */
 void SetPicture(unsigned width, unsigned height, void *Picture)
 {
+	int i;
 	if (PicMFDBAdr)
-		SDL_FreeSurface(BufferMFDBAdr);
+		SDL_FreeSurface(PicMFDBAdr);
 	PicMFDBAdr = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, width/8, 0, 0, 0, 0);
+	/* Workaround für SDL-Bug, der Speicher uninitialisiert lässt, 
+	 * wodurch gegebenenfalls memcmp() in Map1to1 fehlschlägt und 
+	 * Copy() mit Fehler zurückkehrt.
+	 */
+	for (i = 0; i < PicMFDBAdr->format->palette->ncolors; i++)
+		PicMFDBAdr->format->palette->colors[i].unused = 0;
 	printf("PicMFDB wurde gesetzt\n");
 }
 
@@ -402,10 +411,14 @@ void SetPicture(unsigned width, unsigned height, void *Picture)
 void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
 	unsigned pitch = width/8;
+	int i;
 	printf("width %i height %i pitch %i\n", width, height, pitch);
 	if (BufferMFDBAdr)
 		SDL_FreeSurface(BufferMFDBAdr);
 	BufferMFDBAdr = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, pitch, 0, 0, 0, 0);
+	/* Wie oben */
+	for (i = 0; i < BufferMFDBAdr->format->palette->ncolors; i++)
+		BufferMFDBAdr->format->palette->colors[i].unused = 0;
 	printf("BufferMFDB wurde gesetzt\n");
 }
 
