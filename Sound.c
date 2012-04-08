@@ -3,6 +3,7 @@
 extern void XConcat(char *s, char *p, char *r, int *ok);
 #define Concat(x, y, z, a) XConcat(x, y, z, &a)
 #include <arpa/inet.h> /* byte order htons() ntohs()*/
+#include <SDL/SDL.h>
 #include "Sound.h"
 
 #include "HASCSSystem.h"
@@ -27,6 +28,8 @@ extern void XConcat(char *s, char *p, char *r, int *ok);
 static uint16_t *IBuffer;
 static int DoLoop;
 /*static ModeBuf stack;*/
+
+static SDL_AudioSpec desired;
 
 static int DMASound()
 {
@@ -64,7 +67,6 @@ static unsigned GetFreq(unsigned f)
 	else if (f < 37550) return 2;
 	else return 3;
 }
-
 
 int LoadSoundFile(char *f, unsigned id, SoundType *ref_s)
 {
@@ -172,6 +174,67 @@ int LoadSound(unsigned n, SoundType *ref_s)
 #undef s
 }
 
+static struct {
+	unsigned char *start, *b, *ende;
+	int loop, mode;
+} SoundCB;
+
+void SoundCallback(void *Buffer, Uint8 *stream, int len)
+{
+	int i;
+	if (SoundCB.b == SoundCB.ende) {
+		SDL_PauseAudio(1);
+		return;
+	}
+	for (i = 0; i < len; i++) {
+		switch (SoundCB.mode) {
+		case 0:
+			stream[i++] = *SoundCB.b;
+			stream[i++] = *SoundCB.b;
+			/* FALLTHROUGH */
+		case 1:
+			stream[i++] = *SoundCB.b;
+			/* FALLTHROUGH */
+		case 2:
+			stream[i] = *SoundCB.b++;
+			break;
+		case 3:
+			stream[i] = *SoundCB.b++;
+			if (SoundCB.b == SoundCB.ende)
+				break;
+			SoundCB.b++;
+		}
+		if (SoundCB.b == SoundCB.ende) {
+			if (!SoundCB.loop)
+				break;
+			else
+				SoundCB.b = SoundCB.start;
+		}
+	}
+	for (; i < len; i++)
+		stream[i] = 0;
+	ChangeVorz(stream, len);
+}
+
+static void PlaySoundSDL(SoundType *ref_s)
+{
+#define s (*ref_s)
+	if (!SoundAusgabe) return;
+
+
+	printf("PlaySoundSDL(Start = %p, Length = %ld, "
+		"ende = %p, Freq = %d, Loop = %d)\n", 
+		s.Buffer, s.Length,
+		s.Buffer + s.Length, s.Frequency, DoLoop);
+	SDL_LockAudio();
+	SoundCB.loop = DoLoop;
+	SoundCB.mode = GetFreq(s.Frequency);
+	SoundCB.start = SoundCB.b = s.Buffer;
+	SoundCB.ende = s.Buffer + s.Length;
+	SDL_PauseAudio(0);
+	SDL_UnlockAudio();
+#undef s
+}
 
 static void PlaySoundDMA(SoundType *ref_s)
 {
@@ -186,10 +249,6 @@ static void PlaySoundDMA(SoundType *ref_s)
 	if (!SoundAusgabe) return;
 
 	EnterSupervisorMode(stack); /* Supervisormode */
-	printf("PlaySoundDMA(Start = %p, Length = %ld, "
-		"ende = %p, Freq = %d, Loop = %d)\n", 
-		s.Buffer, s.Length,
-		s.Buffer + s.Length, GetFreq(s.Frequency), DoLoop);
 #if 0
 	sndmactl = 0; /* Stop */
 #endif
@@ -382,7 +441,23 @@ static void __attribute__ ((constructor)) at_init(void)
 	DoLoop = FALSE;
 	SoundAusgabe = TRUE;
 	*SoundPath = *"";
+#if 1
+	PlaySound = PlaySoundSDL;
 
+	/* AUDIO_S8 würde zu Endlosschleife wegen Bug in SDL führen... */
+	desired.format = AUDIO_U8;
+	desired.freq = /*22050*/ 25033;
+	desired.samples = 1024;
+	desired.channels = 1; /* Mono */
+	desired.callback = SoundCallback;
+	desired.userdata = NULL;
+
+	if (SDL_OpenAudio(&desired, NULL) < 0) {
+		fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
+		exit(-1);
+	}
+#endif
+#if 0
 	if (DMASound())
 		PlaySound = PlaySoundDMA;
 	else {
@@ -391,4 +466,5 @@ static void __attribute__ ((constructor)) at_init(void)
 		conterm &= ~ ((1<<8)|(1<<10)); /* Tastaturklick und Bell aus */
 		LeaveSupervisorMode(stack);
 	}
+#endif
 }
