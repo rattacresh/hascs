@@ -1204,11 +1204,9 @@ static void Picture(CharPtr *ref_p)
 
 void ShowPicture(unsigned n, int New)
 {
-	printf("ShowPicture1()\n");
 	unsigned ys, ws, hs, i, PicW, PicH;
 	if (!LoadImageN(n, &PicW, &PicH))
 		return;
-	printf("ShowPicture1()\n");
 	if (New) {
 		OpenWindow = TRUE;
 		DialogBreite = 0; DialogHoehe = 0; x = 0; w = 0;
