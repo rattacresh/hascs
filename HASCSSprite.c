@@ -387,8 +387,6 @@ static void DoEdit(void)
 	while (Weiter) {
 		WaitInput(&MausX, &MausY, &MausButton, &Taste, -1);
 		MausX = MausX / 16; MausY = MausY / 16;
-		printf("Ev: %d %d %d %d\n", MausX, MausY, MausLinks&MausButton,
-				MausRechts&MausButton);
 		if (MausX >= 27 && MausX <= 32 && MausY <= 8)
 			MenueWahl(0, MausY);
 		else if (MausX >= 34 && MausY <= 39 && MausY <= 8)
