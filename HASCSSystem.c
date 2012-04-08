@@ -496,7 +496,7 @@ void DeleteFile(char *Name)
 		char file[61];
 		FileError = FileName(Name, file);
 		if (FileError) {
-			printf("Would remove %s (%s)\n", file, Name);
+			printf("Would remove %s\n", file);
 			/*FileError = remove(Name) >= 0;*/
 		} else {
 			FileName("DUMMY.DUM", file);
