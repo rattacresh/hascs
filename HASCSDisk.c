@@ -732,6 +732,8 @@ void LoadOrSavePlayer(int Load)
 		Assign(SpielerPars, Spieler.Name);
 		SpielerPars[22] = Spieler.x / 256;
 		SpielerPars[23] = Spieler.x % 256;
+		SpielerPars[24] = Spieler.y / 256;
+		SpielerPars[25] = Spieler.y % 256;
 		SpielerPars[26] = Spieler.TPMax / 256;
 		SpielerPars[27] = Spieler.TPMax % 256;
 		SpielerPars[28] = Spieler.TP / 256;
