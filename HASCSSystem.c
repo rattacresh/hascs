@@ -189,7 +189,9 @@ void *Allocate(unsigned long Bytes)
  */
 void *GetBuffer(unsigned long Bytes)
 {    
+#ifdef DEBUG_CACHE
 	printf("GetBuffer: Bytes = %lu", Bytes);
+#endif
 
 	if (Bytes >= BufferLen) {
 		BufferLen = Bytes + 1;
@@ -204,9 +206,10 @@ void *GetBuffer(unsigned long Bytes)
 			Error("Ungerade Pufferadresse!", -1);
 	}
 	BufferAdr[Bytes] = 0; // Endmarkierung 
-
+#ifdef DEBUG_CACHE
 	printf("  BufferAdr = %p", BufferAdr);
 	printf("\n");
+#endif
     
 	return BufferAdr;
 }
@@ -219,21 +222,26 @@ unsigned GetCache(unsigned id)
 {
 	unsigned i;
     
+#ifdef DEBUG_CACHE
 	printf("GetCache: id = %u", id);
+#endif
     
 	for (i = 1; i <= AnzCache; i++)
 		if (id == Cache[i].CacheId) {
 			CacheCounter++;
 			Cache[i].CacheUsed = CacheCounter;
-
+#ifdef DEBUG_CACHE
 			printf("  index = %u", i);
 			printf("  buffer = %p", Cache[i].CacheBuffer);
 			printf("  bytes = %i", Cache[i].CacheLength);
 			printf("\n");
+#endif
 
 			return i;
 		}
+#ifdef DEBUG_CACHE
 	printf("\n");
+#endif
 	return 0;
 }
 
@@ -283,9 +291,11 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 		return 0; // Der Rückgabewert wird vom Aufrufer (unten) gar nicht verwendet.
 	}
     
+#ifdef DEBUG_CACHE
 	printf("NewCache: id = %u", id);
 	printf("  Bytes = %lu", Bytes);
 	printf("\n");
+#endif
 
 	i = GetCache(id);
 	if (i != 0) 
@@ -406,7 +416,9 @@ void SetPicture(unsigned width, unsigned height, void *Picture)
 	 */
 	for (i = 0; i < PicMFDBAdr->format->palette->ncolors; i++)
 		PicMFDBAdr->format->palette->colors[i].unused = 0;
+#if 0
 	printf("PicMFDB wurde gesetzt\n");
+#endif
 }
 
 /**
@@ -417,14 +429,18 @@ void SetBuffer(unsigned width, unsigned height, void *Buffer)
 {
 	unsigned pitch = width/8;
 	int i;
+#if 0
 	printf("width %i height %i pitch %i\n", width, height, pitch);
+#endif
 	if (BufferMFDBAdr)
 		SDL_FreeSurface(BufferMFDBAdr);
 	BufferMFDBAdr = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, pitch, 0, 0, 0, 0);
 	/* Wie oben */
 	for (i = 0; i < BufferMFDBAdr->format->palette->ncolors; i++)
 		BufferMFDBAdr->format->palette->colors[i].unused = 0;
+#if 0
 	printf("BufferMFDB wurde gesetzt\n");
+#endif
 }
 
 
@@ -954,8 +970,10 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			case 1: /* SDL Event */
 				switch (msg->type) {
 				case SDL_KEYDOWN:
+#if 0
 					printf("The %s key was pressed (code %i)!\n",
 					       SDL_GetKeyName(msg->key.keysym.sym), msg->key.keysym.sym);		
+#endif
 					if (msg->key.keysym.sym == SDLK_RSHIFT
 					 || msg->key.keysym.sym == SDLK_LSHIFT
 					 || msg->key.keysym.sym == SDLK_RCTRL
@@ -980,7 +998,9 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 						&= ~(1<<msg->button.button);
 					goto CountClicks;
 				case SDL_MOUSEBUTTONDOWN:
+#if 0
 					printf("Mouse button %d pressed at (%d,%d)\n", msg->button.button, msg->button.x, msg->button.y);		
+#endif
 					buttonevent = (1<<SDL_MOUSEBUTTONDOWN);
 					Save.mButtons
 						|= (1<<msg->button.button);
@@ -1021,6 +1041,8 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 				default:
 					printf("uncatched event type %d\n", 
 						msg->type);
+					/* FALLTHROUGH */
+				case SDL_KEYUP:
 					continue;
 				}
 				break;
