@@ -445,13 +445,13 @@ int FileName(char *Pattern, char *FileName)
 		Assign(Pattern, LastFileName, ok);
 	}
 	if (!result) {
-		char *sep;
+		/*char *sep;*/
 		if (GlobCounter >= DTABuffer.gl_pathc)
 			result = -1;
-		else if ((sep = strrchr(DTABuffer.gl_pathv[GlobCounter], 
+		else /*if ((sep = strrchr(DTABuffer.gl_pathv[GlobCounter], 
 					DIRSEPCHR)))
 			Assign(sep + 1, FileName, ok);
-		else
+		else */
 			Assign(DTABuffer.gl_pathv[GlobCounter], FileName, ok);
 	}
 	return result >= 0;
@@ -494,10 +494,12 @@ void DeleteFile(char *Name)
 {
 	if (strchr(Name, '*') || strchr(Name, '?')) {
 		char file[61];
-		FileError = FileName(Name, file) == 0;
+		FileError = FileName(Name, file);
 		if (FileError) {
-			printf("Would remove %s\n", Name);
+			printf("Would remove %s (%s)\n", file, Name);
 			/*FileError = remove(Name) >= 0;*/
+		} else {
+			FileName("DUMMY.DUM", file);
 		}
 		return;
 	}
