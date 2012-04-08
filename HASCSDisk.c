@@ -677,7 +677,7 @@ void SaveLevel(unsigned n)
 		RenameFile(LName, backup);
 	} else {
 		MakeLevelName(LName, 0, n);
-		Spieler.OldLevels[n/8] |= n%8;
+		Spieler.OldLevels[n/8] |= 1<<(n%8);
 	}
 	LoadOrSaveLevel(FALSE, LName);
 	if (FileError) {
@@ -688,7 +688,7 @@ void SaveLevel(unsigned n)
 void LoadLevel(unsigned n)
 {
 	String60Typ s, LName;
-	if (n%8 & Spieler.OldLevels[n/8])
+	if (1<<(n%8) & Spieler.OldLevels[n/8])
 		MakeLevelName(LName, 0, n); /* saved Level */
 	else
 		MakeLevelName(LName, 1, n); /* original Level */
