@@ -158,6 +158,7 @@ int LoadImageN(unsigned n, unsigned *ref_w, unsigned *ref_h)
 	handle = /*HASCSSystem.*/OpenFile(Name);
 	ImgBuffer = /*HASCSSystem.*/GetBuffer(length);
 	/*HASCSSystem.*/ReadFile(handle, length, ImgBuffer);
+	AuswertHeader();
 	ImageHeader = &ImgHeader;
 	if (/*HASCSSystem.*/FileError
 		|| ImageHeader->Version != 1
