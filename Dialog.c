@@ -249,7 +249,6 @@ static VariableType Variable[] = {
 	{"PARAMETER.PAR4", NULL, 25, NumberToken},
 	{"PARAMETER.PAR5", NULL, 26, NumberToken},
 	{"PARAMETER.PAR6", NULL, 27, NumberToken},
-
 	{"REDRAW", &Redraw, 0, NumberToken},
 	{"DEBUG", &DebugLevel, 0, NumberToken},
 
@@ -302,6 +301,16 @@ static VariableType Variable[] = {
 	{"X", &LocalVar[23], 0, NumberToken},
 	{"Y", &LocalVar[24], 0, NumberToken},
 	{"Z", &LocalVar[25], 0, NumberToken},
+
+	{"MONSTER.TREFFERWURF", NULL, 101, NumberToken},
+	{"MONSTER.SCHADEN", NULL, 102, NumberToken},
+	{"MONSTER.BONUS", NULL, 103, NumberToken},
+
+	{"GEGENSTAND.X", NULL, 111, NumberToken}, 
+	{"GEGENSTAND.Y", NULL, 112, NumberToken},
+
+	{"PARAMETER.X", NULL, 121, NumberToken},
+	{"PARAMETER.Y", NULL, 122, NumberToken},
 };
 
 /* Forward Deklarationen ************************************************/
@@ -782,7 +791,9 @@ static void *GetItem(unsigned n, CharPtr *ref_p, unsigned *ref_r, char *s)
 	r = 0;
 	if  (Variable[n].loc != NULL)
 		v = Variable[n].loc;
-	else if (Variable[n].number < 10) {
+	else if (Variable[n].number < 10 
+	      || (Variable[n].number >= 100 && Variable[n].number < 110))
+	{
 		if (SelectedMonster) /* Monster */
 			switch (Variable[n].number) {
 			case 1: v = &SelectedMonster->Status; break;
@@ -793,8 +804,13 @@ static void *GetItem(unsigned n, CharPtr *ref_p, unsigned *ref_r, char *s)
 			case 6: v = &SelectedMonster->Spezial; break;
 			case 7: v = &SelectedMonster->Typ; break;
 			case 8: v = (CardPtr)&SelectedMonster->Name; break;
+			case 101: v = &SelectedMonster->Trefferwurf; break;
+			case 102: v = &SelectedMonster->Schaden; break;
+			case 103: v = &SelectedMonster->Bonus; break;
 			}
-	} else if (Variable[n].number < 20) {
+	} else if (Variable[n].number < 20
+	      || (Variable[n].number >= 110 && Variable[n].number < 120))
+	{
 		if (SelectedGegenstand)
 			switch (Variable[n].number) {
 			case 11 : v = &SelectedGegenstand->Sprite; break;
@@ -806,8 +822,12 @@ static void *GetItem(unsigned n, CharPtr *ref_p, unsigned *ref_r, char *s)
 			case 17 : v = &SelectedGegenstand->Flags; break;
 			case 18 : v = &SelectedGegenstand->Dialog; break;
 			case 19 : v = (CardPtr)&SelectedGegenstand->Name; break;
+			case 111: v = &SelectedGegenstand->x; break;
+			case 112: v = &SelectedGegenstand->y; break;
 			}
-	} else if (Variable[n].number < 30) {
+	} else if (Variable[n].number < 30
+	      || (Variable[n].number >= 120 && Variable[n].number < 130))
+	{
 		if (SelectedParameter)
 			switch (Variable[n].number) {
 			case 21 : v = &SelectedParameter->Art; break;
@@ -817,6 +837,8 @@ static void *GetItem(unsigned n, CharPtr *ref_p, unsigned *ref_r, char *s)
 			case 25 : v = &SelectedParameter->xrunter; break;
 			case 26 : v = &SelectedParameter->yrunter; break;
 			case 27 : v = &SelectedParameter->Levelrunter; break;
+			case 121: v = &SelectedParameter->x; break;
+			case 122: v = &SelectedParameter->y; break;
 		}
 
 	} else if (Variable[n].number >= 60000) {
@@ -1366,7 +1388,7 @@ static void Select(CharPtr *ref_p)
 	case 8: i = GetNumber(&p);
 		SelectedParameter = NULL;
 		if (i >= 1 && i <= AnzahlParameter)
-			SelectedParameter =&Parameter[i];
+			SelectedParameter = &Parameter[i];
 		break;
 	}
 #undef p
