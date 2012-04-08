@@ -148,6 +148,7 @@ void InitWorkstation(char *WinName)
 	
 	SDL_Rect  dst = {0,0,640,400};
 #endif
+	srand(time(NULL));
 #if 1
 	// Ich zeichne einfach das gesamte Fenster neu und
 	// ignoriere den Frame:
@@ -188,8 +189,7 @@ void *Allocate(unsigned long Bytes)
  */
 void *GetBuffer(unsigned long Bytes)
 {    
-	printf("\n");
-	printf("GetBuffer: Bytes = %lu\n", Bytes);
+	printf("GetBuffer: Bytes = %lu", Bytes);
 
 	if (Bytes >= BufferLen) {
 		BufferLen = Bytes + 1;
@@ -205,7 +205,8 @@ void *GetBuffer(unsigned long Bytes)
 	}
 	BufferAdr[Bytes] = 0; // Endmarkierung 
 
-	printf("  BufferAdr = %p\n", BufferAdr);
+	printf("  BufferAdr = %p", BufferAdr);
+	printf("\n");
     
 	return BufferAdr;
 }
@@ -218,20 +219,21 @@ unsigned GetCache(unsigned id)
 {
 	unsigned i;
     
-	printf("\n");
-	printf("GetCache: id = %u\n", id);
+	printf("GetCache: id = %u", id);
     
 	for (i = 1; i <= AnzCache; i++)
 		if (id == Cache[i].CacheId) {
 			CacheCounter++;
 			Cache[i].CacheUsed = CacheCounter;
 
-			printf("  index = %u\n", i);
-			printf("  buffer = %p\n", Cache[i].CacheBuffer);
-			printf("  bytes = %i\n", Cache[i].CacheLength);
-			
+			printf("  index = %u", i);
+			printf("  buffer = %p", Cache[i].CacheBuffer);
+			printf("  bytes = %i", Cache[i].CacheLength);
+			printf("\n");
+
 			return i;
 		}
+	printf("\n");
 	return 0;
 }
 
@@ -281,8 +283,9 @@ unsigned NewCache(unsigned id, unsigned long Bytes)
 		return 0; // Der Rückgabewert wird vom Aufrufer (unten) gar nicht verwendet.
 	}
     
-	printf("NewCache: id = %u\n", id);
-	printf("  Bytes = %lu\n", Bytes);
+	printf("NewCache: id = %u", id);
+	printf("  Bytes = %lu", Bytes);
+	printf("\n");
 
 	i = GetCache(id);
 	if (i != 0) 
@@ -360,9 +363,10 @@ int LoadAndRun(char *Prg, char *Arg)
 void Copy(int direction, int sx, int sy, int width, int height, int dx, int dy)
 {
 	SDL_Rect sourceRect, destRect;
+#if 0
 	printf("Copy(%d, %d, %d, %d, %d, %d, %d)\n", direction,
 			sx, sy, width, height, dx, dy);
-
+#endif
 	sourceRect.x = sx; sourceRect.y = sy;
 	sourceRect.w = width; sourceRect.h = height;
 
@@ -394,7 +398,8 @@ void SetPicture(unsigned width, unsigned height, void *Picture)
 	int i;
 	if (PicMFDBAdr)
 		SDL_FreeSurface(PicMFDBAdr);
-	PicMFDBAdr = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, width/8, 0, 0, 0, 0);
+	
+	PicMFDBAdr = SDL_CreateRGBSurfaceFrom(Picture, width, height, 1, (width + 15)/16*16/8, 0, 0, 0, 0);
 	/* Workaround für SDL-Bug, der Speicher uninitialisiert lässt, 
 	 * wodurch gegebenenfalls memcmp() in Map1to1 fehlschlägt und 
 	 * Copy() mit Fehler zurückkehrt.
@@ -624,8 +629,10 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		frame.w=xxx++;//512;
 		frame.h=64;
 #endif
+#if 0
 		printf("Redraw(%d %d %d %d)", frame.x, frame.y,
 			frame.w, frame.h);
+#endif
 		if (RcIntersect(&frame, &r)) {
 			/*GrafMouse(mouseOff, NIL);*/
 			/* Pufferkoordinaten */
@@ -634,14 +641,20 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			s.w = r.w; s.h = r.h;
 			s.w += s.x-(s.x/8*8);
 			s.x /= 8;
+#if 0
 			printf(" => Blit %d %d %d %d ",	s.x,s.y,s.w,s.h);
+#endif
 			SDL_BlitSurface(BufferMFDBAdr, &s, ScreenMFDBAdr, &r);
 			//SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
+#if 0
 			printf("=> Update %d %d %d %d", r.x, r.y, r.w, r.h);
+#endif
 			SDL_UpdateRect(ScreenMFDBAdr, r.x, r.y, r.w, r.h);
 			/*GrafMouse(mouseOn, NIL);*/
 		}
+#if 0
 		printf("\n");
+#endif
 		/*UpdateWindow(FALSE);*/
 	}
 
@@ -698,9 +711,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 	void Ende(void)
 	{
 		/*int dummy;*/
-		/*Error("HASCS III wirklich beenden?", 0);*/
-		ExitWorkstation(0);
-		exit(0);
+		Error("HASCS III wirklich beenden?", 0);
 	}
 
 	void Correct(int *ref_x, int *ref_y, Uint16 *ref_w, Uint16 *ref_h)
@@ -709,12 +720,16 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 #define y (*ref_y)
 #define w (*ref_w)
 #define h (*ref_h)
+#if 0
 		printf("Correct(%d %d %d %d)", x, y, w, h);
+#endif
 		w = Min(w, 640);
 		h = Min(h, 400);
 		x = Min(x, 640-w); x = Max(0, x); /* XOff */
 		y = Min(y, 400-h); y = Max(0, y); /* YOff */
+#if 0
 		printf(" = (%d %d %d %d)\n", x, y, w, h);
+#endif
 #undef x
 #undef y
 #undef w
@@ -758,6 +773,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 				Redraw = TRUE; key.sym = '\0';
 			}
 			break;
+#if 0
 		case SDLK_u : if (key.mod & KMOD_CTRL) { /* Control U */
 				Copy(0,128,144,512,64,128,128);
 				key.sym = '\0';
@@ -767,6 +783,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 				Copy(0,8*16,12*16,16,16,7*16,11*16);
 				key.sym = '\0';
 			}
+#endif
 		default:
 			break;
 		}
@@ -1071,9 +1088,11 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		rect.y = (int)NewYMin * 16 - YOff + work.y;
 		rect.w = ((int)(NewXMax - NewXMin) + 1) * 16;
 		rect.h = ((int)(NewYMax - NewYMin) + 1) * 16;
+#if 0
 		printf("Update %d %d %d %d | %d %d %d %d\n",
 			NewXMin,NewYMin,NewXMax,NewYMax,
 			rect.x,rect.y,rect.w,rect.h);
+#endif
 		RedrawWindow(rect);
 		NewXMin = 40; NewYMin = 25; NewXMax = 0; NewYMax = 0;
 	}
@@ -1137,18 +1156,6 @@ void WaitKey(void)
 {
 	unsigned x, y; BITSET s; char ch;
 	WaitInput(&x, &y, &s, &ch, -1);
-#if 0
-	RedrawWindow(NULL);
-
-	SDL_Event event;
-	while (event.type != SDL_KEYDOWN) {
-		SDL_WaitEvent(&event);
-		if (event.type == SDL_QUIT) {
-			ExitWorkstation(0);
-			exit(0);
-		}
-	}       
-#endif
 }
 
 /**
@@ -1160,11 +1167,6 @@ void WaitTime(unsigned t)
 {
 	unsigned mx, my; BITSET mb; char mch;
 	WaitInput(&mx, &my, &mb, &mch, t); /* Redraw! */
-#if 0
-	RedrawWindow(NULL);
-	if (t > 0)
-		usleep(t);
-#endif
 }
 
 
@@ -1176,7 +1178,7 @@ unsigned long GetTime()
 unsigned Zufall(unsigned n)
 {
 	if (n == 0) return 0;
-	return rand();
+	return 1 + (rand() % n);
 }
 
 void SetzeZufall(unsigned long n)

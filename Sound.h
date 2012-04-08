@@ -37,7 +37,7 @@ void (*PlaySound)(SoundType *);
 
 int LoadSound(unsigned n, SoundType *s);
 
-int LoadSoundFile(char *f, unsigned id, SoundType s);
+int LoadSoundFile(char *f, unsigned id, SoundType *s);
 
 void PlaySoundN(unsigned n);
 

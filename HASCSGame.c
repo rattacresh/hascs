@@ -56,12 +56,13 @@ void MakeSichtBereich(int Force)
 			if (of >= dx) {
 				of -= dx; x0 += ay; y0 += iy;
 			}
-			if (LevelSpieler & ~SichtBereich[x0][y0].Spezial)
+			if (LevelSpieler & ~SichtBereich[x0][y0].Spezial) {
 				SichtBereich[x0][y0].Spezial |= LevelSpieler;
 				if (ct <= Weite
 				 || (LevelSichtbar & SichtBereich[x0][y0].Spezial 
 				  && SLicht & ~Spieler.Status))
 					SichtBereich[x0][y0].Spezial |= LevelBekannt;
+			}
 			if (FeldDurchsichtig & ~Felder[SichtBereich[x0][y0].Feld].Spezial)
 				return;
 			ct++;
@@ -69,12 +70,10 @@ void MakeSichtBereich(int Force)
 	}
 
 
-	if (!Force) {
+	if (!Force)
 		if (Spieler.x == oldx && Spieler.y == oldy 
-		 && Spieler.Sichtweite == Weite) { /* keine Änderungen */
+		 && Spieler.Sichtweite == Weite) /* keine Änderungen */
 			return;
-		}
-	}
 
 	oldx = Spieler.x; oldy = Spieler.y;
 	Weite = Spieler.Sichtweite;

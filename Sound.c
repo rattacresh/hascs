@@ -66,8 +66,9 @@ static unsigned GetFreq(unsigned f)
 }
 
 
-int LoadSoundFile(char *f, unsigned id, SoundType s)
+int LoadSoundFile(char *f, unsigned id, SoundType *ref_s)
 {
+#define s (*ref_s)
 	int h;
 	char header[128];
 	int ok/*, free*/;
@@ -143,6 +144,7 @@ int LoadSoundFile(char *f, unsigned id, SoundType s)
 	else ok = LoadUnknown();
 	/*HASCSSystem.*/CloseFile(h);
 	return ok;
+#undef s
 }
 
 int LoadSound(unsigned n, SoundType *ref_s)
@@ -165,7 +167,7 @@ int LoadSound(unsigned n, SoundType *ref_s)
 		FileName[8] = n / 10 % 10 + '0';
 		FileName[9] = n % 10 + '0';
 		Concat(SoundPath, FileName, FileName, ok);
-		return LoadSoundFile(FileName, id, s);
+		return LoadSoundFile(FileName, id, &s);
 	}
 #undef s
 }
@@ -184,6 +186,10 @@ static void PlaySoundDMA(SoundType *ref_s)
 	if (!SoundAusgabe) return;
 
 	EnterSupervisorMode(stack); /* Supervisormode */
+	printf("PlaySoundDMA(Start = %p, Length = %ld, "
+		"ende = %p, Freq = %d, Loop = %d)\n", 
+		s.Buffer, s.Length,
+		s.Buffer + s.Length, GetFreq(s.Frequency), DoLoop);
 #if 0
 	sndmactl = 0; /* Stop */
 #endif

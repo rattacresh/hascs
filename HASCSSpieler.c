@@ -515,7 +515,7 @@ static void Benutze(GegenstandTyp *ref_r)
 			switch (Stab) {
 			case 1 : j = W6(Wirkung);
 				BeginOutput(); /* erst Ausgabe, da Monster tot sein könnte! */
-				Print(Name); Print("#620#"); PrintCard(j, 1); Print("#626#");
+				Print(m.Name); Print("#620#"); PrintCard(j, 1); Print("#626#");
 				EndOutput();
 				/*b =*/ HitMonster(&m, j);
 				return;
@@ -525,7 +525,7 @@ static void Benutze(GegenstandTyp *ref_r)
 			case 5 : Minus(&m.Trefferwurf, Wirkung); break;
 			case 6 : Minus(&m.Schaden, Wirkung); break;
 			case 7 : Minus(&m.Bonus, Wirkung); break;
-			case 8 : BeginOutput(); Print(Name); Print("#628#"); EndOutput();
+			case 8 : BeginOutput(); Print(m.Name); Print("#628#"); EndOutput();
 				do {
 					NormalKoords(
 						Zufall(2 * Wirkung + 1) + m.x - Wirkung - 1,
@@ -536,7 +536,7 @@ static void Benutze(GegenstandTyp *ref_r)
 			case 10 : DoMonsterDialog(Wirkung, &m);
 				return;
 			}
-			BeginOutput(); Print(Name); Print("#628#"); EndOutput();
+			BeginOutput(); Print(m.Name); Print("#628#"); EndOutput();
 #undef m
 #undef Stab
 #undef Wirkung
@@ -846,7 +846,7 @@ static void InfoMonster(unsigned mx, unsigned my)
 			InfoFeld(mx, my);
 	} else {
 		BeginOutput();
-		Print("#680#"); Print(Name); /* Du siehst: ... */
+		Print("#680#"); Print(Monster[i].Name); /* Du siehst: ... */
 		EndOutput();
 		if (Monster[i].Sprich > 0 && Monster[i].Sprich < 1000 && Monster[i].Status > 1)
 			DoMonsterDialog(Monster[i].Sprich, &Monster[i]);

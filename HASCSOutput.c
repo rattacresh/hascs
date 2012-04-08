@@ -463,8 +463,12 @@ void Split(char *p, char *r, char *s, unsigned i)
 			if (p[j] == '\0')
 				break;
 #endif
-		} else
+	 	} else {
 			p[j] = '\0';
+#if 1
+			break;
+#endif
+		}
 	for (j = 0; j <= HIGH(r); j++)
 		if (j + i <= HIGH(s))  {
 			r[j] = s[j+i];
@@ -472,8 +476,12 @@ void Split(char *p, char *r, char *s, unsigned i)
 			if (r[j] == '\0')
 				break;
 #endif
-		} else
+		} else {
 			r[j] = '\0';
+#if 1
+			break;
+#endif
+		}
 }
 
 unsigned FindC(char *s, char c)

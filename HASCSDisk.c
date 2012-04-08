@@ -87,33 +87,7 @@ static void ReadBlock(int handle, unsigned anzahl, CharPtr a)
 }
 
 /* Serialisierung ********************************************************/
-static void MakeParameter(ParameterTyp *p, CharPtr Buffer)
-{
-	Buffer[0] = p->x / 256;
-	Buffer[1] = p->x % 256;
-	Buffer[2] = p->y / 256;
-	Buffer[3] = p->y % 256;
-	Buffer[4] = p->Art / 256;
-	Buffer[5] = p->Art % 256;
-	Buffer[6] = p->xhoch / 256;
-	Buffer[7] = p->xhoch % 256;
-	Buffer[8] = p->yhoch / 256;
-	Buffer[9] = p->yhoch % 256;
-	Buffer[10] = p->Levelhoch / 256;
-	Buffer[11] = p->Levelhoch % 256;
-	Buffer[12] = p->xrunter / 256;
-	Buffer[13] = p->xrunter % 256;
-	Buffer[14] = p->yrunter / 256;
-	Buffer[15] = p->yrunter % 256;
-	Buffer[16] = p->Levelrunter / 256;
-	Buffer[17] = p->Levelrunter % 256;
-}
-static void MakeFeld(FeldTyp *f, CharPtr Buffer)
-{
-	Buffer[0] = f->Spezial / 256;
-	Buffer[1] = f->Spezial % 256;
-	strncpy(f->Name, Buffer + 2, sizeof f->Name);
-}
+
 static void MakeGegen(GegenstandTyp *g, CharPtr Buffer)
 {
 	Buffer[0] = g->x / 256;
@@ -138,6 +112,7 @@ static void MakeGegen(GegenstandTyp *g, CharPtr Buffer)
 	Buffer[40] = g->RingDauer / 256;
 	Buffer[41] = g->RingDauer % 256;
 }
+
 static void MakeMonster(MonsterTyp *m, CharPtr Buffer)
 {
 	strncpy(Buffer, m->Name, sizeof m->Name);
@@ -162,23 +137,7 @@ static void MakeMonster(MonsterTyp *m, CharPtr Buffer)
 	Buffer[40] = m->Spezial / 256;
 	Buffer[41] = m->Spezial % 256;
 }
-static void AuswertParameter(ParameterTyp *p, CharPtr Buffer)
-{
-	p->x = Buffer[0]*256+Buffer[1];
-	p->y = Buffer[2]*256+Buffer[3];
-	p->Art = Buffer[4]*256+Buffer[5];
-	p->xhoch = Buffer[6]*256+Buffer[7];
-	p->yhoch = Buffer[8]*256+Buffer[9];
-	p->Levelhoch = Buffer[10]*256+Buffer[11];
-	p->xrunter = Buffer[12]*256+Buffer[13];
-	p->yrunter = Buffer[14]*256+Buffer[15];
-	p->Levelrunter = Buffer[16]*256+Buffer[17];
-}
-static void AuswertFeld(FeldTyp *f, CharPtr Buffer)
-{
-	f->Spezial = Buffer[0]*256+Buffer[1];
-	strncpy(f->Name, Buffer + 2, sizeof f->Name);
-}
+
 static void AuswertGegen(GegenstandTyp *g, CharPtr Buffer)
 {
 	g->x = Buffer[0]*256+Buffer[1];
@@ -216,13 +175,7 @@ static void DoMonsterList(MonsterTyp Monster[], unsigned AnzahlMonster,
 	for (i = 0; i < AnzahlMonster; i++)
 		Do(&Monster[i], Buffer + i * 42);
 }
-static void DoParameterList(ParameterTyp Parameter[], unsigned AnzahlParameter, 
-	CharPtr Buffer, void (*Do)(ParameterTyp *, CharPtr))
-{
-	int i;
-	for (i = 0; i < AnzahlParameter; i++)
-		Do(&Parameter[i], Buffer + i * 18);
-}
+
 static void DoGegenList(GegenstandTyp Gegen[], unsigned AnzahlGegen,
 	CharPtr Buffer, void (*Do)(GegenstandTyp *, CharPtr))
 {
@@ -230,13 +183,7 @@ static void DoGegenList(GegenstandTyp Gegen[], unsigned AnzahlGegen,
 	for (i = 0; i < AnzahlGegen; i++)
 		Do(&Gegen[i], Buffer + i * 42);
 }
-static void DoFeldList(FeldTyp Feld[], unsigned AnzahlFeld,
-	CharPtr Buffer, void (*Do)(FeldTyp *, CharPtr))
-{
-	int i;
-	for (i = 0; i < AnzahlFeld; i++)
-		Do(&Feld[i], Buffer + i * 24);
-}
+
 /* Felder ****************************************************************/
 
 void LoadOrSaveDat(int Load, char *FileName)
@@ -244,12 +191,34 @@ void LoadOrSaveDat(int Load, char *FileName)
 	int h;
 	String60Typ s;
 
+	void MakeFeld(FeldTyp *f, CharPtr Buffer)
+	{
+		strncpy(f->Name, Buffer, sizeof f->Name);
+		Buffer[22] = f->Spezial / 256;
+		Buffer[3] = f->Spezial % 256;
+	}
+
+	void AuswertFeld(FeldTyp *f, CharPtr Buffer)
+	{
+		strncpy(f->Name, Buffer, sizeof f->Name);
+		f->Spezial = Buffer[22]*256+Buffer[23];
+	}
+
+	void DoFeldList(FeldTyp Feld[], unsigned AnzahlFeld,
+		CharPtr Buffer, void (*Do)(FeldTyp *, CharPtr))
+	{
+		int i;
+		for (i = 0; i < AnzahlFeld; i++)
+			Do(&Feld[i], Buffer + i * 24);
+	}
+
 	Buffer = GetBuffer(BufferSize);
 	Concat(s, PrgPath, FileName);
 	if (Load) {
 		h = OpenFile(s);
-		if (FileError)
+		if (FileError) {
 			Fehler("Felderdaten Lesefehler: ", s); return;
+		}
 		ReadBlock(h, 24*MaxSprites, Buffer);
 		DoFeldList(Felder, MaxSprites, Buffer, AuswertFeld);
 		if (Editor) {
@@ -262,8 +231,9 @@ void LoadOrSaveDat(int Load, char *FileName)
 		}
 	} else {
 		h = CreateFile(s);
-		if (FileError)
+		if (FileError) {
 			Fehler("Felderdaten Schreibfehler: ", s); return;
+		}
 		DoFeldList(Felder, MaxSprites, Buffer, MakeFeld);
 		WriteBlock(h, 24*MaxSprites, Buffer);
 		DoMonsterList(MonsterKlasse, MaxSprites, Buffer, MakeMonster);
@@ -314,7 +284,6 @@ void LoadOrSaveSprites(int Load, char *FileName)
 			Fehler("Muster Lesefehler: ", s); return;
 		}
 		Count = sizeof SpriteArrayBuf;
-		printf("count=%d\n", Count);
 		ReadFile(h, Count, SpriteArrayBuf);
 		AuswertSpriteArrayBuf(FelderSprite);
 		ReadFile(h, Count, SpriteArrayBuf);
@@ -357,10 +326,56 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 		ShortBuffer[0] = shortlength / 256;
 		ShortBuffer[1] = shortlength % 256;
 	}
+
 	void AuswertShort(void)
 	{
 		shortlength = ShortBuffer[0] * 256 + ShortBuffer[1];
 	}
+
+	void MakeParameter(ParameterTyp *p, CharPtr Buffer)
+	{
+		Buffer[0] = p->x / 256;
+		Buffer[1] = p->x % 256;
+		Buffer[2] = p->y / 256;
+		Buffer[3] = p->y % 256;
+		Buffer[4] = p->Art / 256;
+		Buffer[5] = p->Art % 256;
+		Buffer[6] = p->xhoch / 256;
+		Buffer[7] = p->xhoch % 256;
+		Buffer[8] = p->yhoch / 256;
+		Buffer[9] = p->yhoch % 256;
+		Buffer[10] = p->Levelhoch / 256;
+		Buffer[11] = p->Levelhoch % 256;
+		Buffer[12] = p->xrunter / 256;
+		Buffer[13] = p->xrunter % 256;
+		Buffer[14] = p->yrunter / 256;
+		Buffer[15] = p->yrunter % 256;
+		Buffer[16] = p->Levelrunter / 256;
+		Buffer[17] = p->Levelrunter % 256;
+	}
+
+	void AuswertParameter(ParameterTyp *p, CharPtr Buffer)
+	{
+		p->x = Buffer[0]*256+Buffer[1];
+		p->y = Buffer[2]*256+Buffer[3];
+		p->Art = Buffer[4]*256+Buffer[5];
+		p->xhoch = Buffer[6]*256+Buffer[7];
+		p->yhoch = Buffer[8]*256+Buffer[9];
+		p->Levelhoch = Buffer[10]*256+Buffer[11];
+		p->xrunter = Buffer[12]*256+Buffer[13];
+		p->yrunter = Buffer[14]*256+Buffer[15];
+		p->Levelrunter = Buffer[16]*256+Buffer[17];
+	}
+
+	void DoParameterList(ParameterTyp Parameter[], 
+		unsigned AnzahlParameter, 
+		CharPtr Buffer, void (*Do)(ParameterTyp *, CharPtr))
+	{
+		int i;
+		for (i = 0; i < AnzahlParameter; i++)
+			Do(&Parameter[i], Buffer + i * 18);
+	}
+
 	void MakeLevelPars(void)
 	{
 		unsigned x;
@@ -534,13 +549,15 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 
 		Count = 42 * AnzahlMonster;
 		ReadBlock(h, Count, Buffer);
-		DoMonsterList(Monster, AnzahlMonster, Buffer, AuswertMonster);
+		DoMonsterList(Monster + 1, AnzahlMonster,
+			Buffer, AuswertMonster);
 		Count = 42 * AnzahlGegen;
 		ReadBlock(h, Count, Buffer);
-		DoGegenList(Gegenstand, AnzahlGegen, Buffer, AuswertGegen);
+		DoGegenList(Gegenstand + 1, AnzahlGegen,
+			Buffer, AuswertGegen);
 		Count = 18 * AnzahlParameter;
 		ReadBlock(h, Count, Buffer);
-		DoParameterList(Parameter, AnzahlParameter,
+		DoParameterList(Parameter + 1, AnzahlParameter,
 				Buffer, AuswertParameter);
 
 		if (!Editor) { /* Karte laden */
@@ -581,13 +598,13 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 		WriteFile(h, 2, ShortBuffer);
 		WriteFile(h, shortlength, Buffer);
 
-		DoMonsterList(Monster, AnzahlMonster, Buffer, MakeMonster);
+		DoMonsterList(Monster + 1, AnzahlMonster, Buffer, MakeMonster);
 		Count = 42 * AnzahlMonster;
 		WriteBlock(h, Count, Buffer);
-		DoGegenList(Gegenstand, AnzahlGegen, Buffer, MakeGegen);
+		DoGegenList(Gegenstand + 1, AnzahlGegen, Buffer, MakeGegen);
 		Count = 42 * AnzahlGegen;
 		WriteBlock(h, Count, Buffer);
-		DoParameterList(Parameter, AnzahlParameter, 
+		DoParameterList(Parameter + 1, AnzahlParameter, 
 				Buffer, MakeParameter);
 		Count = 18 * AnzahlParameter;
 		WriteBlock(h, Count, Buffer);

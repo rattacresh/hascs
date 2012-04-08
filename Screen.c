@@ -190,7 +190,7 @@ unsigned HandleScreen(void)
 			i = FindObject(mx, my);
 			if (i != 0) {
 				if (Selectable & DScreen.Obj[i].Flags) {
-					DScreen.Obj[i].Flags = DScreen.Obj[i].Flags & ~Inverted;
+					DScreen.Obj[i].Flags = DScreen.Obj[i].Flags ^ Inverted;
 					DrawObject(i);
 				}
 				if (Editable & DScreen.Obj[i].Flags)

@@ -784,7 +784,7 @@ static void EingabeParameter(void)
 	na = AddObject(2, 2, 13, 1, "Name: ", Editable|Outlined);
 	d = AddObject(2, 4, 13, 1, "Musterdatei: ", Outlined|Exit);
 	d = AddObject(2, 6, 6, 1, "Breite: ", Editable);
-	d = AddObject(9, 6, 6, 1, "Höhe: ", Editable);
+	d = AddObject(9, 6, 6, 1, "H\x94he: ", Editable);
 	d = AddObject(2, 7, 6, 1, "Sicht: ", Editable);
 	d = AddObject(9, 7, 6, 1, "Dialog: ", Editable);
 	d = AddObject(2, 8, 13, 1, "Max. Monsteranzahl: ", Editable);
@@ -943,7 +943,7 @@ static void SoundBearbeiten()
 			if (h == la) {
 				if (SelectFile("Welcher Sound...", "*.*", SampleFile)) {
 					FreeCache(0);
-					if (!LoadSoundFile(SampleFile, 1, Sample))
+					if (!LoadSoundFile(SampleFile, 1, &Sample))
 						Sample = SoundOff;
 				}
 			} else if (h == sp)
