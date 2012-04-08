@@ -769,8 +769,7 @@ static unsigned FindText(unsigned n)
 	for (i = 1; i <= AnzahlTexte; i++)
 		if (Text[i].Nummer == n)
 			return i;
-	AnzahlTexte++;
-	Text[AnzahlTexte].Nummer = n;
+	Text[++AnzahlTexte].Nummer = n;
 	return AnzahlTexte;
 }
 
@@ -1024,8 +1023,7 @@ static void Gosub(CharPtr *ref_p)
 	
 	label = GetNumber(&p);
 	if (ReturnLevel < MaxGosub) {
-		ReturnLevel++;
-		ReturnAddress[ReturnLevel].LabelAddress = p;
+		ReturnAddress[++ReturnLevel].LabelAddress = p;
 		Continue = FindLabel(&p, label);
 	} else {
 		DialogFehler("Zuviele verschachtelte GOSUB", "", 65535);
@@ -1038,7 +1036,7 @@ static void Return(CharPtr *ref_p)
 {
 #define p (*ref_p)
 	if (ReturnLevel > 0)
-		p = ReturnAddress[--ReturnLevel].LabelAddress;
+		p = ReturnAddress[ReturnLevel--].LabelAddress;
 	else {
 		DialogFehler("RETURN ohne GOSUB", "", 65535);
 		Continue = FALSE;
