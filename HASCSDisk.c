@@ -291,6 +291,8 @@ void LoadOrSaveSprites(int Load, char *FileName)
 		ReadFile(h, Count, SpriteArrayBuf);
 		AuswertSpriteArrayBuf(SystemSprite);
 		ReadFile(h, Count, SpriteArrayBuf);
+		if (FileError) /* HASCS II Sprite Sets don't have System */
+			return;
 		AuswertSpriteArrayBuf(GegenSprite);
 	} else {
 		h = CreateFile(s);
