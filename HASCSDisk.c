@@ -904,7 +904,7 @@ void LoadOrSavePlayer(int Load)
 		if (FileError) {
 			Concat(s, "Spieler Lesefehler: ", s); Error(s, 0); return;
 		}
-#if 0 /* HASCSIII 1.31 */
+#if 0 /* HASCSIII 1.00 bis 1.31 */
 		ReadFile(h, sizeof SpielerPars, SpielerPars);
 		CodeBuffer(SpielerPars, sizeof SpielerPars, code);
 #else
@@ -917,7 +917,7 @@ void LoadOrSavePlayer(int Load)
 			Concat(s, "Spieler Schreibfehler: ", s); Error(s, 0);
 		}
 		MakeSpieler();
-#if 0 /* HASCSIII 1.31 */
+#if 0 /* HASCSIII 1.00 bis 1.31 */
 		CodeBuffer(Spieler, SIZE(Spieler), code);
 		WriteFile(h, sizeof SpielerPars, SpielerPars);
 #else
