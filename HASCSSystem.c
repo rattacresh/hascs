@@ -75,6 +75,8 @@ static unsigned long BufferLen = 0;
 static unsigned long mousetime = 1;
 static int losgelassen = TRUE;
 
+static unsigned long Rand;
+
 /* Min max */
 
 static int Max(int a, int b)
@@ -1199,15 +1201,28 @@ unsigned long GetTime()
 	return time(NULL);
 }
 
+#define RandomCard(x, n) (Rand \
+		= ((Rand * 3141592621UL) + 1) % 0xFFFFFFUL) % n + x
+
+#define Randomize(n) (Rand = n == 0 ? time(NULL) /*XBios Random()*/ : n)
+
 unsigned Zufall(unsigned n)
 {
 	if (n == 0) return 0;
+#if 0
 	return 1 + (rand() % n);
+#else
+	return RandomCard(1,n);
+#endif
 }
 
 void SetzeZufall(unsigned long n)
 {
+#if 0
 	srand(n);
+#else
+	Randomize(n);
+#endif
 }
 
 /**

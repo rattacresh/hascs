@@ -719,12 +719,35 @@ void DeleteLevels(void)
 }
 
 
+static void CodeBuffer(unsigned long code, unsigned size, char *Buffer)
+{
+	SetzeZufall(code);
+	while (size > 0) {
+		*Buffer++ ^= Zufall(256) - 1;
+		size--;
+	}
+	SetzeZufall(0L);
+}
+
+static unsigned long MakeCode(char *s)
+{
+	unsigned long code = 290568; int i;
+	for (i = 0; i < HIGH(s); i++) {
+		if (s[i] == '\0')
+			return code;
+		code += s[i];
+	}
+	return code;
+}
+
+
 /* Spieler ***************************************************************/
 
 void LoadOrSavePlayer(int Load)
 {
 	int h; 
 	String60Typ s;
+	unsigned long code;
 	char SpielerPars[1292];
 
 	void MakeSpieler(void)
@@ -872,6 +895,7 @@ void LoadOrSavePlayer(int Load)
 	Buffer = GetBuffer(BufferSize);
 	Assign(s, Spieler.Name);
 	Korrektur(s);
+	code = MakeCode(s);
 	Concat(s, PlaPath, s);
 	Concat(s, s, ".PLA");
 
@@ -880,7 +904,12 @@ void LoadOrSavePlayer(int Load)
 		if (FileError) {
 			Concat(s, "Spieler Lesefehler: ", s); Error(s, 0); return;
 		}
-		ReadBlock(h, 1292, SpielerPars);
+#if 0 /* HASCSIII 1.31 */
+		ReadFile(h, sizeof SpielerPars, SpielerPars);
+		CodeBuffer(SpielerPars, sizeof SpielerPars, code);
+#else
+		ReadBlock(h, sizeof SpielerPars, SpielerPars);
+#endif
 		AuswertSpieler();
 	} else {
 		h = CreateFile(s);
@@ -888,7 +917,12 @@ void LoadOrSavePlayer(int Load)
 			Concat(s, "Spieler Schreibfehler: ", s); Error(s, 0);
 		}
 		MakeSpieler();
-		WriteBlock(h, 1292, SpielerPars);
+#if 0 /* HASCSIII 1.31 */
+		CodeBuffer(Spieler, SIZE(Spieler), code);
+		WriteFile(h, sizeof SpielerPars, SpielerPars);
+#else
+		WriteBlock(h, sizeof SpielerPars, SpielerPars);
+#endif
 	}
 	CloseFile(h);
 }
@@ -1119,3 +1153,21 @@ static void __attribute__ ((constructor)) at_init(void)
 
 	Buffer = GetBuffer(BufferSize);
 }
+
+#if 0
+int main(void)
+{
+	int h = OpenFile("RTC.PLA");
+	char xblock[1292];
+	unsigned long code = MakeCode("RTC");
+
+	ReadFile(h, sizeof xblock, xblock);
+	CloseFile(h);
+	printf("decoding...\n");
+	CodeBuffer(code, sizeof xblock, xblock);
+	h = CreateFile("RTC.DEC");
+	WriteFile(h, sizeof xblock, xblock);
+	CloseFile(h);
+	return 0;
+}
+#endif
