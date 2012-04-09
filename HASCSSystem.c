@@ -79,6 +79,8 @@ static unsigned long Rand;
 
 Uint32 VideoModeFlags = SDL_SWSURFACE|SDL_RESIZABLE;
 double WindowScale = 1.0;
+unsigned desktopX, desktopY;
+
 
 /* Min max */
 
@@ -126,7 +128,10 @@ void InitWorkstation(char *WinName)
 		fprintf(stderr, "SDL konnte nicht initialisiert werden: %s\n", SDL_GetError());
 		exit(1);
 	}
-	
+
+	const SDL_VideoInfo *VideoInfo = SDL_GetVideoInfo();
+	desktopX = VideoInfo->current_w;
+	desktopY = VideoInfo->current_h;
 	
 	ScreenWidth = 640; // paramptr->rasterWidth + 1;
 	ScreenHeight = 400; // paramptr->rasterHeight + 1;
@@ -721,7 +726,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 	void VollBild(void)
 	{
 		if (type == 0) { /* Fenster wieder normal */
-			WindowMFDBAdr = SDL_SetVideoMode(0, 0, 0, 
+			WindowMFDBAdr = SDL_SetVideoMode(save.w, save.h, 16, 
 				WindowMFDBAdr->flags & ~SDL_FULLSCREEN);
 			SDL_Flip(WindowMFDBAdr);
 			type = 1;
@@ -729,7 +734,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			save.w = WindowMFDBAdr->w;
 			save.h = WindowMFDBAdr->h;
 			type = 0;
-			WindowMFDBAdr = SDL_SetVideoMode(0, 0, 0,
+			WindowMFDBAdr = SDL_SetVideoMode(desktopX, desktopY, 16,
 				WindowMFDBAdr->flags | SDL_FULLSCREEN);
 			SDL_Flip(WindowMFDBAdr);
 			XOff = 0; YOff = 0;
