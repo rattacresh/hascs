@@ -778,9 +778,20 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		case SDLK_UP : YOff -= 16; Redraw = TRUE; break;
 		case SDLK_DOWN : YOff += 16; Redraw = TRUE; break;
 		case SDLK_KP_ENTER : key.sym = '\r'; break;
-		case SDLK_WORLD_68 : key.sym = 132; break; // ä
-		case SDLK_WORLD_86 : key.sym = 148; break; // ö
-		case SDLK_WORLD_92 : key.sym = 154; break; // ü
+		case SDLK_WORLD_68 : key.sym = 132; break; /* ä */
+		case SDLK_WORLD_86 : key.sym = 148; break; /* ö */
+		case SDLK_WORLD_92 : key.sym = 154; break; /* ü */
+		case SDLK_KP0 : key.sym = 0x70; break;
+		case SDLK_KP1 : key.sym = 0x6D; break;
+		case SDLK_KP2 : key.sym = 0x6E; break;
+		case SDLK_KP3 : key.sym = 0x6F; break;
+		case SDLK_KP4 : key.sym = 0x6A; break;
+		case SDLK_KP5 : key.sym = 0x6B; break;
+		case SDLK_KP6 : key.sym = 0x6C; break;
+		case SDLK_KP7 : key.sym = 0x67; break;
+		case SDLK_KP8 : key.sym = 0x68; break;
+		case SDLK_KP9 : key.sym = 0x69; break;
+
 		case SDLK_q : if (key.mod & KMOD_CTRL) { /* Control Q */
 				Ende();  key.sym = '\0';
 			}
