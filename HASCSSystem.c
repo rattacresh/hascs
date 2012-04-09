@@ -62,7 +62,7 @@ unsigned NewXMin = 40, NewYMin = 25, NewXMax = 0, NewYMax = 0;
     
 unsigned AnzCache = 0, CacheCounter = 0;
     
-static SDL_Surface *ScreenMFDBAdr, *BufferMFDBAdr, *PicMFDBAdr;
+static SDL_Surface *ScreenMFDBAdr, *BufferMFDBAdr, *PicMFDBAdr, *WindowMFDBAdr;
 
 static struct stat StatBuf;
 static glob_t DTABuffer;
@@ -76,6 +76,9 @@ static unsigned long mousetime = 1;
 static int losgelassen = TRUE;
 
 static unsigned long Rand;
+
+Uint32 VideoModeFlags = SDL_SWSURFACE|SDL_RESIZABLE;
+double WindowScale = 1.0;
 
 /* Min max */
 
@@ -128,8 +131,8 @@ void InitWorkstation(char *WinName)
 	ScreenWidth = 640; // paramptr->rasterWidth + 1;
 	ScreenHeight = 400; // paramptr->rasterHeight + 1;
 	
-	ScreenMFDBAdr = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, SDL_HWSURFACE);
-	if (ScreenMFDBAdr == NULL) {
+	WindowMFDBAdr = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, VideoModeFlags);
+	if (WindowMFDBAdr == NULL) {
 		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung %ix%i öffnen: %s\n", ScreenWidth, ScreenHeight, SDL_GetError());
 		exit(1);
 	}
@@ -139,7 +142,7 @@ void InitWorkstation(char *WinName)
 		SDL_DEFAULT_REPEAT_INTERVAL);
 
 	type = 1;
-	work.x = 0; work.y = 0; work.w = 640; work.h = 400;
+	work.x = 0; work.y = 0; work.w = ScreenWidth; work.h = ScreenHeight;
 #if 0
 
 	SDL_Color colors[256];
@@ -148,15 +151,16 @@ void InitWorkstation(char *WinName)
 	colors[0].r = colors[0].g = colors[0].b  = 255;
 	SDL_SetPalette(surf, SDL_LOGPAL|SDL_PHYSPAL, colors, 0, 256);
 	
-	SDL_Rect  dst = {0,0,640,400};
+	SDL_Rect  dst = {0,0,ScreenWidth,ScreenHeight};
 #endif
 	srand(time(NULL));
 #if 1
-	// Ich zeichne einfach das gesamte Fenster neu und
-	// ignoriere den Frame:
-	SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
-	SDL_Flip(ScreenMFDBAdr);
+	SDL_BlitSurface(BufferMFDBAdr, NULL, WindowMFDBAdr, NULL);
+	SDL_Flip(WindowMFDBAdr);
 #endif
+
+	ScreenMFDBAdr = SDL_ConvertSurface(BufferMFDBAdr, WindowMFDBAdr->format, VideoModeFlags);
+	SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
 }
 
 /**
@@ -436,6 +440,7 @@ void SetBuffer(unsigned width, unsigned height, void *Buffer)
 #endif
 	if (BufferMFDBAdr)
 		SDL_FreeSurface(BufferMFDBAdr);
+
 	BufferMFDBAdr = SDL_CreateRGBSurfaceFrom(Buffer, width, height, 1, pitch, 0, 0, 0, 0);
 	/* Wie oben */
 	for (i = 0; i < BufferMFDBAdr->format->palette->ncolors; i++)
@@ -664,12 +669,20 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 #if 0
 			printf(" => Blit %d %d %d %d ",	s.x,s.y,s.w,s.h);
 #endif
+
 			SDL_BlitSurface(BufferMFDBAdr, &s, ScreenMFDBAdr, &r);
+
+			int err = SDL_SoftStretch(ScreenMFDBAdr, NULL, WindowMFDBAdr, NULL);
+			if (err)
+				printf("SDL error: %s\n", SDL_GetError());	
+			
 			//SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
 #if 0
 			printf("=> Update %d %d %d %d", r.x, r.y, r.w, r.h);
 #endif
-			SDL_UpdateRect(ScreenMFDBAdr, r.x, r.y, r.w, r.h);
+			//SDL_UpdateRect(WindowMFDBAdr, r.x, r.y, r.w, r.h);
+			//SDL_UpdateRect(WindowMFDBAdr, 0, 0, 0, 0);
+			SDL_Flip(WindowMFDBAdr);
 			/*GrafMouse(mouseOn, NIL);*/
 		}
 #if 0
@@ -708,23 +721,23 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 	void VollBild(void)
 	{
 		if (type == 0) { /* Fenster wieder normal */
-			ScreenMFDBAdr = SDL_SetVideoMode(0, 0, 0, 
-				ScreenMFDBAdr->flags & ~SDL_FULLSCREEN);
-			SDL_Flip(ScreenMFDBAdr);
+			WindowMFDBAdr = SDL_SetVideoMode(0, 0, 0, 
+				WindowMFDBAdr->flags & ~SDL_FULLSCREEN);
+			SDL_Flip(WindowMFDBAdr);
 			type = 1;
 		} else {
-			save.w = ScreenMFDBAdr->w;
-			save.h = ScreenMFDBAdr->h;
+			save.w = WindowMFDBAdr->w;
+			save.h = WindowMFDBAdr->h;
 			type = 0;
-			ScreenMFDBAdr = SDL_SetVideoMode(0, 0, 0,
-				ScreenMFDBAdr->flags | SDL_FULLSCREEN);
-			SDL_Flip(ScreenMFDBAdr);
+			WindowMFDBAdr = SDL_SetVideoMode(0, 0, 0,
+				WindowMFDBAdr->flags | SDL_FULLSCREEN);
+			SDL_Flip(WindowMFDBAdr);
 			XOff = 0; YOff = 0;
 		}
 		work.x = 0;
 		work.y = 0;
-		work.w = ScreenMFDBAdr->w;
-		work.h = ScreenMFDBAdr->h;
+		work.w = WindowMFDBAdr->w;
+		work.h = WindowMFDBAdr->h;
 		RedrawWindow(work);
 	}
 
@@ -791,6 +804,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		case SDLK_KP7 : key.sym = '7'; break;
 		case SDLK_KP8 : key.sym = '8'; break;
 		case SDLK_KP9 : key.sym = '9'; break;
+		case SDLK_F11 : VollBild(); key.sym = '\0'; break;
 
 		case SDLK_q : if (key.mod & KMOD_CTRL) { /* Control Q */
 				Ende();  key.sym = '\0';
@@ -883,6 +897,36 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			/*SetTopWindow(win);*/
 			break;
 		case SDL_VIDEORESIZE :
+			{ 
+				unsigned newW, newH;
+				double origRatio = 640.0 / 400.0;
+				double resizRatio = (double)msg.resize.w / (double)msg.resize.h;
+				if (resizRatio < origRatio) {
+					newW = msg.resize.w;
+					newH = (double)msg.resize.w * (400.0 / 640.0);
+				} else {	
+					newW = (double)msg.resize.h * (640.0 / 400.0);
+					newH = msg.resize.h;
+				}
+				if (newW < 640 || newH < 400) {
+					newW = 640;
+					newH = 400;
+				}
+				WindowMFDBAdr = SDL_SetVideoMode(newW, newH, 16, WindowMFDBAdr->flags);
+				if (WindowMFDBAdr == NULL) {
+					fprintf(stderr, "Resizing to %ix%i error: %s\n", newW, newH, SDL_GetError());
+					exit(1);
+				}
+				WindowScale = newW / 640.0;
+			}
+			XOff = 0; YOff = 0;
+			work.x = 0;
+			work.y = 0;
+			work.w = WindowMFDBAdr->w;
+			work.h = WindowMFDBAdr->h;
+			RedrawWindow(work);
+			//SDL_Flip(ScreenMFDBAdr);
+			break;
 #if 0
 			work = CalcWindow(calcWork, type, msg.moveFrame);
 			Correct(XOff, YOff, work.w, work.h);
@@ -1187,6 +1231,8 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		WarteZeit, xx, yy, b, ch);
 #endif
 
+	xx /= WindowScale;
+	yy /= WindowScale;
 
 #undef xx
 #undef yy

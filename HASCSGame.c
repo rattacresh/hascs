@@ -212,7 +212,7 @@ unsigned DoGame(void)
 	void KeyBoard(char Taste)
 	{
 		unsigned i, x, y;
-		switch (CAP(Taste)) {
+		switch (CAP(Taste)) {			
 		case '1' : mt = MausLinks; mx = SichtMitteX - 1; my = SichtMitteY + 1; break;
 		case '2' : mt = MausLinks; mx = SichtMitteX    ; my = SichtMitteY + 1; break;
 		case '3' : mt = MausLinks; mx = SichtMitteX + 1; my = SichtMitteY + 1; break;
@@ -438,6 +438,7 @@ unsigned DoGame(void)
 			else {
 				mx = mx / 16; my = my / 16;
 			}
+
 			if (Rueckgabe == 0) {
 				SpielerAktion = SpielerBewegung(mx, my, mt);
 				if (SpielerAktion == 2)
