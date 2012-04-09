@@ -781,16 +781,16 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		case SDLK_WORLD_68 : key.sym = 132; break; /* ä */
 		case SDLK_WORLD_86 : key.sym = 148; break; /* ö */
 		case SDLK_WORLD_92 : key.sym = 154; break; /* ü */
-		case SDLK_KP0 : key.sym = 0x70; break;
-		case SDLK_KP1 : key.sym = 0x6D; break;
-		case SDLK_KP2 : key.sym = 0x6E; break;
-		case SDLK_KP3 : key.sym = 0x6F; break;
-		case SDLK_KP4 : key.sym = 0x6A; break;
-		case SDLK_KP5 : key.sym = 0x6B; break;
-		case SDLK_KP6 : key.sym = 0x6C; break;
-		case SDLK_KP7 : key.sym = 0x67; break;
-		case SDLK_KP8 : key.sym = 0x68; break;
-		case SDLK_KP9 : key.sym = 0x69; break;
+		case SDLK_KP0 : key.sym = '0'; break;
+		case SDLK_KP1 : key.sym = '1'; break;
+		case SDLK_KP2 : key.sym = '2'; break;
+		case SDLK_KP3 : key.sym = '3'; break;
+		case SDLK_KP4 : key.sym = '4'; break;
+		case SDLK_KP5 : key.sym = '5'; break;
+		case SDLK_KP6 : key.sym = '6'; break;
+		case SDLK_KP7 : key.sym = '7'; break;
+		case SDLK_KP8 : key.sym = '8'; break;
+		case SDLK_KP9 : key.sym = '9'; break;
 
 		case SDLK_q : if (key.mod & KMOD_CTRL) { /* Control Q */
 				Ende();  key.sym = '\0';
@@ -988,7 +988,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			case 1: /* SDL Event */
 				switch (msg->type) {
 				case SDL_KEYDOWN:
-#if 1
+#if 0
 					printf("The %s key was pressed (code %i)!\n",
 					       SDL_GetKeyName(msg->key.keysym.sym), msg->key.keysym.sym);		
 #endif
