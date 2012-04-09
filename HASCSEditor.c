@@ -441,7 +441,7 @@ static void InputMonster(unsigned x, unsigned y, unsigned neu, unsigned *ref_t)
 			SetFlagSelected(s + i, 1);
 
 	DrawScreen();
-	if (a == HandleScreen()) MakeScreen(x, y); return;
+	if (a == HandleScreen()) { MakeScreen(x, y); return; }
 
 	GetInputString(n, m.Name);
 	m.Trefferwurf = GetInputCard(n+1);
@@ -571,7 +571,7 @@ static void InputParameter(unsigned x, unsigned y, int new, unsigned *ref_a)
 	SetInputCard(ar + 6, p.Levelrunter);
 
 	DrawScreen();
-	if (ab == HandleScreen()) MakeScreen(x, y); return;
+	if (ab == HandleScreen()) { MakeScreen(x, y); return; }
 
 	p. Art = GetInputCard(ar);
 	p. xhoch = GetInputCard(ar + 1);
@@ -916,8 +916,9 @@ static void DialogBearbeiten(void)
 				ende = DialogNummer;
 			}
 			for (i = begin; i <= ende; i++)
-				if (SaveDialog(i, h == co))
+				if (SaveDialog(i, h == co)) {
 					SetInputCard(nr, i); DrawObject(nr); WaitTime(0);
+				}
 		} else if (h == te)
 			DoDialog(DialogNummer);
 	}
