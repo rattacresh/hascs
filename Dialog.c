@@ -1596,6 +1596,81 @@ static void CodeDialog(unsigned long n, unsigned long l, void *b)
 	}
 }
 
+static void OldCodeDialog(unsigned n, unsigned long l, CharPtr p)
+{
+	unsigned i;
+	if (n >= 0)
+		SetzeZufall(n);
+	else
+		SetzeZufall(1);
+
+	for (i = 0; i <= l - 1; i++)
+		*p++ ^= Zufall(256) - 1;
+
+	SetzeZufall(0L);
+}
+int OldSaveDialog(unsigned n, int coded, unsigned long l, CharPtr p)
+{
+	String80Type s;
+	int f;
+
+	if (coded)
+		OldCodeDialog(BenutzerNummer, l, p);
+	MakeFileName(coded, n, s);
+	f = CreateFile(s);
+	if (!FileError) {
+		WriteFile(f, l, p);
+		CloseFile(f);
+	}
+	if (coded)
+		OldCodeDialog(BenutzerNummer, l, p);
+	return !FileError;
+}
+
+int OldLoadDialog(unsigned n, int coded)
+{
+	unsigned long l;
+	CharPtr p;
+	String80Type s;
+	int f;
+
+	void BruteTest(CharPtr p)
+	{
+		if (p[0] >= 32 && p[1] >= 32 
+		 && p[2] >= 32 && p[3] >= 32
+		 && p[4] >= 32 && p[5] >= 32
+		 && p[6] >= 32 && p[7] >= 32
+		 && p[0] < 128 && p[1] < 128
+		 && p[2] < 128 && p[3] < 128
+		 && p[4] < 128 && p[5] < 128
+		 && p[6] < 128 && p[7] < 128)
+			printf("%d: %.8s\n", BenutzerNummer, p);
+	}
+	if (coded == -1) { /* Versuche es mit roher Gewalt... */
+		unsigned i;
+		unsigned old = BenutzerNummer;
+		for (i = 0; i < 65536; i++) {
+			BenutzerNummer = i;
+			OldLoadDialog(n, 2);
+		}
+		BenutzerNummer = old;
+		return TRUE;
+	}
+
+	MakeFileName(coded, n, s);
+	l = FileLength(s); if (l == 0) return FALSE;
+	p = GetBuffer(l);
+	f = OpenFile(s); ReadFile(f, l, p); CloseFile(f);
+	if (coded)
+		OldCodeDialog(BenutzerNummer, l, p);
+
+	if (coded == 2)
+		BruteTest(p);
+	else
+		return OldSaveDialog(n, !coded, l, p);
+	return TRUE;
+}
+
 int LoadDialog(unsigned n, int coded)
 {
 	char s[128];
@@ -1640,7 +1715,7 @@ int SaveDialog(unsigned n, int coded)
 	BITSET *p;
 
 	MakeFileName(!coded, n, s);
-	l = FileLength(s); if (l == 0) return FALSE;;
+	l = FileLength(s); if (l == 0) return FALSE;
 	p = GetBuffer(l);
 	f = OpenFile(s); ReadFile(f, l, p); CloseFile(f);
 	CodeDialog(BenutzerNummer, l, p);
