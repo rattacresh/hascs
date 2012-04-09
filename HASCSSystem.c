@@ -729,13 +729,17 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			WindowMFDBAdr = SDL_SetVideoMode(save.w, save.h, 16, 
 				WindowMFDBAdr->flags & ~SDL_FULLSCREEN);
 			SDL_Flip(WindowMFDBAdr);
+			WindowScale = (double)save.w / 640.0;
 			type = 1;
 		} else {
 			save.w = WindowMFDBAdr->w;
 			save.h = WindowMFDBAdr->h;
 			type = 0;
+			if (desktopX > desktopY*1.6)
+				desktopX = desktopY*1.6;
 			WindowMFDBAdr = SDL_SetVideoMode(desktopX, desktopY, 16,
-				WindowMFDBAdr->flags | SDL_FULLSCREEN);
+							 WindowMFDBAdr->flags | SDL_FULLSCREEN);
+			WindowScale = (double)desktopX / 640.0;
 			SDL_Flip(WindowMFDBAdr);
 			XOff = 0; YOff = 0;
 		}
