@@ -435,8 +435,9 @@ unsigned DoGame(void)
 			WaitInput(&mx, &my, &mt, &ch, -1);
 			if (mt == 0)
 				KeyBoard(ch); /* Tasten-Befehl ? */
-			else
+			else {
 				mx = mx / 16; my = my / 16;
+			}
 			if (Rueckgabe == 0) {
 				SpielerAktion = SpielerBewegung(mx, my, mt);
 				if (SpielerAktion == 2)
