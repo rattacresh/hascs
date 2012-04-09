@@ -6,22 +6,23 @@
   3. Bool values for A IN B => !!(A & B)
   4. (done) undo changed INC()/DEC() order in dialog.c hascsedi.c 
      hascsspi.c
-  5. check for missing {} around single-line bodies
+  5. (done) check for missing {} around single-line bodies
   6. (done) 0C => '\0'
-  7. replace ~ü~ü and other charset  specific stuff (umlauts)
+  7. (done replace ~ü~ü and other charset  specific stuff (umlauts)
      by correct \u...
-  8. search for sizeof, usually near direct read into memory
+  8. (done) search for sizeof, usually near direct read into memory
   9. check for BITSET variables with arithmetic operators, change them 
      to C bitwise operators
- 10. some funcs really rely on HIGH(...)
- 11. sometimes the original source code usees  BeginOutput instead of 
-     BeginOutput(). Does Modula execute the function in this case or 
-     does it merely compute the address and disposes of it?
+ 10. (done) some funcs really rely on HIGH(...)
+ 11. (done) sometimes the original source code usees  BeginOutput 
+     instead of BeginOutput(). Does Modula execute the function in this 
+     case or does it merely compute the address and disposes of it? => 
+     Executes
  12. Check With for evaluation (has any of the expressions specified on 
      WITH changed value on use and it should of course not have in the 
-     C code to make it equivalent to the MODUAL version)?
- 13. make non-exported funtions static 13. FIXME/XXX/--rtc/machine 
-     dependencies
- 14. at_init
+     C code to make it equivalent to the MODULA version)?
+ 13. make non-exported funtions static
+ 14. (done) FIXME/XXX/--rtc/machine dependencies
+ 15. (done) at_init
 
 
