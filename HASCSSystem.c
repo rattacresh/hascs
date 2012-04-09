@@ -777,6 +777,10 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		case SDLK_RIGHT : XOff += 16; Redraw = TRUE; break;
 		case SDLK_UP : YOff -= 16; Redraw = TRUE; break;
 		case SDLK_DOWN : YOff += 16; Redraw = TRUE; break;
+		case SDLK_KP_ENTER : key.sym = '\r'; break;
+		case SDLK_WORLD_68 : key.sym = 132; break; // ä
+		case SDLK_WORLD_86 : key.sym = 148; break; // ö
+		case SDLK_WORLD_92 : key.sym = 154; break; // ü
 		case SDLK_q : if (key.mod & KMOD_CTRL) { /* Control Q */
 				Ende();  key.sym = '\0';
 			}
@@ -817,6 +821,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			ch = '\0'; /* Richtungstasten löschen */
 		ok = ch != '\0';
 	}
+
 	void Message(void)
 	{
 #if 0
@@ -972,7 +977,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			case 1: /* SDL Event */
 				switch (msg->type) {
 				case SDL_KEYDOWN:
-#if 0
+#if 1
 					printf("The %s key was pressed (code %i)!\n",
 					       SDL_GetKeyName(msg->key.keysym.sym), msg->key.keysym.sym);		
 #endif
