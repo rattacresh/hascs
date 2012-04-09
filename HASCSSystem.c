@@ -934,12 +934,12 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 	{
 		int buttonevent = (1<<SDL_MOUSEBUTTONUP)
 			|(1<<SDL_MOUSEBUTTONDOWN);
-		Uint32 expiration = 0;
 		static struct {
 			Point mLoc;
 			unsigned mButtons;
 			SDLMod keyState;
 			SDL_keysym key;
+			Uint32 expiration;
 		} Save;
 
 		int independ;
@@ -974,10 +974,10 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			? (Save.mButtons & buttons) != (state & buttons)
 			: (Save.mButtons & buttons) == (state & buttons);
 #if 0
-		printf("MultiEvent() %d %d|%d %d %d %d\n", *doneClicks, Save.mButtons, independ, mouse, buttons, state);
+		printf("MultiEvent() %d %d|%d %d %d %d %ld\n", *doneClicks, Save.mButtons, independ, mouse, buttons, state, time);
 #endif
-		if (flags & timer)
-			expiration = SDL_GetTicks() + time;
+		if (flags & timer && !Save.expiration)
+			Save.expiration = SDL_GetTicks();
 
 		do {
 			SDL_PumpEvents();
@@ -1011,6 +1011,9 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 					*events |= (1<<SDL_KEYDOWN);
 					break;
 				case SDL_MOUSEBUTTONUP:
+#if 0
+					printf("Mouse button %d released at (%d,%d)\n", msg->button.button, msg->button.x, msg->button.y);		
+#endif
 					buttonevent = (1<<SDL_MOUSEBUTTONUP);
 					Save.mButtons
 						&= ~(1<<msg->button.button);
@@ -1069,8 +1072,9 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 				continue;
 			case 0: /* Timeout */
 				if (flags & timer
-				 && SDL_GetTicks() >= expiration)
+				 && SDL_GetTicks() >= Save.expiration + time)
 				{
+					Save.expiration = 0;
 #if 0
 					printf("Timeout after %d\n",
 						flags & timer ? time : -1);

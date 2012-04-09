@@ -78,7 +78,7 @@ static void ShowMonster(unsigned i)
 {
 	unsigned xs, ys;
 	if (Monster[i].Status > 0 && Monster[i].Status < 1000) {
-		if ((LevelParameter & Level[Monster[i].x][Monster[i].y].Spezial)) {
+		if (LevelParameter & Level[Monster[i].x][Monster[i].y].Spezial) {
 			MonsterParameter(&Monster[i]);
 			if (Monster[i].Status == 0) {
 				ClearMonster(Monster[i].x, Monster[i].y);
