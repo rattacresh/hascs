@@ -146,7 +146,7 @@ void InitWorkstation(char *WinName)
 		SDL_DEFAULT_REPEAT_INTERVAL);
 
 	type = 1;
-	work.x = 0; work.y = 0; work.w = ScreenWidth; work.h = ScreenHeight;
+	work.x = 0; work.y = 0; work.w = ScreenWidth*2; work.h = ScreenHeight*2;
 #if 0
 
 	SDL_Color colors[256];
