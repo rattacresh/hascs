@@ -600,7 +600,7 @@ static void Benutze(GegenstandTyp *ref_r)
 			do {
 				NormalKoords((int)(Zufall(2 * r.PhioleWirkung + 1) + Spieler.x)
 					           - (int)r.PhioleWirkung - 1,
-					           (int)Z(ufall(2 * r.PhioleWirkung + 1) + Spieler.y)
+					           (int)(Zufall(2 * r.PhioleWirkung + 1) + Spieler.y)
 					           - (int)r.PhioleWirkung - 1,
 					           &i, &j);
 			} while (!SpielerFrei(i, j));
