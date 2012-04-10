@@ -3,16 +3,16 @@ CFLAGS = -g3 -O2 -Wall -funsigned-char
 LIBS = -lSDL
 #LIBS = -lSDL -lefence
 HASCSEDITOR_SOURCE = \
-	Dialog.c HASCSGame.c HASCSMagic.c HASCSSprite.c Sound.c \
+	scale2x.c scale3x.c scalebit.c Dialog.c HASCSGame.c HASCSMagic.c HASCSSprite.c Sound.c \
 	HASCSCharakter.c HASCSGlobal.c HASCSMonster.c HASCSSystem.c Start.c \
 	HASCSDisk.c HASCSGraphics.c HASCSOutput.c Image.c \
-	HASCSEditor.c HASCSSpieler.c Screen.c
+	HASCSEditor.c HASCSSpieler.c Screen.c 
 HASCSEDITOR_OBJS := $(HASCSEDITOR_GEN:.c=.o) $(HASCSEDITOR_SOURCE:.c=.o)
 HASCSIII_SOURCE = \
-	Dialog.c HASCSGame.c HASCSMagic.c HASCSSprite.c Sound.c \
+	scale2x.c scale3x.c scalebit.c Dialog.c HASCSGame.c HASCSMagic.c HASCSSprite.c Sound.c \
 	HASCSCharakter.c HASCSGlobal.c HASCSMonster.c HASCSSystem.c Start.c \
 	HASCSDisk.c HASCSGraphics.c HASCSOutput.c Image.c \
-	HASCSIII.c HASCSSpieler.c Screen.c
+	HASCSIII.c HASCSSpieler.c Screen.c 
 HASCSIII_OBJS := $(HASCSIII_GEN:.c=.o) $(HASCSIII_SOURCE:.c=.o)
 SDLDEMO_SOURCE = SDLDemo.c HASCSSystem.c HASCSGraphics.c
 SDLDEMO_OBJS := $(SDLDEMO_GEN:.c=.o) $(SDLDEMO_SOURCE:.c=.o)
