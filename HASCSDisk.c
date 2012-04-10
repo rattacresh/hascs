@@ -41,7 +41,7 @@ static unsigned PseudoZufall(unsigned n)
 	return ZufallsZahl % (long)n + 1;
 }
 
-static void WriteBlock(int handle, unsigned anzahl, CharPtr a)
+void WriteBlock(int handle, unsigned anzahl, CharPtr a)
 {
 	unsigned i;
 	unsigned long count, pruef, start;
@@ -64,7 +64,7 @@ static void WriteBlock(int handle, unsigned anzahl, CharPtr a)
 	WriteFile(handle, count, Buffer);
 }
 
-static void ReadBlock(int handle, unsigned anzahl, CharPtr a)
+void ReadBlock(int handle, unsigned anzahl, CharPtr a)
 {
 	unsigned i;
 	unsigned long count, pruef, test;
@@ -602,14 +602,26 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 
 		DoMonsterList(Monster + 1, AnzahlMonster, Buffer, MakeMonster);
 		Count = 42 * AnzahlMonster;
+#if 1 /* HASCS III */
 		WriteBlock(h, Count, Buffer);
+#else
+		WriteFile(h, Count, Buffer);
+#endif
 		DoGegenList(Gegenstand + 1, AnzahlGegen, Buffer, MakeGegen);
 		Count = 42 * AnzahlGegen;
+#if 1 /* HASCS III */
 		WriteBlock(h, Count, Buffer);
+#else
+		WriteFile(h, Count, Buffer);
+#endif
 		DoParameterList(Parameter + 1, AnzahlParameter, 
 				Buffer, MakeParameter);
 		Count = 18 * AnzahlParameter;
+#if 1 /* HASCS III */
 		WriteBlock(h, Count, Buffer);
+#else
+		WriteFile(h, Count, Buffer);
+#endif
 		
 		if (!Editor) { /* Karte speichern */
 			shortlength = KarteSpeichern();
@@ -899,6 +911,9 @@ void LoadOrSavePlayer(int Load)
 	Concat(s, PlaPath, s);
 	Concat(s, s, ".PLA");
 
+	/* HASCS II 3399 bytes = 3394 bytes payload + 5 bytes trailer =  */
+	/* HASCS III 1.00 bis 1.31 1292 bytes (all payload) */
+	/* HASCS III 1.43 1297 bytes = 1929 bytes playload + 5 bytes trailer */
 	if (Load) { 
 		h = OpenFile(s);
 		if (FileError) {
@@ -907,7 +922,7 @@ void LoadOrSavePlayer(int Load)
 #if 0 /* HASCSIII 1.00 bis 1.31 */
 		ReadFile(h, sizeof SpielerPars, SpielerPars);
 		CodeBuffer(SpielerPars, sizeof SpielerPars, code);
-#else
+#else /* HASCS II, HASCS IIII 1.43 */
 		ReadBlock(h, sizeof SpielerPars, SpielerPars);
 #endif
 		AuswertSpieler();
@@ -920,7 +935,7 @@ void LoadOrSavePlayer(int Load)
 #if 0 /* HASCSIII 1.00 bis 1.31 */
 		CodeBuffer(Spieler, SIZE(Spieler), code);
 		WriteFile(h, sizeof SpielerPars, SpielerPars);
-#else
+#else /* HASCS II, HASCS IIII 1.43 */
 		WriteBlock(h, sizeof SpielerPars, SpielerPars);
 #endif
 	}

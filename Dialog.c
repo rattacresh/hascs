@@ -1584,18 +1584,6 @@ static void MakeFileName(int c, unsigned n, char *s)
 	}
 }
 
-static void CodeDialog(unsigned long n, unsigned long l, void *b)
-{
-	unsigned long i;
-	uint16_t *p = b;
-
-	for (i = 1; i <= l / 2; i++) {
-		n = (n * 153 + 97) % 16777216;
-		*p = htons(ntohs(*p) ^ (n % 65536)); /* EXOR */
-		p++;
-	}
-}
-
 static void OldCodeDialog(unsigned n, unsigned long l, CharPtr p)
 {
 	unsigned i;
@@ -1626,6 +1614,7 @@ int OldSaveDialog(unsigned n, int coded, unsigned long l, CharPtr p)
 		OldCodeDialog(BenutzerNummer, l, p);
 	return !FileError;
 }
+
 
 int OldLoadDialog(unsigned n, int coded)
 {
@@ -1669,6 +1658,118 @@ int OldLoadDialog(unsigned n, int coded)
 	else
 		return OldSaveDialog(n, !coded, l, p);
 	return TRUE;
+}
+
+void V2LoadOrSaveDialog(unsigned n, int Load)
+{
+	int f;
+#if 0
+	CharPtr end;
+	unsigned long count;
+#endif
+	unsigned DialogLength;
+	unsigned DialogNumber;
+	String80Type s;
+	CharPtr p;
+	char Header[4];
+
+	void MakeHeader(void)
+	{
+		Header[0] = DialogLength / 256;
+		Header[1] = DialogLength % 256;
+		Header[2] = DialogNumber / 256;
+		Header[3] = DialogNumber % 256;
+	}
+
+	void AuswertHeader(void)
+	{
+		DialogLength = Header[0] * 256 + Header[1];
+		DialogNumber = Header[2] * 256 + Header[3];
+	}
+
+	extern void ReadBlock(int handle, unsigned anzahl, CharPtr a);
+	extern void WriteBlock(int handle, unsigned anzahl, CharPtr a);
+
+	if (Load) {
+#if 0
+		if (n == CurrentDialogNumber)
+			return
+		Concat(s, DiaPath, "DIALOG.000");
+		MakeNumber(s, n);
+#else
+		MakeFileName(1, n, s);
+#endif
+		f = OpenFile(s);
+		if (FileError) {
+#if 0
+			V2LoadTextDialog();
+			/* V2LoadTextDialog:
+			 * ..."T_DIA.000" ... CurrentDialogNumber = n;
+			 */
+#endif
+			return;
+		}
+#if 0
+		LoadedDialogNumber = n;
+		count = 2;
+		ReadFile(f, count, &DialogLength);
+		ReadFile(f, count, &DialogNumber);
+		ReadBlock(f, DialogLength, Buffer + 20000);
+		end = Buffer + 20000 + DialogLength;
+		*end = '\0';
+		Tokenize(Buffer + 20000);
+#else
+		p = GetBuffer(DialogLength);
+		ReadFile(f, 4, Header);
+		AuswertHeader();
+		ReadBlock(f, DialogLength, p);
+		OldSaveDialog(n, 0, DialogLength, p);
+#endif
+
+		if (DialogNumber != n) {
+			Concat(s, "Falsche Dialognummer: ", s);
+			Error(s, -1);
+		}
+	} else {
+#if 0
+		DialogNumber = CurrentDialogNumber;
+		Concat(s, DiaPath, "DIALOG.000");
+		MakeNumber(s, n)
+		DeleteFile(s);
+#else
+		MakeFileName(0, n, s);
+		DialogLength = FileLength(s); if (DialogLength == 0) return;
+		p = GetBuffer(DialogLength);
+		f = OpenFile(s); ReadFile(f, DialogLength, p); CloseFile(f);
+		MakeFileName(1, n, s);
+		DialogNumber = n;
+#endif
+		f = CreateFile(s);
+#if 0
+		count = 2;
+		WriteFile(f, count, &DialogLength);
+		WriteFile(f, count, &DialogNumber);
+		WriteBlock(f, DialogLength, Buffer + 20000);
+#else
+		MakeHeader();
+		WriteFile(f, 4, Header);
+		WriteBlock(f, DialogLength, p);
+#endif
+	}
+
+	CloseFile(f);
+	
+}
+static void CodeDialog(unsigned long n, unsigned long l, void *b)
+{
+	unsigned long i;
+	uint16_t *p = b;
+
+	for (i = 1; i <= l / 2; i++) {
+		n = (n * 153 + 97) % 16777216;
+		*p = htons(ntohs(*p) ^ (n % 65536)); /* EXOR */
+		p++;
+	}
 }
 
 int LoadDialog(unsigned n, int coded)
