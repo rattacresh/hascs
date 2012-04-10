@@ -58,7 +58,7 @@ void MakeSichtBereich(int Force)
 			}
 			if (LevelSpieler & ~SichtBereich[x0][y0].Spezial) {
 				SichtBereich[x0][y0].Spezial |= LevelSpieler;
-				if (ct <= Weite
+				if (ct <= (int)Weite
 				 || (LevelSichtbar & SichtBereich[x0][y0].Spezial 
 				  && SLicht & ~Spieler.Status))
 					SichtBereich[x0][y0].Spezial |= LevelBekannt;
@@ -102,7 +102,7 @@ static void Falle(ParameterTyp *ref_p)
 	s = 0;
 	for (i = 1; i <= p.Schaden; i++)
 		s += Zufall(6); /* Schaden auswürfeln */
-	if (SAbenteurer & Spieler.Typ) { s = s / 2; }
+	if (SAbenteurer & Spieler.Typ) s = s / 2;
 	TrefferPunkte(s, FALSE);
 	BeginOutput();
 	if ((1 << 0) & p.Flag) {

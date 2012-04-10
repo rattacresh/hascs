@@ -17,7 +17,7 @@ typedef struct {
 		PixelHeight,
 		LineWidth,
 		Lines; /* 2 Bytes Typ! */
-	} HeaderType;
+} HeaderType;
 
 typedef unsigned char *BytePtr;
 

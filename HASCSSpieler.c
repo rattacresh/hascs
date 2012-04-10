@@ -89,7 +89,7 @@ int RingAnlegen(GegenstandTyp *ref_r)
 		} else if (r.Ring >= 10 && r.Ring <= 15) /* Basiswerterhöhung */
 			ChangeBasiswert(r.Ring - 10, r.RingWirkung);
 		else if (r.Ring >= 20 && r.Ring <= 25) /* Basiswertsenkung */
-			ChangeBasiswert(r.Ring - 20, -r.RingWirkung);
+			ChangeBasiswert(r.Ring - 20, -(int)r.RingWirkung);
 		OutputText("#669#");
 		return TRUE;
 	} else
@@ -102,11 +102,11 @@ void RingAblegen(GegenstandTyp *ref_r)
 #define r (*ref_r)
 	if (r.Ring == 1) { /* Statusänderung */
 		Spieler.Status = Spieler.Status & ~r.RingWirkung;
-		Spieler.Permanent = Spieler.Permanent & ~ r.RingWirkung;
+		Spieler.Permanent = Spieler.Permanent & ~r.RingWirkung;
 	} else if (r.Ring >= 10 && r.Ring <= 15) /* Basiswerterhöhung */
-		ChangeBasiswert(r.Ring - 10, -r.RingWirkung);
+		ChangeBasiswert(r.Ring - 10, -(int)r.RingWirkung);
 	else if (r.Ring >= 20 && r.Ring <= 25) /* Basiswertsenkung */
-		ChangeBasiswert(r.Ring - 20, -r.RingWirkung);
+		ChangeBasiswert(r.Ring - 20, -(int)r.RingWirkung);
 	r.KennNummer = 0;
 #undef r
 }
@@ -528,10 +528,10 @@ static void Benutze(GegenstandTyp *ref_r)
 			case 8 : BeginOutput(); Print(m.Name); Print("#628#"); EndOutput();
 				do {
 					NormalKoords(
-						Zufall(2 * Wirkung + 1) + m.x - Wirkung - 1,
-						Zufall(2 * Wirkung + 1) + m.y - Wirkung - 1, &i, &j);
+						(int)(Zufall(2 * Wirkung + 1) + m.x) - (int)Wirkung - 1,
+						(int)(Zufall(2 * Wirkung + 1) + m.y) - (int)Wirkung - 1, &i, &j);
 				} while (!MonsterFrei(&m, i, j));
-				nm = m; DeleteMonster(x, y); NewMonster(i, j, &nm);
+				nm = m; DeleteMonster(m.x, m.y); NewMonster(i, j, &nm);
 				return;
 			case 10 : DoMonsterDialog(Wirkung, &m);
 				return;
@@ -598,10 +598,10 @@ static void Benutze(GegenstandTyp *ref_r)
 			break;
 		case 9: OutputText("#633#");
 			do {
-				NormalKoords((int)Zufall(2 * r.PhioleWirkung + 1) + Spieler.x
-					           - r.PhioleWirkung - 1,
-					           (int)Zufall(2 * r.PhioleWirkung + 1) + Spieler.y
-					           - r.PhioleWirkung - 1,
+				NormalKoords((int)(Zufall(2 * r.PhioleWirkung + 1) + Spieler.x)
+					           - (int)r.PhioleWirkung - 1,
+					           (int)Z(ufall(2 * r.PhioleWirkung + 1) + Spieler.y)
+					           - (int)r.PhioleWirkung - 1,
 					           &i, &j);
 			} while (!SpielerFrei(i, j));
 			Spieler.x = i; Spieler.y = j;

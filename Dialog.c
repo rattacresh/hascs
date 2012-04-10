@@ -440,7 +440,7 @@ static int Tokenize(CharPtr p, CharPtr q, unsigned long *ref_l)
 #define p (*ref_p)
 		unsigned i;
 		for (i = 0; i <= HIGH(s); i++) {
-			if (*p < ' ') { s[i] = '\0'; break; }
+			if (*p < ' ') { s[i] = '\0'; return; }
 			s[i] = *p++;
 		}
 #undef p

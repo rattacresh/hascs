@@ -141,7 +141,7 @@ static void PrintFeld(unsigned i, unsigned j)
 {
 	unsigned x, y, n;
 
-	NormalKoords(i - XOff, j - YOff, &x, &y);
+	NormalKoords((int)i - (int)XOff, (int)j - (int)YOff, &x, &y);
 	if (x > 24 || y > 24) return;
 	SetSprite(x, y, &FelderSprite[Level[i][j].Feld]);
 	if (LevelMonster & Level[i][j].Spezial) {
@@ -437,7 +437,7 @@ static void InputMonster(unsigned x, unsigned y, unsigned neu, unsigned *ref_t)
 	SetInputCard(n+6, m.Typ);
 	SetInputCard(n+7, m.Sprich);
 	for (i = 0; i <= 10; i++)
-		if (i & m.Spezial)
+		if ((1<<i) & m.Spezial)
 			SetFlagSelected(s + i, 1);
 
 	DrawScreen();
@@ -505,7 +505,7 @@ static void InputGegenstand(unsigned x, unsigned y, unsigned neu, unsigned *ref_
 	SetInputCard(na + 6, g.RingDauer);
 
 	for (i = 0; i <= 3; i++)
-		if (i & g.Flags) SetFlagSelected(fl+i, 1);
+		if ((1<<i) & g.Flags) SetFlagSelected(fl+i, 1);
 	
 	DrawScreen();
 	if (ab == HandleScreen()) { MakeScreen(x, y); return; }
@@ -520,7 +520,7 @@ static void InputGegenstand(unsigned x, unsigned y, unsigned neu, unsigned *ref_
 	g.Flags = 0;
 	for (i = 0; i <= 3; i++)
 		if (GetFlagSelected(fl+i))
-			g.Flags |= 1<<i;
+			g.Flags |= (1<<i);
 
 	if (neu == 0 || neu == 1) {
 		DeleteGegenstand(x, y);
@@ -606,7 +606,7 @@ static void InputFeld(unsigned n)
 
 	SetInputString(na, Felder[n].Name);
 	for (i = 0; i <= 6; i++)
-		if (i & Felder[n].Spezial)
+		if ((1<<i) & Felder[n].Spezial)
 			SetFlagSelected(sp + i, 1);
 
 	DrawScreen();
@@ -806,7 +806,7 @@ static void EingabeParameter(void)
 	SetInputCard(na + 5, LevelDialog);
 	SetInputCard(na + 6, LevelMaxMonster);
 	for (i = 0; i <=  5; i++)
-		if (i & LevelFlags)
+		if ((1<<i) & LevelFlags)
 			SetFlagSelected(fl+i, 1);
 		else
 			SetFlagSelected(fl+i, 0);

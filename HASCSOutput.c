@@ -538,7 +538,7 @@ int StringToInt(char *s)
 		if (s[i] == '-' && f == 1) /* ein Minuszeichen */
 			f = -1;
 		else if (s[i] >= '0' && s[i] <= '9')
-			z = z * 10 + (s[i] - '0');
+			z = z * 10 + (int)(s[i] - '0');
 		else if (s[i] != ' ')
 			return z * f;
 	return z * f;

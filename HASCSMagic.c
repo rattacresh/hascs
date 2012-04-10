@@ -27,12 +27,11 @@ int Vision(unsigned Weite, unsigned Art, unsigned *ref_lx, unsigned *ref_ly)
 		unsigned xk, yk, Farbe;
 
 		zeigen = TRUE;
-		x1 = XOff + x + Spieler.x - (Anzahl / 2);
-		y1 = YOff + y + Spieler.y - (Anzahl / 2);
-		if (LevelNotZyklisch & LevelFlags) { /* nicht zyklisch */
-			zeigen = x1 >= 0 && x1 <= LevelBreite
-				&& y1 >= 0 && y1 <= LevelHoehe;
-		}
+		x1 = XOff + (int)(x + Spieler.x) - (int)(Anzahl / 2);
+		y1 = YOff + (int)(y + Spieler.y) - (int)(Anzahl / 2);
+		if (LevelNotZyklisch & LevelFlags) /* nicht zyklisch */
+			zeigen = x1 >= 0 && x1 <= (int)LevelBreite
+				&& y1 >= 0 && y1 <= (int)LevelHoehe;
 		NormalKoords(x1, y1, &xl, &yl);
 		if ((1<<0) & Art) /* Karte */
 			zeigen = zeigen && LevelKarte & Level[xl][yl].Spezial;
@@ -128,8 +127,8 @@ int Vision(unsigned Weite, unsigned Art, unsigned *ref_lx, unsigned *ref_ly)
 		{
 			mx = (mx - (RahmenX+1)*16) / 4;
 			my = (my - (RahmenY+1)*16) / 4;
-			NormalKoords((int)(Spieler.x+mx) - Anzahl / 2 + XOff,
-				(int)(Spieler.y+my) - Anzahl / 2 + YOff, &lx, &ly);
+			NormalKoords((int)(Spieler.x+mx) - (int)(Anzahl / 2) + XOff,
+				(int)(Spieler.y+my) - (int)(Anzahl / 2) + YOff, &lx, &ly);
 			return TRUE;
 		}
 	return FALSE;
@@ -164,8 +163,8 @@ void Erweckung(unsigned NeuerStatus)
 	nummer = 0; i = 1; min = UINT_MAX;
 	while (i <= AnzahlMonster) {
 		if (Monster[i].Status == 0) {
-			Entfernung = ABS(Spieler.x - (int)Monster[i].x)
-				+ ABS(Spieler.y - (int)Monster[i].y);
+			Entfernung = ABS((int)Spieler.x - (int)Monster[i].x)
+				+ ABS((int)Spieler.y - (int)Monster[i].y);
 			if (Entfernung < min) {
 				min = Entfernung;
 				nummer = i;

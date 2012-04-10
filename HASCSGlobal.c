@@ -410,7 +410,7 @@ unsigned GetBasiswert(unsigned n)
 void ChangeBasiswert(unsigned n, int x)
 {
 	int z;
-	z = GetBasiswert(n) + x;
+	z = (int)GetBasiswert(n) + x;
 	if (z < 0) z = 0;
 	switch (n) {
 	case 0 : Spieler.St = z; break;
@@ -704,8 +704,8 @@ void NormalKoords(int xh, int yh, unsigned *ref_i, unsigned *ref_j)
 {
 #define i (*ref_i)
 #define j (*ref_j)
-	i = (xh + LevelBreite + 1) % (LevelBreite + 1);
-	j = (yh + LevelHoehe + 1) % (LevelHoehe + 1);
+	i = (xh + (int)LevelBreite + 1) % (LevelBreite + 1);
+	j = (yh + (int)LevelHoehe + 1) % (LevelHoehe + 1);
 #undef i
 #undef j
 }

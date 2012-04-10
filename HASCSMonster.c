@@ -431,8 +431,8 @@ void MonsterBewegung(void)
 		}
 		if (Monster[i].Status == 1 || ms) {
 			mx = Monster[i].x; my = Monster[i].y;
-			dx = (int)Spieler.x - mx;
-			dy = (int)Spieler.y - my;
+			dx = (int)Spieler.x - (int)mx;
+			dy = (int)Spieler.y - (int)my;
 			if (LevelNotZyklisch & ~LevelFlags) { /* zykl. Level */
 				if (ABS(dx) > LevelBreite / 2) dx = -dx;
 				if (ABS(dy) > LevelHoehe / 2) dy = -dy;

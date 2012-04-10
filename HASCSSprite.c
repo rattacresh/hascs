@@ -318,7 +318,7 @@ static void DoEdit(void)
 				else
 					Vertikal(&aSprite);
 				break;
-			case 6 : RotateRight(&aSprite);
+			case 6 : RotateRight(&aSprite); break;
 			case 7 : if (MausLinks & MausButton)
 					XFill(&aSprite, Farbe);
 				else if (MausRechts & MausButton)
