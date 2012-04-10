@@ -10,8 +10,8 @@
 
 #include "compat.h"
 #include "HASCSSystem.h"
-
 #include "HASCSGraphics.h"
+#include "scalebit.h"
 
 #if 1 /* hidden compat stuff */
 #define StrEqual(p,q) (!strcmp(p,q))
@@ -77,8 +77,7 @@ static int losgelassen = TRUE;
 
 static unsigned long Rand;
 
-Uint32 VideoModeFlags = SDL_SWSURFACE|SDL_RESIZABLE;
-double WindowScale = 1.0;
+double WindowScale = 2.0;
 unsigned desktopX, desktopY;
 
 
@@ -136,7 +135,7 @@ void InitWorkstation(char *WinName)
 	ScreenWidth = 640; // paramptr->rasterWidth + 1;
 	ScreenHeight = 400; // paramptr->rasterHeight + 1;
 	
-	WindowMFDBAdr = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 16, VideoModeFlags);
+	WindowMFDBAdr = SDL_SetVideoMode(ScreenWidth*2, ScreenHeight*2, 16, SDL_SWSURFACE);
 	if (WindowMFDBAdr == NULL) {
 		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung %ix%i öffnen: %s\n", ScreenWidth, ScreenHeight, SDL_GetError());
 		exit(1);
@@ -159,13 +158,13 @@ void InitWorkstation(char *WinName)
 	SDL_Rect  dst = {0,0,ScreenWidth,ScreenHeight};
 #endif
 	srand(time(NULL));
-#if 1
+#if 0
 	SDL_BlitSurface(BufferMFDBAdr, NULL, WindowMFDBAdr, NULL);
 	SDL_Flip(WindowMFDBAdr);
 #endif
 
-	ScreenMFDBAdr = SDL_ConvertSurface(BufferMFDBAdr, WindowMFDBAdr->format, VideoModeFlags);
-	SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
+	ScreenMFDBAdr = SDL_ConvertSurface(BufferMFDBAdr, WindowMFDBAdr->format, SDL_SWSURFACE);
+	//SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
 }
 
 /**
@@ -177,6 +176,8 @@ void ExitWorkstation(int result)
 		SDL_FreeSurface(PicMFDBAdr);
 	if (BufferMFDBAdr)
 		SDL_FreeSurface(BufferMFDBAdr);
+	if (ScreenMFDBAdr)
+		SDL_FreeSurface(ScreenMFDBAdr);
 	atexit(SDL_Quit);
 	exit(result);
 }
@@ -676,17 +677,20 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 #endif
 
 			SDL_BlitSurface(BufferMFDBAdr, &s, ScreenMFDBAdr, &r);
+			
+			scale(2, WindowMFDBAdr->pixels, WindowMFDBAdr->w*2, ScreenMFDBAdr->pixels, ScreenMFDBAdr->w*2, 2, ScreenMFDBAdr->w, ScreenMFDBAdr->h);
 
+			/*
 			int err = SDL_SoftStretch(ScreenMFDBAdr, NULL, WindowMFDBAdr, NULL);
 			if (err)
 				printf("SDL error: %s\n", SDL_GetError());	
+			*/
 			
 			//SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
 #if 0
 			printf("=> Update %d %d %d %d", r.x, r.y, r.w, r.h);
 #endif
 			//SDL_UpdateRect(WindowMFDBAdr, r.x, r.y, r.w, r.h);
-			//SDL_UpdateRect(WindowMFDBAdr, 0, 0, 0, 0);
 			SDL_Flip(WindowMFDBAdr);
 			/*GrafMouse(mouseOn, NIL);*/
 		}
@@ -729,17 +733,24 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			WindowMFDBAdr = SDL_SetVideoMode(save.w, save.h, 16, 
 				WindowMFDBAdr->flags & ~SDL_FULLSCREEN);
 			SDL_Flip(WindowMFDBAdr);
-			WindowScale = (double)save.w / 640.0;
+			//WindowScale = (double)save.w / 640.0;
+			WindowScale = 2.0;
 			type = 1;
 		} else {
 			save.w = WindowMFDBAdr->w;
 			save.h = WindowMFDBAdr->h;
 			type = 0;
+			/*
 			if (desktopX > desktopY*1.6)
 				desktopX = desktopY*1.6;
+
 			WindowMFDBAdr = SDL_SetVideoMode(desktopX, desktopY, 16,
 							 WindowMFDBAdr->flags | SDL_FULLSCREEN);
-			WindowScale = (double)desktopX / 640.0;
+			*/
+			WindowMFDBAdr = SDL_SetVideoMode(640*2, 400*2, 16,
+							 WindowMFDBAdr->flags | SDL_FULLSCREEN);
+			//WindowScale = (double)desktopX / 640.0;
+			WindowScale = 2.0;
 			SDL_Flip(WindowMFDBAdr);
 			XOff = 0; YOff = 0;
 		}
@@ -1243,6 +1254,10 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 	xx /= WindowScale;
 	yy /= WindowScale;
 
+#if 0
+	printf("Mauspos: %u, %u\n", xx, yy);
+#endif
+
 #undef xx
 #undef yy
 #undef ch
@@ -1361,4 +1376,3 @@ int PrinterStatus()
 {
 	return 0;
 }
-
