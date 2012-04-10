@@ -1584,11 +1584,11 @@ static void MakeFileName(int c, unsigned n, char *s)
 	}
 }
 
-static void OldCodeDialog(unsigned n, unsigned long l, CharPtr p)
+static void OldCodeDialog(int code, unsigned long l, CharPtr p)
 {
 	unsigned i;
-	if (n >= 0)
-		SetzeZufall(n);
+	if (code >= 0)
+		SetzeZufall(code);
 	else
 		SetzeZufall(1);
 
