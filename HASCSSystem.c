@@ -703,7 +703,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		size = 1000 * (long)work.w / 640;
 		pos = 0;
 		if (work.w < 640)
-			pos = 1000 * (long)XOff / (640 - work.w);
+			pos = 1000 * (long)XOff / (640 - (long)work.w);
 		oldpos = WindowSliderValue(win, horPosition);
 		oldsize = WindowSliderValue(win, horSize);
 		if (oldpos != pos)
@@ -713,7 +713,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		size = 1000 * (long)work.h / 400;
 		pos = 0;
 		if (work.h < 400)
-			pos = 1000 * (long)YOff / (400 - work.h);
+			pos = 1000 * (long)YOff / (400 - (long)work.h);
 		oldpos = WindowSliderValue(win, vertPosition);
 		oldsize = WindowSliderValue(win, vertSize);
 		if (oldpos != pos)
