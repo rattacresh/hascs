@@ -86,6 +86,29 @@ void ReadBlock(int handle, unsigned anzahl, CharPtr a)
 		Error("Prüfsummenfehler!", -1);
 }
 
+void V1CodeBuffer(unsigned long code, unsigned size, char *Buffer)
+{
+	static unsigned char secret[] = {
+		0xC1, 0x61, 0x4B, 0x21,
+		0xB7, 0xC9, 0x80, 0x41,
+		0x4E, 0x32, 0x24, 0x3C,
+		0x3F, 0xE4, 0x92, 0x00
+	};
+	unsigned char *p;
+
+	if (code >= sizeof secret)
+		code = 0;
+	p = secret + code;
+	while (size) {
+		*Buffer = (-64+/*~*/(*Buffer ^ *p++))%256;
+		Buffer++;
+		//*Buffer++ ^= *p++;
+		if (*p == '\0')
+			p = secret;
+		size--;
+	}
+}
+
 /* Serialisierung ********************************************************/
 
 static void MakeGegen(GegenstandTyp *g, CharPtr Buffer)

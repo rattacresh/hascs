@@ -1660,6 +1660,67 @@ int OldLoadDialog(unsigned n, int coded)
 	return TRUE;
 }
 
+void V1LoadOrSaveDialog(unsigned n, int Load)
+{
+	int f;
+	unsigned DialogLength;
+	unsigned DialogNumber;
+	String80Type s;
+	CharPtr p;
+	unsigned long l;
+	char Header[4];
+
+	void MakeHeader(void)
+	{
+		Header[0] = DialogLength / 256;
+		Header[1] = DialogLength % 256;
+		Header[2] = DialogNumber / 256;
+		Header[3] = DialogNumber % 256;
+	}
+
+	void AuswertHeader(void)
+	{
+		DialogLength = Header[0] * 256 + Header[1];
+		DialogNumber = Header[2] * 256 + Header[3];
+	}
+
+	extern void V1CodeBuffer(unsigned long code, 
+		unsigned size, char *Buffer);
+
+	if (Load) {
+		MakeFileName(1, n, s);
+		l = FileLength(s); if (l == 0) return;
+		f = OpenFile(s);
+		if (FileError)
+			return;
+		p = GetBuffer(DialogLength);
+		ReadFile(f, 4, Header);
+		AuswertHeader();
+		ReadFile(f, l-4, p);
+		V1CodeBuffer(0, l, p);
+		OldSaveDialog(n, 0, l, p);
+
+		if (DialogNumber != n) {
+			Concat(s, "Falsche Dialognummer: ", s);
+			Error(s, -1);
+		}
+	} else {
+		MakeFileName(0, n, s);
+		DialogLength = FileLength(s); if (DialogLength == 0) return;
+		p = GetBuffer(DialogLength);
+		f = OpenFile(s); ReadFile(f, DialogLength, p); CloseFile(f);
+		MakeFileName(1, n, s);
+		DialogNumber = n;
+		f = CreateFile(s);
+
+		MakeHeader();
+		WriteFile(f, 4, Header);
+		WriteFile(f, DialogLength, p);
+	}
+
+	CloseFile(f);
+	
+}
 void V2LoadOrSaveDialog(unsigned n, int Load)
 {
 	int f;
