@@ -330,7 +330,7 @@ static void FeldAendern(unsigned f, unsigned o)
 
 static void Generator(void)
 {
-	unsigned fa, ll, zu, af, nf, an, ok, ab, gr, x=0, y, /*i,*/ Auswahl;
+	unsigned fa, ll, zu, af, nf, an, ok, ab, gr, x, y, /*i,*/ Auswahl;
 	int found;
 
 	unsigned DialogBox()
@@ -376,14 +376,16 @@ static void Generator(void)
 		else if (Auswahl == ok) {
 			if (GZufall == 1)
 				found = FindFeld(&x, &y, &Hintergrund, &SpriteNummer);
-			else
+			else {
 				x = XOff; y = YOff;
-				found = Level[x][y].Feld = Hintergrund;
+				found = Level[x][y].Feld == Hintergrund;
+			}
 			
-			if (found)
+			if (found) {
 				Insel(x, y, SpriteNummer, Hintergrund, Groesse, Anzahl);
+				XOff = x; YOff = y;
+			}
 			
-			XOff = x; YOff = y;
 		}
 		MakeScreen(XOff, YOff); WaitTime(0);
 	} while (Auswahl != ab);
