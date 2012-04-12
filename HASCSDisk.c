@@ -1005,7 +1005,8 @@ void LoadOrSavePlayer(int Load)
 	Concat(s, PlaPath, s);
 	Concat(s, s, ".PLA");
 
-	/* HASCS I 578 bytes (all payload) */
+	/* HASCS I 1.20 (Weisen) 576 bytes */
+	/* HASCS I Midgard 580 */
 	/* HASCS II 3399 bytes = 3394 bytes payload + 5 bytes trailer =  */
 	/* HASCS III 1.00 bis 1.31 1292 bytes (all payload) */
 	/* HASCS III 1.43 1297 bytes = 1929 bytes playload + 5 bytes trailer */
@@ -1018,8 +1019,11 @@ void LoadOrSavePlayer(int Load)
 		ReadFile(h, sizeof SpielerPars, SpielerPars);
 		CodeBuffer(SpielerPars, sizeof SpielerPars, code);
 #elseif 0 /* HASCS I */
-		ReadFile(h, ..., SpielerPars);
-		V1DecodeBuffer(SpielerPars, ..., 0);
+		ReadFile(h, 576, SpielerPars);
+#elseif 0 /* HASCS I 1.20 */
+		ReadFile(h, 578, SpielerPars);
+		V1DecodeBuffer(SpielerPars, 578, 0);
+		ReadFile(h, 2, Trailer);
 #else /* HASCS II, HASCS IIII 1.43 */
 		ReadBlock(h, sizeof SpielerPars, SpielerPars);
 #endif
@@ -1034,8 +1038,11 @@ void LoadOrSavePlayer(int Load)
 		CodeBuffer(Spieler, SIZE(Spieler), code);
 		WriteFile(h, sizeof SpielerPars, SpielerPars);
 #elseif 0 /* HASCS I */
-		V1CodeBuffer(SpielerPars, ..., 0);
-		WriteFile(h, ..., SpielerPars);
+		WriteFile(h, 576, SpielerPars);
+#elseif 0 /* HASCS I */
+		V1CodeBuffer(SpielerPars, 578, 0);
+		WriteFile(h, 578, SpielerPars);
+		WriteFile(h, 2, Trailer);
 #else /* HASCS II, HASCS IIII 1.43 */
 		WriteBlock(h, sizeof SpielerPars, SpielerPars);
 #endif
