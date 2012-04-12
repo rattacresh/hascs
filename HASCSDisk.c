@@ -86,27 +86,61 @@ void ReadBlock(int handle, unsigned anzahl, CharPtr a)
 		Error("Prüfsummenfehler!", -1);
 }
 
-void V1CodeBuffer(unsigned long code, unsigned size, char *Buffer)
+static unsigned char V1Secret[] = {
+	0xC1, 0x61, 0x4B, 0x21,
+	0xB7, 0xC9, 0x80, 0x41,
+	0x4E, 0x32, 0x24, 0x3C,
+	0x3F, 0xE4, 0x92, 0x00
+};
+
+void V1CodeBuffer(unsigned code, unsigned long size, CharPtr Buffer)
 {
-	static unsigned char secret[] = {
-		0xC1, 0x61, 0x4B, 0x21,
-		0xB7, 0xC9, 0x80, 0x41,
-		0x4E, 0x32, 0x24, 0x3C,
-		0x3F, 0xE4, 0x92, 0x00
-	};
 	unsigned char *p;
 
-	if (code >= sizeof secret)
+	if (code >= sizeof V1Secret)
 		code = 0;
-	p = secret + code;
+	p = V1Secret + code % (sizeof V1Secret - 1);
 	while (size) {
-		*Buffer = (-64+/*~*/(*Buffer ^ *p++))%256;
+		*Buffer = (*Buffer + *p++)%256;
 		Buffer++;
-		//*Buffer++ ^= *p++;
 		if (*p == '\0')
-			p = secret;
+			p = V1Secret;
 		size--;
 	}
+}
+
+void V1DecodeBuffer(unsigned code, unsigned long size, CharPtr Buffer)
+{
+	unsigned char *p;
+
+	if (code >= sizeof V1Secret)
+		code = 0;
+	p = V1Secret + code % (sizeof V1Secret - 1);
+	while (size) {
+		*Buffer = (*Buffer - *p++)%256;
+		Buffer++;
+		if (*p == '\0')
+			p = V1Secret;
+		size--;
+	}
+}
+
+void V1DecodeFile(unsigned code, char *s, char *t)
+{
+	int f;
+	char *p;
+	unsigned long l;
+	l = FileLength(s); if (l == 0) return;
+	f = OpenFile(s);
+	if (FileError)
+		return;
+	p = GetBuffer(BufferSize);
+	ReadFile(f, l, p);
+	CloseFile(f);
+
+	V1DecodeBuffer(code, l, p);
+	
+	f = CreateFile(t); WriteFile(f, l, p); CloseFile(f);
 }
 
 /* Serialisierung ********************************************************/
@@ -218,7 +252,7 @@ void LoadOrSaveDat(int Load, char *FileName)
 	{
 		strncpy(f->Name, Buffer, sizeof f->Name);
 		Buffer[22] = f->Spezial / 256;
-		Buffer[3] = f->Spezial % 256;
+		Buffer[23] = f->Spezial % 256;
 	}
 
 	void AuswertFeld(FeldTyp *f, CharPtr Buffer)
@@ -237,6 +271,43 @@ void LoadOrSaveDat(int Load, char *FileName)
 
 	Buffer = GetBuffer(BufferSize);
 	Concat(s, PrgPath, FileName);
+
+	/* V1 DAT format:
+	 *
+	 * 2800 block= 100 records, 28 bytes each
+	 *    Waffen
+	 *    22 bytes name
+	 *    2 bytes Schaden?
+	 *    2 bytes Bonus?
+	 *    2 bytes Anwendungen?
+	 *    index 0 = Hand
+	 * 2600 block = 100 records, 26 bytes each
+	 *    Rüstungen
+	 *    22 bytes name
+	 *    2 bytes Schutz?
+	 *    2 bytes Bonus?
+	 * 2080 block = 80 records, 26 bytes each
+	 *    Monster
+	 *    22 bytes name
+	 *    2 bytes Schaden?
+	 *    2 bytes Bonus?
+	 * 1920 block = 80 records, 24 bytes each
+	 *    Felder
+	 *    22 bytes name
+	 *    2 bytes Spezial
+	 * total 9400 bytes
+	 *
+	 * separate using:
+	 *
+	 *  dd if=HASCS.DAT of=A.DAT bs=1 count=2800
+	 *  dd if=HASCS.DAT of=B.DAT bs=1 count=2600 skip=2800
+	 *  dd if=HASCS.DAT of=C.DAT bs=1 count=2080 skip=5400
+	 *  dd if=HASCS.DAT of=D.DAT bs=1 count=1920 skip=7480
+	 * 
+	 * Then decode using V1CodeBuffer, like calling
+	 * V1DecodeFile(0, "D.DAT", "D.DEC")
+	 * from the debugger
+	 */
 	if (Load) {
 		h = OpenFile(s);
 		if (FileError) {
@@ -934,6 +1005,7 @@ void LoadOrSavePlayer(int Load)
 	Concat(s, PlaPath, s);
 	Concat(s, s, ".PLA");
 
+	/* HASCS I 578 bytes (all payload) */
 	/* HASCS II 3399 bytes = 3394 bytes payload + 5 bytes trailer =  */
 	/* HASCS III 1.00 bis 1.31 1292 bytes (all payload) */
 	/* HASCS III 1.43 1297 bytes = 1929 bytes playload + 5 bytes trailer */
@@ -945,6 +1017,9 @@ void LoadOrSavePlayer(int Load)
 #if 0 /* HASCSIII 1.00 bis 1.31 */
 		ReadFile(h, sizeof SpielerPars, SpielerPars);
 		CodeBuffer(SpielerPars, sizeof SpielerPars, code);
+#elseif 0 /* HASCS I */
+		ReadFile(h, ..., SpielerPars);
+		V1DecodeBuffer(SpielerPars, ..., 0);
 #else /* HASCS II, HASCS IIII 1.43 */
 		ReadBlock(h, sizeof SpielerPars, SpielerPars);
 #endif
@@ -958,6 +1033,9 @@ void LoadOrSavePlayer(int Load)
 #if 0 /* HASCSIII 1.00 bis 1.31 */
 		CodeBuffer(Spieler, SIZE(Spieler), code);
 		WriteFile(h, sizeof SpielerPars, SpielerPars);
+#elseif 0 /* HASCS I */
+		V1CodeBuffer(SpielerPars, ..., 0);
+		WriteFile(h, ..., SpielerPars);
 #else /* HASCS II, HASCS IIII 1.43 */
 		WriteBlock(h, sizeof SpielerPars, SpielerPars);
 #endif

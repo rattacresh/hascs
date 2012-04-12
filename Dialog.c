@@ -1660,7 +1660,7 @@ int OldLoadDialog(unsigned n, int coded)
 	return TRUE;
 }
 
-void V1LoadOrSaveDialog(unsigned n, int Load)
+void V1LoadOrSaveDialog(unsigned n, int Load, unsigned size)
 {
 	int f;
 	unsigned DialogLength;
@@ -1684,8 +1684,10 @@ void V1LoadOrSaveDialog(unsigned n, int Load)
 		DialogNumber = Header[2] * 256 + Header[3];
 	}
 
-	extern void V1CodeBuffer(unsigned long code, 
-		unsigned size, char *Buffer);
+	extern void V1DecodeBuffer(unsigned code, 
+		unsigned long size, CharPtr Buffer);
+	extern void V1CodeBuffer(unsigned code, 
+		unsigned long size, CharPtr Buffer);
 
 	if (Load) {
 		MakeFileName(1, n, s);
@@ -1696,8 +1698,27 @@ void V1LoadOrSaveDialog(unsigned n, int Load)
 		p = GetBuffer(DialogLength);
 		ReadFile(f, 4, Header);
 		AuswertHeader();
-		ReadFile(f, l-4, p);
-		V1CodeBuffer(0, l, p);
+
+		/* wurden im original HASCS I unterschieden durch
+		 * zwei verschiedene Ordner HASCS.INS und HASCS.DIA,
+		 * mit Dateien TEXT.XXX vs. DIALOG.XXX
+		 */
+		if (size)
+			l = 4+size*DialogLength;
+		else {
+			if (4+74*DialogLength == l)
+				l = 74*DialogLength; /* Dialog */
+			else if (4+61*DialogLength == l)
+				l = 61*DialogLength; /* Text */
+			else {
+				Concat(s, "Falsche Dateigröße: ", s);
+				Error(s, -1);
+			}
+		}
+
+		ReadFile(f, l, p);
+		CloseFile(f);
+		V1DecodeBuffer(0, l, p);
 		OldSaveDialog(n, 0, l, p);
 
 		if (DialogNumber != n) {
@@ -1706,14 +1727,33 @@ void V1LoadOrSaveDialog(unsigned n, int Load)
 		}
 	} else {
 		MakeFileName(0, n, s);
-		DialogLength = FileLength(s); if (DialogLength == 0) return;
+		l = FileLength(s); if (DialogLength == 0) return;
 		p = GetBuffer(DialogLength);
-		f = OpenFile(s); ReadFile(f, DialogLength, p); CloseFile(f);
+		f = OpenFile(s); ReadFile(f, l, p); CloseFile(f);
 		MakeFileName(1, n, s);
 		DialogNumber = n;
+
+		if (size)
+			DialogLength = l / size;
+		else {
+			if (l % 74 == 0 && l % 61 == 0) {
+				Concat(s, "Ambige Dateigröße: ", s);
+				Error(s, -1);
+			} else if (l % 74 == 0)
+				DialogLength = l / 74;
+			else if (l % 61 == 0)
+				DialogLength = l / 61;
+			else {
+				Concat(s, "Falsche Dateigröße: ", s);
+				Error(s, -1);
+			}
+		}
 		f = CreateFile(s);
 
 		MakeHeader();
+
+		V1CodeBuffer(0, l, p);
+
 		WriteFile(f, 4, Header);
 		WriteFile(f, DialogLength, p);
 	}
