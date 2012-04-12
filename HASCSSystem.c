@@ -45,7 +45,7 @@ void XAssign(char *s, char *p, int *ok)
 #define Assign(x,y,a) XAssign(x, y, &a)
 #endif
 
-static int ScreenWidth, ScreenHeight; //, ScreenPlanes;
+static int ScreenWidth, ScreenHeight;
 
 /*static char WName[60];*/
 static int type;
@@ -54,8 +54,6 @@ static int type;
 static SDL_Rect /*desk,*/ work, /*curr, full,*/ save;
 static int XOff, YOff;
 		
-//static void *MenuAdr;
-
 int ShowError = TRUE;
 int FileError = FALSE;
 unsigned NewXMin = 40, NewYMin = 25, NewXMax = 0, NewYMax = 0;
@@ -135,9 +133,9 @@ void InitWorkstation(char *WinName)
 	ScreenWidth = 640; // paramptr->rasterWidth + 1;
 	ScreenHeight = 400; // paramptr->rasterHeight + 1;
 	
-	WindowMFDBAdr = SDL_SetVideoMode(ScreenWidth*2, ScreenHeight*2, 16, SDL_SWSURFACE);
+	WindowMFDBAdr = SDL_SetVideoMode(ScreenWidth*2, ScreenHeight*2, 0, SDL_SWSURFACE);
 	if (WindowMFDBAdr == NULL) {
-		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung %ix%i öffnen: %s\n", ScreenWidth, ScreenHeight, SDL_GetError());
+		fprintf(stderr, "Ich konnte kein Fenster mit der Auflösung %ix%i öffnen: %s\n", ScreenWidth*2, ScreenHeight*2, SDL_GetError());
 		exit(1);
 	}
 	
@@ -188,9 +186,7 @@ void ExitWorkstation(int result)
  */
 void *Allocate(unsigned long Bytes)
 {
-	if (!Bytes) 
-		return NULL;
-	return malloc(Bytes);
+	return Bytes ? malloc(Bytes) : NULL;
 }
 
 /**
@@ -463,6 +459,9 @@ int FileName(char *Pattern, char *FileName)
 {
 	int result;
 	int ok;
+#if 0
+	printf("FileName: pat: %s und file: %s\n", Pattern, FileName);
+#endif
 	if (StrEqual(LastFileName, Pattern)) {
 		GlobCounter++;
 		result = 0;
@@ -505,6 +504,9 @@ unsigned long FileLength(char *Filename)
 
 int OpenFile(char *Name)
 {
+#if 0
+	printf("Open File: %s\n", Name);
+#endif
 	int Handle;
 	
 	Handle = open(Name, 0);
@@ -678,13 +680,15 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 
 			SDL_BlitSurface(BufferMFDBAdr, &s, ScreenMFDBAdr, &r);
 			
-			scale(2, WindowMFDBAdr->pixels, WindowMFDBAdr->w*2, ScreenMFDBAdr->pixels, ScreenMFDBAdr->w*2, 2, ScreenMFDBAdr->w, ScreenMFDBAdr->h);
+			scale(2, WindowMFDBAdr->pixels, WindowMFDBAdr->w * WindowMFDBAdr->format->BytesPerPixel, 
+			      ScreenMFDBAdr->pixels, ScreenMFDBAdr->w * ScreenMFDBAdr->format->BytesPerPixel, 
+			      WindowMFDBAdr->format->BytesPerPixel, ScreenMFDBAdr->w, ScreenMFDBAdr->h);
 
 			/*
 			int err = SDL_SoftStretch(ScreenMFDBAdr, NULL, WindowMFDBAdr, NULL);
 			if (err)
 				printf("SDL error: %s\n", SDL_GetError());	
-			*/
+			*/			
 			
 			//SDL_BlitSurface(BufferMFDBAdr, NULL, ScreenMFDBAdr, NULL);
 #if 0
@@ -730,7 +734,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 	void VollBild(void)
 	{
 		if (type == 0) { /* Fenster wieder normal */
-			WindowMFDBAdr = SDL_SetVideoMode(save.w, save.h, 16, 
+			WindowMFDBAdr = SDL_SetVideoMode(save.w, save.h, 0, 
 				WindowMFDBAdr->flags & ~SDL_FULLSCREEN);
 			SDL_Flip(WindowMFDBAdr);
 			//WindowScale = (double)save.w / 640.0;
@@ -744,10 +748,10 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			if (desktopX > desktopY*1.6)
 				desktopX = desktopY*1.6;
 
-			WindowMFDBAdr = SDL_SetVideoMode(desktopX, desktopY, 16,
+			WindowMFDBAdr = SDL_SetVideoMode(desktopX, desktopY, 0,
 							 WindowMFDBAdr->flags | SDL_FULLSCREEN);
 			*/
-			WindowMFDBAdr = SDL_SetVideoMode(640*2, 400*2, 16,
+			WindowMFDBAdr = SDL_SetVideoMode(640*2, 400*2, 0,
 							 WindowMFDBAdr->flags | SDL_FULLSCREEN);
 			//WindowScale = (double)desktopX / 640.0;
 			WindowScale = 2.0;
@@ -932,7 +936,7 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 					newW = 640;
 					newH = 400;
 				}
-				WindowMFDBAdr = SDL_SetVideoMode(newW, newH, 16, WindowMFDBAdr->flags);
+				WindowMFDBAdr = SDL_SetVideoMode(newW, newH, 0, WindowMFDBAdr->flags);
 				if (WindowMFDBAdr == NULL) {
 					fprintf(stderr, "Resizing to %ix%i error: %s\n", newW, newH, SDL_GetError());
 					exit(1);

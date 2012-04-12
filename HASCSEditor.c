@@ -330,7 +330,7 @@ static void FeldAendern(unsigned f, unsigned o)
 
 static void Generator(void)
 {
-	unsigned fa, ll, zu, af, nf, an, ok, ab, gr, x, y, /*i,*/ Auswahl;
+	unsigned fa, ll, zu, af, nf, an, ok, ab, gr, x=0, y, /*i,*/ Auswahl;
 	int found;
 
 	unsigned DialogBox()
