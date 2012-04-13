@@ -1763,6 +1763,10 @@ void V1LoadOrSaveDialog(unsigned n, int Load, unsigned size)
 }
 void V2LoadOrSaveDialog(unsigned n, int Load)
 {
+	/* Wird benutzt für kodierte Dialoge DIALOG.XXX 
+	 * (vs unkodierte T_DIA.XXX) und für Strings HASCS_II.INI
+	 * (vs. unkodiert HASCS_II.TXT)
+	 */
 	int f;
 #if 0
 	CharPtr end;

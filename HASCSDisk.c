@@ -272,7 +272,8 @@ void LoadOrSaveDat(int Load, char *FileName)
 	Buffer = GetBuffer(BufferSize);
 	Concat(s, PrgPath, FileName);
 
-	/* V1 DAT format:
+	/* V1 encoded packed DAT format, usually HASCS.DAT 
+	 * (ascii version: HASCS.PAR)
 	 *
 	 * 2800 block= 100 records, 28 bytes each
 	 *    Waffen
@@ -294,7 +295,8 @@ void LoadOrSaveDat(int Load, char *FileName)
 	 * 1920 block = 80 records, 24 bytes each
 	 *    Felder
 	 *    22 bytes name
-	 *    2 bytes Spezial
+	 *    1 byte 1=begehbar, 0=nicht begehbar
+	 *    1 byte 1=durchsichtig, 0=nicht durchsichtig
 	 * total 9400 bytes
 	 *
 	 * separate using:
@@ -307,6 +309,8 @@ void LoadOrSaveDat(int Load, char *FileName)
 	 * Then decode using V1CodeBuffer, like calling
 	 * V1DecodeFile(0, "D.DAT", "D.DEC")
 	 * from the debugger
+	 *
+	 * V1 uncoded format 
 	 */
 	if (Load) {
 		h = OpenFile(s);
@@ -533,6 +537,30 @@ void LoadOrSaveLevel(int Load, String60Typ Name)
 		return counter;
 	}
 
+	/* HASCS I level format (eritra):
+	 *
+	 * 1 Byte Version? == 0;
+	 * 1 Byte Breite
+	 * 1 Byte Höhe
+	 * 7 bytes ???
+	 *90 bytes titel
+	 * 
+	 * HASCS I level format (Weisen):
+	 *
+	 * 1 byte version? == 6;
+	 * 1 byte breite
+	 * 1 byte höhe
+	 *90 bytes titel
+	 *
+	 * HASCS I level format (midgard)
+	 *
+	 * 1 Byte Version? == 7;
+	 * 1 Byte Breite
+	 * 1 Byte Höhe
+	 * 7 bytes ???
+	 *20 bytes titel
+	 *
+	 */
 	void AuswertLevelPars(void)
 	{
 		unsigned x/*, p*/;
@@ -1018,9 +1046,9 @@ void LoadOrSavePlayer(int Load)
 #if 0 /* HASCSIII 1.00 bis 1.31 */
 		ReadFile(h, sizeof SpielerPars, SpielerPars);
 		CodeBuffer(SpielerPars, sizeof SpielerPars, code);
-#elseif 0 /* HASCS I */
+#elif 0 /* HASCS I */
 		ReadFile(h, 576, SpielerPars);
-#elseif 0 /* HASCS I 1.20 */
+#elif 0 /* HASCS I 1.20 */
 		ReadFile(h, 578, SpielerPars);
 		V1DecodeBuffer(SpielerPars, 578, 0);
 		ReadFile(h, 2, Trailer);
@@ -1037,9 +1065,9 @@ void LoadOrSavePlayer(int Load)
 #if 0 /* HASCSIII 1.00 bis 1.31 */
 		CodeBuffer(Spieler, SIZE(Spieler), code);
 		WriteFile(h, sizeof SpielerPars, SpielerPars);
-#elseif 0 /* HASCS I */
+#elif 0 /* HASCS I */
 		WriteFile(h, 576, SpielerPars);
-#elseif 0 /* HASCS I */
+#elif 0 /* HASCS I */
 		V1CodeBuffer(SpielerPars, 578, 0);
 		WriteFile(h, 578, SpielerPars);
 		WriteFile(h, 2, Trailer);
