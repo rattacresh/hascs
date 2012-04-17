@@ -767,9 +767,25 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 
 #ifdef SCALE
 	void ScaleMode(int scaleFactor) {
-		unsigned newW = 640 * scaleFactor;
-		unsigned newH = 400 * scaleFactor;
+		unsigned newW, newH;
+		newW = 640 * scaleFactor;
+		newH = 400 * scaleFactor;
+
 		win = SDL_SetVideoMode(newW, newH, 0, win->flags);
+		if (!win) {
+			printf("switch ging daneben\n");
+			scaleFactor = 1;
+			newW = 640;
+			newH = 400;
+			win = SDL_SetVideoMode(newW, newH, 0, win->flags);
+			
+			if (!win) {
+				printf("Could not switch mode to 640x400: %s\n", SDL_GetError());
+				exit(-13);
+			}
+		}
+		printf("Erfolgreicher modeswitch zu %ux%u\n", newW, newH);
+
 		work.x = 0;
 		work.y = 0;
 		work.w = win->w;
