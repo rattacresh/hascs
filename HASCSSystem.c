@@ -771,6 +771,13 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		newW = 640 * scaleFactor;
 		newH = 400 * scaleFactor;
 
+		if (newW > ScreenWidth || newH > ScreenHeight) {
+			scaleFactor = 1;
+			WindowScaleFactor = 1;
+			newW = 640;
+			newH = 400;
+		}			
+
 		win = SDL_SetVideoMode(newW, newH, 0, win->flags);
 		if (!win) {
 			printf("switch ging daneben\n");
