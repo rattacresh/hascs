@@ -76,6 +76,10 @@ static int losgelassen = TRUE;
 
 static unsigned long Rand;
 
+#ifdef SCALE
+int WindowScaleFactor;
+#endif
+
 
 /* Min max */
 
@@ -132,7 +136,8 @@ void InitWorkstation(char *WinName)
 
 	type = 1;
 #ifdef SCALE
-	work.x = 0; work.y = 0; work.w = 640*2; work.h = 400*2;
+	WindowScaleFactor = 1;
+	work.x = 0; work.y = 0; work.w = 640 * WindowScaleFactor; work.h = 400 * WindowScaleFactor;
 #else
 	work.x = 0; work.y = 0; work.w = 640; work.h = 400;
 #endif
@@ -707,14 +712,18 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			if (err)
 				printf("SDL error: %s\n", SDL_GetError());	
 #elif defined(SCALE)
-			scale(2, win->pixels,
-				win->w 
-				* win->format->BytesPerPixel, 
-				ScreenMFDBAdr->pixels, 
-				ScreenMFDBAdr->w 
-				* ScreenMFDBAdr->format->BytesPerPixel, 
-				win->format->BytesPerPixel,
-				ScreenMFDBAdr->w, ScreenMFDBAdr->h);
+			if (WindowScaleFactor != 1)
+				scale(WindowScaleFactor, 
+				      win->pixels,
+				      win->w 
+				      * win->format->BytesPerPixel, 
+				      ScreenMFDBAdr->pixels, 
+				      ScreenMFDBAdr->w 
+				      * ScreenMFDBAdr->format->BytesPerPixel, 
+				      win->format->BytesPerPixel,
+				      ScreenMFDBAdr->w, ScreenMFDBAdr->h);
+			else
+				SDL_BlitSurface(ScreenMFDBAdr, NULL, win, NULL);
 #endif
 #if defined(STRETCH) || defined(SCALE)
 			SDL_Flip(win);
@@ -755,6 +764,19 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 			SetWindowSlider(win, vertSize, size);
 #endif
 	}
+
+#ifdef SCALE
+	void ScaleMode(int scaleFactor) {
+		unsigned newW = 640 * scaleFactor;
+		unsigned newH = 400 * scaleFactor;
+		win = SDL_SetVideoMode(newW, newH, 0, win->flags);
+		work.x = 0;
+		work.y = 0;
+		work.w = win->w;
+		work.h = win->h;
+		RedrawWindow(work);
+	}
+#endif
 
 	void VollBild(void)
 	{
@@ -851,7 +873,15 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		case SDLK_KP8 : key.sym = '8'; break;
 		case SDLK_KP9 : key.sym = '9'; break;
 		case SDLK_F11 : VollBild(); key.sym = '\0'; break;
-
+		case SDLK_F12 : {
+#ifdef SCALE
+			if (++WindowScaleFactor > 4)
+				WindowScaleFactor = 1;
+			ScaleMode(WindowScaleFactor);
+#endif
+		}
+			break;
+			
 		case SDLK_q : if (key.mod & KMOD_CTRL) { /* Control Q */
 				Ende();  key.sym = '\0';
 			}
