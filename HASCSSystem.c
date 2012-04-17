@@ -136,7 +136,7 @@ void InitWorkstation(char *WinName)
 
 	type = 1;
 #ifdef SCALE
-	WindowScaleFactor = 1;
+	WindowScaleFactor = 2;
 	work.x = 0; work.y = 0; work.w = 640 * WindowScaleFactor; work.h = 400 * WindowScaleFactor;
 #else
 	work.x = 0; work.y = 0; work.w = 640; work.h = 400;
