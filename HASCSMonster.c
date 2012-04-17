@@ -515,25 +515,22 @@ void MonsterBewegung(void)
 			switch (Monster[i].Status) {
 			case 1 : ZielBewegung(i, TRUE); break;
 			case 2 : ZufallsBewegung(i);
-				if (Zufall(1000) > (980 + Spieler.Ch)) {
+				if (Zufall(1000) > (980 + Spieler.Ch))
 					Monster[i].Status = 7;
-				}
 				break;
-			case 3 : if (Zufall(1000) > (980 + Spieler.Ch)) {
+			case 3 : if (Zufall(1000) > (980 + Spieler.Ch))
 					Monster[i].Status = 7;
-				}
 				break;
 			case 4 : WegBewegung(i);
 				if (Zufall(20) == 1) Monster[i].TP++;
-				if (Zufall(1000) > (980 + Spieler.Ch)) {
+				if (Zufall(1000) > (980 + Spieler.Ch))
 					Monster[i].Status = 7;
-				}
 				break;
 			case 6 : ZufallsBewegung(i); break;
 			case 7 : ZielBewegung(i, TRUE);
-				/* if (Zufall(1000) < Spieler.Ch) {
+				/* if (Zufall(1000) < Spieler.Ch)
 					   Monster[i].Status = Zufall(2) + 1;
-				 } */
+				 */
 				break;
 			case 8 : WegBewegung(i); break;
 			case 9 : if (((SUnsichtbar|SVersteinert) & Spieler.Status) == 0)
