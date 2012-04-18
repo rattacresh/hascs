@@ -771,13 +771,6 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		newW = 640 * scaleFactor;
 		newH = 400 * scaleFactor;
 
-		if (newW > ScreenWidth || newH > ScreenHeight) {
-			scaleFactor = 1;
-			WindowScaleFactor = 1;
-			newW = 640;
-			newH = 400;
-		}			
-
 		win = SDL_SetVideoMode(newW, newH, 0, win->flags);
 		if (!win) {
 			printf("switch ging daneben\n");
@@ -813,6 +806,15 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 				0, win->flags & ~SDL_FULLSCREEN);
 			type = 1;
 		} else {
+#ifdef SCALE
+			while (640*WindowScaleFactor > ScreenWidth || 400*WindowScaleFactor > ScreenHeight)
+				--WindowScaleFactor;
+			if (!WindowScaleFactor) {
+				printf("Error! Screen resolution too small!n");
+				ExitWorkstation(13);
+			}
+			ScaleMode(WindowScaleFactor);
+#endif
 			save.w = win->w;
 			save.h = win->h;
 			type = 0;
@@ -899,6 +901,9 @@ void WaitInput(unsigned *ref_x, unsigned *ref_y, BITSET *ref_b, char *ref_ch, in
 		case SDLK_F12 : {
 #ifdef SCALE
 			if (++WindowScaleFactor > 4)
+				WindowScaleFactor = 1;
+			if ((640*WindowScaleFactor > ScreenWidth || 400*WindowScaleFactor > ScreenHeight)
+			    && (type == 0))
 				WindowScaleFactor = 1;
 			ScaleMode(WindowScaleFactor);
 #endif
