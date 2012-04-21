@@ -318,12 +318,15 @@ void LoadOrSaveDat(int Load, char *FileName)
 			Fehler("Felderdaten Lesefehler: ", s); return;
 		}
 		ReadBlock(h, 24*MaxSprites, Buffer);
+		if (FileError) return;
 		DoFeldList(Felder, MaxSprites, Buffer, AuswertFeld);
 		if (Editor) {
 			ReadBlock(h, 42*MaxSprites, Buffer);
+			if (FileError) return;
 			DoMonsterList(MonsterKlasse, MaxSprites,
 				Buffer,	AuswertMonster);
 			ReadBlock(h, 42*MaxSprites, Buffer);
+			if (FileError) return;
 			DoGegenList(GegenKlasse, MaxSprites,
 				Buffer,AuswertGegen);
 		}
@@ -383,14 +386,17 @@ void LoadOrSaveSprites(int Load, char *FileName)
 		}
 		Count = sizeof SpriteArrayBuf;
 		ReadFile(h, Count, SpriteArrayBuf);
+		if (FileError) return;
 		AuswertSpriteArrayBuf(FelderSprite);
 		ReadFile(h, Count, SpriteArrayBuf);
+		if (FileError) return;
 		AuswertSpriteArrayBuf(MonsterSprite);
 		ReadFile(h, Count, SpriteArrayBuf);
+		if (FileError) return;
 		AuswertSpriteArrayBuf(SystemSprite);
 		ReadFile(h, Count, SpriteArrayBuf);
-		if (FileError) /* HASCS II Sprite Sets don't have System */
-			return;
+		if (FileError) return;
+		/* HASCS II Sprite Sets don't have System */
 		AuswertSpriteArrayBuf(GegenSprite);
 	} else {
 		h = CreateFile(s);
