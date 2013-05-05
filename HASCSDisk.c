@@ -281,12 +281,13 @@ void LoadOrSaveDat(int Load, char *FileName)
 	 *    2 bytes Schaden?
 	 *    2 bytes Bonus?
 	 *    2 bytes Anwendungen?
-	 *    index 0 = Hand
+	 *    index 0 = Hand (ohne Waffe)
 	 * 2600 block = 100 records, 26 bytes each
 	 *    Rüstungen
 	 *    22 bytes name
 	 *    2 bytes Schutz?
 	 *    2 bytes Bonus?
+	 *    index 0 = Haut (ohne Rüstung)
 	 * 2080 block = 80 records, 26 bytes each
 	 *    Monster
 	 *    22 bytes name
