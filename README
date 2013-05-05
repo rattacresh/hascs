@@ -1,0 +1,50 @@
+             HASCS III - Das Rollenspielentwicklungssystem
+             =============================================
+
+   HASCS III ist ein Entwicklungssystem für Rollenspiele. Lauffähig war 
+   es ursprünglich auf Atari ST(E), TT und Falcon Computern. Die 
+   vorliegende Version ist eine Portierung auf die SDL-Bibliothek.
+
+   Mit HASCS III können Sie Rollenspiele jeder Art erstellen und sie 
+   frei vermarkten.
+
+
+* Hinweis
+
+Dieser frühe Versuch einer Portierung basiert auf HASCS III Version 
+1.43. Dies war die letzte Fassung für den ATARI ST, die veröffentlicht 
+wurde, bevor die Entwicklung Anfang der 1990er Jahre eingestellt wurde. 
+Unterschiedliche Versionen von HASCS setzen unterschiedliche 
+Dateiformate ein. Daher besteht keine Abwärtskompatbilität für Spiele, 
+die für ältere Versionen erstellt wurden. HASCS nutzt außerdem 
+Verschleierungsmethoden, damit nur die Autoren selbst ihre Spiele 
+bearbeiten können. Auch diese sind nicht abwärtskompatbel.
+
+
+* Autoren
+
+HASCS wurde von Alexander Kirchner entwickelt.
+
+Die Portierung wurde von Lew Palm und Peter Backes im Frühling 2012 
+durchgeführt.
+
+
+-----
+
+Copyright (C) 1990  Alexander Kirchner
+
+This file is part of HASCS
+
+HASCS is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+HASCS is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
